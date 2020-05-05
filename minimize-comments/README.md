@@ -23,7 +23,7 @@ None
 ## Example usage
 
 ```yaml
-uses: actions/hello-world-javascript-action@v1
+uses: iStreamPlanet/github-actions/minimize-comments@master
 with:
   github-token: ${{secrets.GITHUB_TOKEN}}
   by-author: github-actions
