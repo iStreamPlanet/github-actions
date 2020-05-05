@@ -22,11 +22,13 @@ None
 
 ## Example usage
 
+```yaml
 uses: actions/hello-world-javascript-action@v1
 with:
   github-token: ${{secrets.GITHUB_TOKEN}}
   by-author: github-actions
   body-includes: terraform plan
+```
 
 # Development
 
