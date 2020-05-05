@@ -1,6 +1,9 @@
 # minimize-comments javascript action
 
-This action minimizes all comments by the specified user which include the given string in the comment body
+This action minimizes all comments by the specified user which include the given string in the comment body.
+It can be used as part of a workflow where a bot emits comments on every PR push. This action should be run
+at the beginning of the workflow to minimize all previous comments so that only the latest comments remain
+visible.
 
 ## Inputs
 
