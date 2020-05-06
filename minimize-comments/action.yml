@@ -1,0 +1,17 @@
+name: Minimize Comments
+author: iStreamPlanet
+description: Minimize Pull Request comments
+inputs:
+  github-token:
+    description: The GitHub token used to create an authenticated client
+    default: ${{ github.token }}
+    required: false
+  by-author:
+    description: The id of the comment author to match.
+    required: true
+  body-includes:
+    description: Newline-separated list of strings that must be present in the body of the comment for it to be minimized. If at least one of the strings in the body is found the comment will be minimized.
+    required: true
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

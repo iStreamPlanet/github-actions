@@ -6,7 +6,8 @@ run();
 async function run() {
   try {
     const token = getInput("github-token", { required: true });
-    const bodyIncludes = getInput("body-includes", { required: true });
+    const bodyIncludesInput = getInput("body-includes", { required: true });
+    const bodyStrings = bodyIncludesInput.split("\n").map(s => s.trim()).filter(s => s.length > 0)
     const byAuthor = getInput("by-author", { required: true });
 
     const github = new GitHub(token);
@@ -47,7 +48,7 @@ async function run() {
         if (
           !comment.isMinimized &&
           comment.author.login === byAuthor &&
-          comment.body.includes(bodyIncludes)
+          bodyStrings.some(s => comment.body.includes(s))
         ) {
           console.log("Minimizing " + comment.id);
           await github.graphql(

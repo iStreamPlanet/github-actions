@@ -519,7 +519,8 @@ run();
 async function run() {
   try {
     const token = Object(_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("github-token", { required: true });
-    const bodyIncludes = Object(_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("body-includes", { required: true });
+    const bodyIncludesInput = Object(_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("body-includes", { required: true });
+    const bodyStrings = bodyIncludesInput.split("\n").map(s => s.trim()).filter(s => s.length > 0)
     const byAuthor = Object(_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("by-author", { required: true });
 
     const github = new _actions_github__WEBPACK_IMPORTED_MODULE_1__.GitHub(token);
@@ -560,7 +561,7 @@ async function run() {
         if (
           !comment.isMinimized &&
           comment.author.login === byAuthor &&
-          comment.body.includes(bodyIncludes)
+          bodyStrings.some(s => comment.body.includes(s))
         ) {
           console.log("Minimizing " + comment.id);
           await github.graphql(

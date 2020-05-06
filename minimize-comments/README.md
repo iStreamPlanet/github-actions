@@ -17,7 +17,7 @@ visible.
 
 ### `body-includes`
 
-**Required** The string that must be present in the body of the comment for it to be minimized.
+**Required** Newline-separated list of strings that must be present in the body of the comment for it to be minimized. If at least one of the strings in the body is found the comment will be minimized.
 
 ## Outputs
 
@@ -30,7 +30,9 @@ uses: iStreamPlanet/github-actions/minimize-comments@master
 with:
   github-token: ${{secrets.GITHUB_TOKEN}}
   by-author: github-actions
-  body-includes: terraform plan
+  body-includes: |
+    terraform plan
+    terraform validate
 ```
 
 # Development
