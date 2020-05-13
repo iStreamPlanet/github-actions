@@ -1663,8 +1663,8 @@ function run(ownersPath) {
                     // path like "clusters/aws/us-east-1/origin-prod-use1-b" to glob "**/origin-*/**"
                     pathToTest = `${pathToTest}/`;
                 }
-                console.log(`Evaluating path '${path}' against glob '${glob}'`);
                 if (minimatch__WEBPACK_IMPORTED_MODULE_3__(pathToTest, glob)) {
+                    console.log(`Evaluating path '${path}' against glob '${glob}'`);
                     matchedOwners = owners;
                 }
             }
@@ -1686,11 +1686,14 @@ function run(ownersPath) {
                 logins.push(owner);
             }
         }
-        console.log(`found ${matchedOwners.length} owners: ${matchedOwners.join(", ")}`);
-        Object(_actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput)("owners", matchedOwners);
-        Object(_actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput)("teamOwners", teams);
-        Object(_actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput)("loginOwners", logins);
+        processResult("owners", matchedOwners);
+        processResult("teamOwners", teams);
+        processResult("loginOwners", logins);
     });
+}
+function processResult(field, result) {
+    console.log(`found ${result.length} ${field}: ${result.join(", ")}`);
+    Object(_actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput)(field, result);
 }
 function isTeam(s) {
     return s.includes("/");

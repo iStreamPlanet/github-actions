@@ -38,8 +38,8 @@ async function run(ownersPath: string) {
       pathToTest = `${pathToTest}/`;
     }
 
-    console.log(`Evaluating path '${path}' against glob '${glob}'`);
     if (minimatch(pathToTest, glob)) {
+      console.log(`Evaluating path '${path}' against glob '${glob}'`);
       matchedOwners = owners;
     }
   }
@@ -53,12 +53,14 @@ async function run(ownersPath: string) {
       logins.push(owner);
     }
   }
-  console.log(
-    `found ${matchedOwners.length} owners: ${matchedOwners.join(", ")}`
-  );
-  setOutput("owners", matchedOwners);
-  setOutput("teamOwners", teams);
-  setOutput("loginOwners", logins);
+  processResult("owners", matchedOwners);
+  processResult("teamOwners", teams);
+  processResult("loginOwners", logins);
+}
+
+function processResult(field: string, result: string[]) {
+  console.log(`found ${result.length} ${field}: ${result.join(", ")}`);
+  setOutput(field, result);
 }
 
 function isTeam(s: string) {
