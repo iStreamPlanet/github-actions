@@ -1,6 +1,6 @@
 import { getInput, setOutput } from "@actions/core";
 import { createReadStream } from "fs";
-import * as readline from "readline";
+import { createInterface } from "readline";
 import * as minimatch from "minimatch";
 
 const path = getInput("path", { required: true });
@@ -12,7 +12,7 @@ async function run(ownersPath: string) {
   console.log(`Opening file '${ownersPath}' in '${process.cwd()}'`);
   const fileStream = createReadStream(ownersPath);
 
-  const rl = readline.createInterface({
+  const rl = createInterface({
     input: fileStream,
     crlfDelay: Infinity,
   });
@@ -26,7 +26,7 @@ async function run(ownersPath: string) {
       continue;
     }
 
-    const [glob, ...owners] = line.split(/\s+/).filter(s => s.length > 0);
+    const [glob, ...owners] = line.split(/\s+/).filter((s) => s.length > 0);
     if (owners.length === 0) {
       continue;
     }
@@ -44,8 +44,23 @@ async function run(ownersPath: string) {
     }
   }
 
+  const logins = [];
+  const teams = [];
+  for (const owner of matchedOwners) {
+    if (isTeam(owner)) {
+      teams.push(owner);
+    } else {
+      logins.push(owner);
+    }
+  }
   console.log(
     `found ${matchedOwners.length} owners: ${matchedOwners.join(", ")}`
   );
   setOutput("owners", matchedOwners);
+  setOutput("teamOwners", teams);
+  setOutput("loginOwners", logins);
+}
+
+function isTeam(s: string) {
+  return s.includes("/");
 }

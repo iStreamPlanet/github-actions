@@ -12,7 +12,15 @@ This action finds the owners of a given path based on the [GitHub CODEOWNERS fil
 
 ### `owners`
 
-A JSON-encoded array of matched owners
+An array of matched owners
+
+### `loginOwners`
+
+An array of matched login owners (e.g. `@username`)
+
+### `teamOwners`
+
+An array of matched teams owners (e.g. `@Organization/team`)
 
 ## Example usage
 

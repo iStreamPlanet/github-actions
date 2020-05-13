@@ -1639,7 +1639,7 @@ function run(ownersPath) {
         var e_1, _a;
         console.log(`Opening file '${ownersPath}' in '${process.cwd()}'`);
         const fileStream = Object(fs__WEBPACK_IMPORTED_MODULE_1__.createReadStream)(ownersPath);
-        const rl = readline__WEBPACK_IMPORTED_MODULE_2__.createInterface({
+        const rl = Object(readline__WEBPACK_IMPORTED_MODULE_2__.createInterface)({
             input: fileStream,
             crlfDelay: Infinity,
         });
@@ -1653,7 +1653,7 @@ function run(ownersPath) {
                 if (line.length === 0 || line.startsWith("#")) {
                     continue;
                 }
-                const [glob, ...owners] = line.split(/\s+/).filter(s => s.length > 0);
+                const [glob, ...owners] = line.split(/\s+/).filter((s) => s.length > 0);
                 if (owners.length === 0) {
                     continue;
                 }
@@ -1676,9 +1676,24 @@ function run(ownersPath) {
             }
             finally { if (e_1) throw e_1.error; }
         }
+        const logins = [];
+        const teams = [];
+        for (const owner of matchedOwners) {
+            if (isTeam(owner)) {
+                teams.push(owner);
+            }
+            else {
+                logins.push(owner);
+            }
+        }
         console.log(`found ${matchedOwners.length} owners: ${matchedOwners.join(", ")}`);
         Object(_actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput)("owners", matchedOwners);
+        Object(_actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput)("teamOwners", teams);
+        Object(_actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput)("loginOwners", logins);
     });
+}
+function isTeam(s) {
+    return s.includes("/");
 }
 
 

@@ -7,7 +7,11 @@ inputs:
     required: true
 outputs:
   owners:
-    description: A JSON-encoded array of matched owners
+    description: An array of matched owners
+  loginOwners:
+    description: An array of matched login owners (e.g. @username)
+  teamOwners:
+    description: An array of matched teams owners (e.g. @Organization/team)
 runs:
   using: 'node12'
   main: 'dist/index.js'
