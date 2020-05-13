@@ -1,0 +1,24 @@
+{
+  "name": "find-path-owner",
+  "version": "1.0.0",
+  "description": "Finds the owner for a given path as specified by a CODEOWNERS file",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "ncc build index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/iStreamPlanet/github-actions"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/minimatch": "^3.0.3",
+    "@types/node": "^14.0.1",
+    "@zeit/ncc": "^0.22.1"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.4",
+    "minimatch": "^3.0.4"
+  }
+}
