@@ -9,7 +9,7 @@ const codeOwnersFile = ".github/CODEOWNERS";
 run(codeOwnersFile);
 
 async function run(ownersPath: string) {
-  console.log(`Opening file '${ownersPath}' in '${process.cwd()}'`)
+  console.log(`Opening file '${ownersPath}' in '${process.cwd()}'`);
   const fileStream = createReadStream(ownersPath);
 
   const rl = readline.createInterface({
@@ -31,12 +31,21 @@ async function run(ownersPath: string) {
       continue;
     }
 
+    let pathToTest = path;
+    if (glob.endsWith("**") && !path.endsWith("/")) {
+      // append a "/" to end of path because otherwise minimatch won't match a
+      // path like "clusters/aws/us-east-1/origin-prod-use1-b" to glob "**/origin-*/**"
+      pathToTest = `${pathToTest}/`;
+    }
+
     console.log(`Evaluating path '${path}' against glob '${glob}'`);
-    if (minimatch(path, glob)) {
+    if (minimatch(pathToTest, glob)) {
       matchedOwners = owners;
     }
   }
 
-  console.log(`found ${matchedOwners.length} owners: ${matchedOwners.join(", ")}`)
+  console.log(
+    `found ${matchedOwners.length} owners: ${matchedOwners.join(", ")}`
+  );
   setOutput("owners", matchedOwners);
 }

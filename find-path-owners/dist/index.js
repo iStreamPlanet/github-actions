@@ -1637,6 +1637,7 @@ run(codeOwnersFile);
 function run(ownersPath) {
     return __awaiter(this, void 0, void 0, function* () {
         var e_1, _a;
+        console.log(`Opening file '${ownersPath}' in '${process.cwd()}'`);
         const fileStream = Object(fs__WEBPACK_IMPORTED_MODULE_1__.createReadStream)(ownersPath);
         const rl = readline__WEBPACK_IMPORTED_MODULE_2__.createInterface({
             input: fileStream,
@@ -1656,8 +1657,14 @@ function run(ownersPath) {
                 if (owners.length === 0) {
                     continue;
                 }
+                let pathToTest = path;
+                if (glob.endsWith("**") && !path.endsWith("/")) {
+                    // append a "/" to end of path because otherwise minimatch won't match a
+                    // path like "clusters/aws/us-east-1/origin-prod-use1-b" to glob "**/origin-*/**"
+                    pathToTest = `${pathToTest}/`;
+                }
                 console.log(`Evaluating path '${path}' against glob '${glob}'`);
-                if (minimatch__WEBPACK_IMPORTED_MODULE_3__(path, glob)) {
+                if (minimatch__WEBPACK_IMPORTED_MODULE_3__(pathToTest, glob)) {
                     matchedOwners = owners;
                 }
             }
