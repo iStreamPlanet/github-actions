@@ -1668,6 +1668,7 @@ function run(ownersPath) {
             }
             finally { if (e_1) throw e_1.error; }
         }
+        console.log(`found ${matchedOwners.length} owners: ${matchedOwners.join(", ")}`);
         Object(_actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput)("owners", matchedOwners);
     });
 }
