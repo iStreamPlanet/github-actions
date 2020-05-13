@@ -26,7 +26,7 @@ async function run(ownersPath: string) {
       continue;
     }
 
-    const [glob, ...owners] = line.split(" ");
+    const [glob, ...owners] = line.split(/\s+/).filter(s => s.length > 0);
     if (owners.length === 0) {
       continue;
     }
