@@ -9,6 +9,7 @@ const codeOwnersFile = ".github/CODEOWNERS";
 run(codeOwnersFile);
 
 async function run(ownersPath: string) {
+  console.log(`Opening file '${ownersPath}' in '${process.cwd()}'`)
   const fileStream = createReadStream(ownersPath);
 
   const rl = readline.createInterface({
