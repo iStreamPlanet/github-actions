@@ -35,5 +35,6 @@ async function run(ownersPath: string) {
     }
   }
 
+  console.log(`found ${matchedOwners.length} owners: ${matchedOwners.join(", ")}`)
   setOutput("owners", matchedOwners);
 }
