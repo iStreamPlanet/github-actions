@@ -30,6 +30,7 @@ async function run(ownersPath: string) {
       continue;
     }
 
+    console.log(`Evaluating path '${path}' against glob '${glob}'`);
     if (minimatch(path, glob)) {
       matchedOwners = owners;
     }

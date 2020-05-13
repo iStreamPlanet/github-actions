@@ -1656,6 +1656,7 @@ function run(ownersPath) {
                 if (owners.length === 0) {
                     continue;
                 }
+                console.log(`Evaluating path '${path}' against glob '${glob}'`);
                 if (minimatch__WEBPACK_IMPORTED_MODULE_3__(path, glob)) {
                     matchedOwners = owners;
                 }
