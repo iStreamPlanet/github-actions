@@ -1,0 +1,15 @@
+name: "build-workspace-matrix"
+description: "Builds a matrix of workspaces based on glob patterns and analysis of which files have changed"
+inputs:
+  workspace_globs:
+    description: "A whitespace-separated list of globs representing specific workspaces"
+    required: true
+  dependency_globs:
+    description: "A whitespace-separated list of globs representing dependencies of each workspace. If any of the dependencies have changed then all workspaces will be returned."
+    required: false
+outputs:
+  matrix:
+    description: "The matrix object"
+runs:
+  using: "node12"
+  main: "dist/index.js"
