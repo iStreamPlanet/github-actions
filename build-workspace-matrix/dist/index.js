@@ -2136,7 +2136,7 @@ const dependencyGlobs = Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInp
         const depsGlobber = yield _actions_glob__WEBPACK_IMPORTED_MODULE_0__.create(dependencyGlobs);
         const dependencies = yield depsGlobber.glob();
         Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found dependencies: ${dependencies.join(", ")}`);
-        const workspaceGlobber = yield _actions_glob__WEBPACK_IMPORTED_MODULE_0__.create(workspaceGlobs);
+        const workspaceGlobber = yield _actions_glob__WEBPACK_IMPORTED_MODULE_0__.create(workspaceGlobs, { implicitDescendants: false });
         const workspaces = yield workspaceGlobber.glob();
         Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found matching workspaces: ${workspaces.join(", ")}`);
         const depsChanged = dependencies.some((d) => changedFiles.indexOf(d) >= 0);

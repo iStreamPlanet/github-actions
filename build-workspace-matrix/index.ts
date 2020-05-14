@@ -12,7 +12,7 @@ const dependencyGlobs = getInput("dependency_globs");
 
   info(`Found dependencies: ${dependencies.join(", ")}`);
 
-  const workspaceGlobber = await glob.create(workspaceGlobs);
+  const workspaceGlobber = await glob.create(workspaceGlobs, { implicitDescendants: false });
   const workspaces = await workspaceGlobber.glob();
 
   info(`Found matching workspaces: ${workspaces.join(", ")}`);
