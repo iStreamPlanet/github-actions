@@ -1,9 +1,8 @@
 import * as glob from "@actions/glob";
-import { getInput, setOutput } from "@actions/core";
+import { getInput, setOutput, info } from "@actions/core";
 
 const workspaceGlobs = getInput("workspace_globs", { required: true });
 const dependencyGlobs = getInput("dependency_globs");
-
 
 (async function run() {
   const changedFiles: string[] = [];
@@ -11,8 +10,12 @@ const dependencyGlobs = getInput("dependency_globs");
   const depsGlobber = await glob.create(dependencyGlobs);
   const dependencies = await depsGlobber.glob();
 
+  info(`Found dependencies: ${dependencies.join(", ")}`);
+
   const workspaceGlobber = await glob.create(workspaceGlobs);
   const workspaces = await workspaceGlobber.glob();
+
+  info(`Found matching workspaces: ${workspaces.join(", ")}`);
 
   const depsChanged = dependencies.some((d) => changedFiles.indexOf(d) >= 0);
 
