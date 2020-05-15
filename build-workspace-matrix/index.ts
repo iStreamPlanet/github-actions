@@ -46,32 +46,36 @@ async function changedFiled(): Promise<string[]> {
 }
 
 (async function run() {
-  const changedFiles = await changedFiled();
+  try {
+    const changedFiles = await changedFiled();
 
-  info(`Found changed files: ${changedFiles.join(", ")}`);
+    info(`Found changed files: ${changedFiles.join(", ")}`);
 
-  const depsGlobber = await glob.create(dependencyGlobs);
-  const dependencies = await depsGlobber.glob();
+    const depsGlobber = await glob.create(dependencyGlobs);
+    const dependencies = await depsGlobber.glob();
 
-  info(`Found dependencies: ${dependencies.join(", ")}`);
+    info(`Found dependencies: ${dependencies.join(", ")}`);
 
-  const workspaceGlobber = await glob.create(workspaceGlobs, {
-    implicitDescendants: false,
-  });
-  const workspaces = await workspaceGlobber.glob();
+    const workspaceGlobber = await glob.create(workspaceGlobs, {
+      implicitDescendants: false,
+    });
+    const workspaces = await workspaceGlobber.glob();
 
-  info(`Found matching workspaces: ${workspaces.join(", ")}`);
+    info(`Found matching workspaces: ${workspaces.join(", ")}`);
 
-  const depsChanged = dependencies.some((d) => changedFiles.indexOf(d) >= 0);
+    const depsChanged = dependencies.some((d) => changedFiles.indexOf(d) >= 0);
 
-  let result: string[];
-  if (depsChanged) {
-    result = workspaces;
-  } else {
-    result = workspaces.filter((w) =>
-      changedFiles.some((f) => f.startsWith(w))
-    );
+    let result: string[];
+    if (depsChanged) {
+      result = workspaces;
+    } else {
+      result = workspaces.filter((w) =>
+        changedFiles.some((f) => f.startsWith(w))
+      );
+    }
+    console.log(`Found ${result.length} workspaces: ${result.join(", ")}`);
+    setOutput("matrix", { workspace: result });
+  } catch (error) {
+    setFailed(error.message);
   }
-  console.log(`Found ${result.length} workspaces: ${result.join(", ")}`);
-  setOutput("matrix", { workspace: result });
 })();
