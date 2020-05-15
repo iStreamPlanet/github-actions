@@ -10402,8 +10402,6 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 
-const workspaceGlobs = Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("workspace_globs", { required: true });
-const dependencyGlobs = Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("dependency_globs");
 function changedFiled() {
     return __awaiter(this, void 0, void 0, function* () {
         const token = Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("github-token", { required: true });
@@ -10448,8 +10446,10 @@ function makeRelative() {
 (function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const changedFiles = yield changedFiled();
+            const workspaceGlobs = Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("workspace_globs", { required: true });
+            const dependencyGlobs = Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("dependency_globs");
             Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Running in ${process.cwd()}`);
+            const changedFiles = yield changedFiled();
             Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found changed files: ${changedFiles.join(", ")}`);
             const depsGlobber = yield _actions_glob__WEBPACK_IMPORTED_MODULE_0__.create(dependencyGlobs);
             const dependencies = (yield depsGlobber.glob()).map(makeRelative());
@@ -10467,7 +10467,7 @@ function makeRelative() {
             else {
                 result = workspaces.filter((w) => changedFiles.some((f) => f.startsWith(w)));
             }
-            console.log(`Found ${result.length} workspaces: ${result.join(", ")}`);
+            console.log(`Found ${result.length} impacted workspaces: ${result.join(", ")}`);
             Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.setOutput)("matrix", { workspace: result });
         }
         catch (error) {

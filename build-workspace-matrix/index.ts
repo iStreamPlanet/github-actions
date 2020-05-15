@@ -4,9 +4,6 @@ import { context, GitHub } from "@actions/github";
 import Webhooks from "@octokit/webhooks";
 import { relative } from "path";
 
-const workspaceGlobs = getInput("workspace_globs", { required: true });
-const dependencyGlobs = getInput("dependency_globs");
-
 async function changedFiled(): Promise<string[]> {
   const token = getInput("github-token", { required: true });
   const github = new GitHub(token);
@@ -55,9 +52,12 @@ function makeRelative() {
 
 (async function run() {
   try {
-    const changedFiles = await changedFiled();
+    const workspaceGlobs = getInput("workspace_globs", { required: true });
+    const dependencyGlobs = getInput("dependency_globs");
 
     info(`Running in ${process.cwd()}`);
+
+    const changedFiles = await changedFiled();
 
     info(`Found changed files: ${changedFiles.join(", ")}`);
 
@@ -83,7 +83,9 @@ function makeRelative() {
         changedFiles.some((f) => f.startsWith(w))
       );
     }
-    console.log(`Found ${result.length} workspaces: ${result.join(", ")}`);
+    console.log(
+      `Found ${result.length} impacted workspaces: ${result.join(", ")}`
+    );
     setOutput("matrix", { workspace: result });
   } catch (error) {
     setFailed(error.message);
