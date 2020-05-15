@@ -10438,26 +10438,32 @@ function changedFiled() {
 }
 (function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        const changedFiles = yield changedFiled();
-        Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found changed files: ${changedFiles.join(", ")}`);
-        const depsGlobber = yield _actions_glob__WEBPACK_IMPORTED_MODULE_0__.create(dependencyGlobs);
-        const dependencies = yield depsGlobber.glob();
-        Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found dependencies: ${dependencies.join(", ")}`);
-        const workspaceGlobber = yield _actions_glob__WEBPACK_IMPORTED_MODULE_0__.create(workspaceGlobs, {
-            implicitDescendants: false,
-        });
-        const workspaces = yield workspaceGlobber.glob();
-        Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found matching workspaces: ${workspaces.join(", ")}`);
-        const depsChanged = dependencies.some((d) => changedFiles.indexOf(d) >= 0);
-        let result;
-        if (depsChanged) {
-            result = workspaces;
+        try {
+            const changedFiles = yield changedFiled();
+            Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Running in ${process.cwd()}`);
+            Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found changed files: ${changedFiles.join(", ")}`);
+            const depsGlobber = yield _actions_glob__WEBPACK_IMPORTED_MODULE_0__.create(dependencyGlobs);
+            const dependencies = yield depsGlobber.glob();
+            Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found dependencies: ${dependencies.join(", ")}`);
+            const workspaceGlobber = yield _actions_glob__WEBPACK_IMPORTED_MODULE_0__.create(workspaceGlobs, {
+                implicitDescendants: false,
+            });
+            const workspaces = yield workspaceGlobber.glob();
+            Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found matching workspaces: ${workspaces.join(", ")}`);
+            const depsChanged = dependencies.some((d) => changedFiles.indexOf(d) >= 0);
+            let result;
+            if (depsChanged) {
+                result = workspaces;
+            }
+            else {
+                result = workspaces.filter((w) => changedFiles.some((f) => f.startsWith(w)));
+            }
+            console.log(`Found ${result.length} workspaces: ${result.join(", ")}`);
+            Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.setOutput)("matrix", { workspace: result });
         }
-        else {
-            result = workspaces.filter((w) => changedFiles.some((f) => f.startsWith(w)));
+        catch (error) {
+            Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.setFailed)(error.message);
         }
-        console.log(`Found ${result.length} workspaces: ${result.join(", ")}`);
-        Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.setOutput)("matrix", { workspace: result });
     });
 })();
 

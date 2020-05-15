@@ -49,6 +49,8 @@ async function changedFiled(): Promise<string[]> {
   try {
     const changedFiles = await changedFiled();
 
+    info(`Running in ${process.cwd()}`);
+
     info(`Found changed files: ${changedFiles.join(", ")}`);
 
     const depsGlobber = await glob.create(dependencyGlobs);
