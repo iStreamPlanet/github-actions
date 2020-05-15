@@ -2,6 +2,7 @@ import * as glob from "@actions/glob";
 import { getInput, setOutput, info, setFailed } from "@actions/core";
 import { context, GitHub } from "@actions/github";
 import Webhooks from "@octokit/webhooks";
+import { relative } from "path";
 
 const workspaceGlobs = getInput("workspace_globs", { required: true });
 const dependencyGlobs = getInput("dependency_globs");
@@ -45,6 +46,13 @@ async function changedFiled(): Promise<string[]> {
   return response.data.files.map((file) => file.filename);
 }
 
+function makeRelative() {
+  const cwd = process.cwd();
+  return function (path: string) {
+    return relative(cwd, path);
+  };
+}
+
 (async function run() {
   try {
     const changedFiles = await changedFiled();
@@ -54,14 +62,14 @@ async function changedFiled(): Promise<string[]> {
     info(`Found changed files: ${changedFiles.join(", ")}`);
 
     const depsGlobber = await glob.create(dependencyGlobs);
-    const dependencies = await depsGlobber.glob();
+    const dependencies = (await depsGlobber.glob()).map(makeRelative());
 
     info(`Found dependencies: ${dependencies.join(", ")}`);
 
     const workspaceGlobber = await glob.create(workspaceGlobs, {
       implicitDescendants: false,
     });
-    const workspaces = await workspaceGlobber.glob();
+    const workspaces = (await workspaceGlobber.glob()).map(makeRelative());
 
     info(`Found matching workspaces: ${workspaces.join(", ")}`);
 

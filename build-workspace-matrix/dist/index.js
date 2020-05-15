@@ -10388,6 +10388,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(469);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(622);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_3__);
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -10396,6 +10398,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+
 
 
 
@@ -10436,6 +10439,12 @@ function changedFiled() {
         return response.data.files.map((file) => file.filename);
     });
 }
+function makeRelative() {
+    const cwd = process.cwd();
+    return function (path) {
+        return Object(path__WEBPACK_IMPORTED_MODULE_3__.relative)(cwd, path);
+    };
+}
 (function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -10443,12 +10452,12 @@ function changedFiled() {
             Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Running in ${process.cwd()}`);
             Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found changed files: ${changedFiles.join(", ")}`);
             const depsGlobber = yield _actions_glob__WEBPACK_IMPORTED_MODULE_0__.create(dependencyGlobs);
-            const dependencies = yield depsGlobber.glob();
+            const dependencies = (yield depsGlobber.glob()).map(makeRelative());
             Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found dependencies: ${dependencies.join(", ")}`);
             const workspaceGlobber = yield _actions_glob__WEBPACK_IMPORTED_MODULE_0__.create(workspaceGlobs, {
                 implicitDescendants: false,
             });
-            const workspaces = yield workspaceGlobber.glob();
+            const workspaces = (yield workspaceGlobber.glob()).map(makeRelative());
             Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found matching workspaces: ${workspaces.join(", ")}`);
             const depsChanged = dependencies.some((d) => changedFiles.indexOf(d) >= 0);
             let result;
