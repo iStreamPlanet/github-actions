@@ -1,17 +1,10 @@
 # build-workspace-matrix
 
-This action prints "Hello World" or "Hello" + the name of a person to greet to the log.
+Builds a matrix of workspaces based on glob patterns and analysis of which files have changed
 
 ## Inputs
 
 ### `github-token`
-
- workspace_globs:
-    description: "A whitespace-separated list of globs representing specific workspaces"
-    required: true
-  dependency_globs:
-    description: "A whitespace-separated list of globs representing dependencies of each workspace. If any of the dependencies have changed then all workspaces will be returned."
-    required: false
 
 **Required** The GitHub API token to use.
 

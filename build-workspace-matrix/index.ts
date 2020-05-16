@@ -3,6 +3,55 @@ import { getInput, setOutput, info, setFailed } from "@actions/core";
 import { context, GitHub } from "@actions/github";
 import Webhooks from "@octokit/webhooks";
 import { relative } from "path";
+import * as minimatch from "minimatch";
+
+(async function run() {
+  try {
+    const workspaceGlobs = getInput("workspace_globs", { required: true });
+    const workspaceGlobber = await glob.create(workspaceGlobs, {
+      implicitDescendants: false,
+    });
+    const workspaces = (await workspaceGlobber.glob()).map(makeRelative());
+
+    info(`Found matching workspaces: ${workspaces.join(", ")}`);
+
+    let result = workspaces;
+    if (context.eventName !== "schedule") {
+      const changedFiles = await changedFiled();
+      info(`Found changed files: ${changedFiles.join(", ")}`);
+      
+      let depsChanged = false;
+      const depsGlobsInput = getInput("dependency_globs");
+      if (depsGlobsInput.length > 0) {
+        for (const glob of depsGlobsInput.split("\n").map(g => g.trim())) {
+          if (glob.length === 0 || glob.startsWith("#")) {
+            continue;
+          }
+          if (changedFiles.some(minimatch.filter(glob))) {
+            info(`Found changed shared dependency matching glob '${glob}`)
+            depsChanged = true;
+            break;
+          }
+        }
+      }
+
+      if (depsChanged) {
+        result = workspaces;
+      } else {
+        result = workspaces.filter((w) =>
+          changedFiles.some((f) => f.startsWith(w))
+        );
+      }
+    }
+
+    console.log(
+      `Found ${result.length} impacted workspaces: ${result.join(", ")}`
+    );
+    setOutput("matrix", { workspace: result });
+  } catch (error) {
+    setFailed(error.message);
+  }
+})();
 
 async function changedFiled(): Promise<string[]> {
   const token = getInput("github-token", { required: true });
@@ -49,45 +98,3 @@ function makeRelative() {
     return relative(cwd, path);
   };
 }
-
-(async function run() {
-  try {
-    const workspaceGlobs = getInput("workspace_globs", { required: true });
-    const dependencyGlobs = getInput("dependency_globs");
-
-    info(`Running in ${process.cwd()}`);
-
-    const changedFiles = await changedFiled();
-
-    info(`Found changed files: ${changedFiles.join(", ")}`);
-
-    const depsGlobber = await glob.create(dependencyGlobs);
-    const dependencies = (await depsGlobber.glob()).map(makeRelative());
-
-    info(`Found dependencies: ${dependencies.join(", ")}`);
-
-    const workspaceGlobber = await glob.create(workspaceGlobs, {
-      implicitDescendants: false,
-    });
-    const workspaces = (await workspaceGlobber.glob()).map(makeRelative());
-
-    info(`Found matching workspaces: ${workspaces.join(", ")}`);
-
-    const depsChanged = dependencies.some((d) => changedFiles.indexOf(d) >= 0);
-
-    let result: string[];
-    if (depsChanged) {
-      result = workspaces;
-    } else {
-      result = workspaces.filter((w) =>
-        changedFiles.some((f) => f.startsWith(w))
-      );
-    }
-    console.log(
-      `Found ${result.length} impacted workspaces: ${result.join(", ")}`
-    );
-    setOutput("matrix", { workspace: result });
-  } catch (error) {
-    setFailed(error.message);
-  }
-})();

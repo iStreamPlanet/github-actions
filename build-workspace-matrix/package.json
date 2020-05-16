@@ -15,10 +15,12 @@
   "dependencies": {
     "@actions/core": "^1.2.4",
     "@actions/github": "^2.2.0",
-    "@actions/glob": "^0.1.0"
+    "@actions/glob": "^0.1.0",
+    "minimatch": "^3.0.4"
   },
   "devDependencies": {
     "@octokit/webhooks": "^7.6.0",
+    "@types/minimatch": "^3.0.3",
     "@zeit/ncc": "^0.22.1"
   }
 }

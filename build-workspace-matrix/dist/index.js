@@ -10390,6 +10390,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(622);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var minimatch__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(93);
+/* harmony import */ var minimatch__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(minimatch__WEBPACK_IMPORTED_MODULE_4__);
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -10402,6 +10404,49 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 
+
+(function run() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const workspaceGlobs = Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("workspace_globs", { required: true });
+            const workspaceGlobber = yield _actions_glob__WEBPACK_IMPORTED_MODULE_0__.create(workspaceGlobs, {
+                implicitDescendants: false,
+            });
+            const workspaces = (yield workspaceGlobber.glob()).map(makeRelative());
+            Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found matching workspaces: ${workspaces.join(", ")}`);
+            let result = workspaces;
+            if (_actions_github__WEBPACK_IMPORTED_MODULE_2__.context.eventName !== "schedule") {
+                const changedFiles = yield changedFiled();
+                Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found changed files: ${changedFiles.join(", ")}`);
+                let depsChanged = false;
+                const depsGlobsInput = Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("dependency_globs");
+                if (depsGlobsInput.length > 0) {
+                    for (const glob of depsGlobsInput.split("\n").map(g => g.trim())) {
+                        if (glob.length === 0 || glob.startsWith("#")) {
+                            continue;
+                        }
+                        if (changedFiles.some(minimatch__WEBPACK_IMPORTED_MODULE_4__.filter(glob))) {
+                            Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found changed shared dependency matching glob '${glob}`);
+                            depsChanged = true;
+                            break;
+                        }
+                    }
+                }
+                if (depsChanged) {
+                    result = workspaces;
+                }
+                else {
+                    result = workspaces.filter((w) => changedFiles.some((f) => f.startsWith(w)));
+                }
+            }
+            console.log(`Found ${result.length} impacted workspaces: ${result.join(", ")}`);
+            Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.setOutput)("matrix", { workspace: result });
+        }
+        catch (error) {
+            Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.setFailed)(error.message);
+        }
+    });
+})();
 function changedFiled() {
     return __awaiter(this, void 0, void 0, function* () {
         const token = Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("github-token", { required: true });
@@ -10443,38 +10488,6 @@ function makeRelative() {
         return Object(path__WEBPACK_IMPORTED_MODULE_3__.relative)(cwd, path);
     };
 }
-(function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const workspaceGlobs = Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("workspace_globs", { required: true });
-            const dependencyGlobs = Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("dependency_globs");
-            Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Running in ${process.cwd()}`);
-            const changedFiles = yield changedFiled();
-            Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found changed files: ${changedFiles.join(", ")}`);
-            const depsGlobber = yield _actions_glob__WEBPACK_IMPORTED_MODULE_0__.create(dependencyGlobs);
-            const dependencies = (yield depsGlobber.glob()).map(makeRelative());
-            Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found dependencies: ${dependencies.join(", ")}`);
-            const workspaceGlobber = yield _actions_glob__WEBPACK_IMPORTED_MODULE_0__.create(workspaceGlobs, {
-                implicitDescendants: false,
-            });
-            const workspaces = (yield workspaceGlobber.glob()).map(makeRelative());
-            Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found matching workspaces: ${workspaces.join(", ")}`);
-            const depsChanged = dependencies.some((d) => changedFiles.indexOf(d) >= 0);
-            let result;
-            if (depsChanged) {
-                result = workspaces;
-            }
-            else {
-                result = workspaces.filter((w) => changedFiles.some((f) => f.startsWith(w)));
-            }
-            console.log(`Found ${result.length} impacted workspaces: ${result.join(", ")}`);
-            Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.setOutput)("matrix", { workspace: result });
-        }
-        catch (error) {
-            Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.setFailed)(error.message);
-        }
-    });
-})();
 
 
 /***/ }),
