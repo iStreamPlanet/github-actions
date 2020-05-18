@@ -1,0 +1,18 @@
+name: "build-workspace-matrix"
+description: "Builds a matrix of workspaces based on glob patterns and analysis of which files have changed"
+inputs:
+  github-token:
+    description: The GitHub token used to create an authenticated client
+    required: true
+  workspaces:
+    description: "A newline-separated list of globs representing specific workspaces"
+    required: true
+  global_dependencies:
+    description: "A newline-separated list of globs representing dependencies of each workspace. If any of the dependencies have changed then all workspaces will be returned."
+    required: false
+outputs:
+  matrix:
+    description: "The matrix object of the shape: { workspace: [] }"
+runs:
+  using: "node12"
+  main: "dist/index.js"
