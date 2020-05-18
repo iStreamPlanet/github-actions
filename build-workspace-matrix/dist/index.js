@@ -10408,7 +10408,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 (function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const workspaceGlobs = Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("workspace_globs", { required: true });
+            const workspaceGlobs = Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("workspaces", { required: true });
             const workspaceGlobber = yield _actions_glob__WEBPACK_IMPORTED_MODULE_0__.create(workspaceGlobs, {
                 implicitDescendants: false,
             });
@@ -10419,7 +10419,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
                 const changedFiles = yield changedFiled();
                 Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Found changed files: ${changedFiles.join(", ")}`);
                 let depsChanged = false;
-                const depsGlobsInput = Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("dependency_globs");
+                const depsGlobsInput = Object(_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("global_dependencies");
                 if (depsGlobsInput.length > 0) {
                     for (const glob of depsGlobsInput.split("\n").map(g => g.trim())) {
                         if (glob.length === 0 || glob.startsWith("#")) {

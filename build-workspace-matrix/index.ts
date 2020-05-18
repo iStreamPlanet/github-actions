@@ -7,7 +7,7 @@ import * as minimatch from "minimatch";
 
 (async function run() {
   try {
-    const workspaceGlobs = getInput("workspace_globs", { required: true });
+    const workspaceGlobs = getInput("workspaces", { required: true });
     const workspaceGlobber = await glob.create(workspaceGlobs, {
       implicitDescendants: false,
     });
@@ -21,7 +21,7 @@ import * as minimatch from "minimatch";
       info(`Found changed files: ${changedFiles.join(", ")}`);
       
       let depsChanged = false;
-      const depsGlobsInput = getInput("dependency_globs");
+      const depsGlobsInput = getInput("global_dependencies");
       if (depsGlobsInput.length > 0) {
         for (const glob of depsGlobsInput.split("\n").map(g => g.trim())) {
           if (glob.length === 0 || glob.startsWith("#")) {

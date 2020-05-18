@@ -4,11 +4,11 @@ inputs:
   github-token:
     description: The GitHub token used to create an authenticated client
     required: true
-  workspace_globs:
-    description: "A whitespace-separated list of globs representing specific workspaces"
+  workspaces:
+    description: "A newline-separated list of globs representing specific workspaces"
     required: true
-  dependency_globs:
-    description: "A whitespace-separated list of globs representing dependencies of each workspace. If any of the dependencies have changed then all workspaces will be returned."
+  global_dependencies:
+    description: "A newline-separated list of globs representing dependencies of each workspace. If any of the dependencies have changed then all workspaces will be returned."
     required: false
 outputs:
   matrix:

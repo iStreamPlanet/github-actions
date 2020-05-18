@@ -8,13 +8,13 @@ Builds a matrix of workspaces based on glob patterns and analysis of which files
 
 **Required** The GitHub API token to use.
 
-### `workspace_globs`
+### `workspaces`
 
-**Required** A whitespace-separated list of globs representing specific workspaces.
+**Required** A newline-separated list of globs representing specific workspaces.
 
-### `dependency_globs`
+### `global_dependencies`
 
-A whitespace-separated list of globs representing dependencies of each workspace. If any of the dependencies have changed then all workspaces will be returned.
+A newline-separated list of globs representing dependencies of each workspace. If any of the dependencies have changed then all workspaces will be returned.
 
 ## Outputs
 
