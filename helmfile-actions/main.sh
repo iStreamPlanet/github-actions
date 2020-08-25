@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ "$#" -ne 1 ]; then
-  echo "Error A command argument must be passed in"
+if [ "$#" -ne 2 ]; then
+  echo "Usage: ./main.sh $command $working_directory"
   exit 1
 fi
 
@@ -9,7 +9,7 @@ function stripColors {
   echo "${1}" | sed 's/\x1b\[[0-9;]*m//g'
 }
 
-workingDir="${INPUT_WORKING_DIRECTORY}"
+workingDir="$2"
 
 echo "${workingDir}"
 
