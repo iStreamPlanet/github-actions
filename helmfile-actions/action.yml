@@ -16,4 +16,6 @@ runs:
       shell: bash
       id: main
       working-directory: ${{ inputs.working_directory }}
+      with:
+        working_directory: ${{ inputs.working_directory }}
       run: ${{ github.action_path }}/main.sh ${{ inputs.command }}
