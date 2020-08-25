@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$#" -ne 2 ]; then
-  echo "Usage: ./main.sh $command $working_directory"
+  echo 'Usage: ./main.sh $command $working_directory'
   exit 1
 fi
 
@@ -10,9 +10,6 @@ function stripColors {
 }
 
 workingDir="$2"
-
-echo "${workingDir}"
-
 function main {
   command="$1"
   scriptDir=$(dirname ${0})
@@ -29,4 +26,4 @@ function main {
   esac
 }
 
-main "${*}"
+main "$1"
