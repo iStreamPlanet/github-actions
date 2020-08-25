@@ -41,7 +41,7 @@ function helmfileDiff {
 
   env
   if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && ([ "${hasChanges}" == "true" ] || [ "${commentStatus}" == "Failed" ]); then
-    commentWrapper="#### \`helmfile diff\` ${commentStatus} for \`${INPUT_WORKING_DIRECTORY}\`
+    commentWrapper="#### \`helmfile diff\` ${commentStatus} for \`${workingDir}\`
 <details><summary>Show Output</summary>
 
 \`\`\`diff
