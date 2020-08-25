@@ -11,7 +11,8 @@ function stripColors {
 
 function main {
   command="$1"
-  source ./diff.sh
+  scriptDir=$(dirname ${0})
+  source ${scriptDir}/diff.sh
 
   case "${command}" in
     diff)
