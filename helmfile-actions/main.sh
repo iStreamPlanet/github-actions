@@ -9,6 +9,8 @@ function stripColors {
   echo "${1}" | sed 's/\x1b\[[0-9;]*m//g'
 }
 
+workingDir="${INPUT_WORKING_DIRECTORY}"
+
 function main {
   command="$1"
   scriptDir=$(dirname ${0})
