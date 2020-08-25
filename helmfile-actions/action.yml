@@ -1,0 +1,19 @@
+name: "helmfile action"
+description: "A composite action wrapper around helmfile"
+inputs:
+  command:
+    description: "The helmfile command to run"
+    required: true
+  working-directory:
+    description: "The directory to run all the commands in"
+    required: false
+    default: "."
+outputs: {}
+runs:
+  using: "composite"
+  steps:
+    - name: helmfile
+      shell: bash
+      id: main
+      working-directory: ${{ inputs.working-directory }}
+      run: ${{ github.action_path }}/main.sh ${{ inputs.command }}
