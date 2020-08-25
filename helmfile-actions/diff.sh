@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function helmfileDiff {
   output=$(helmfile --no-color diff --detailed-exitcode ${*} 2>&1)
   exitCode=$?
@@ -37,6 +39,7 @@ function helmfileDiff {
     echo
   fi
 
+  env
   if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && ([ "${hasChanges}" == "true" ] || [ "${commentStatus}" == "Failed" ]); then
     commentWrapper="#### \`helmfile diff\` ${commentStatus} for \`${INPUT_WORKING_DIRECTORY}\`
 <details><summary>Show Output</summary>
@@ -52,8 +55,6 @@ ${output}
     payload=$(echo "${commentWrapper}" | jq -R --slurp '{body: .}')
     commentsURL=$(cat ${GITHUB_EVENT_PATH} | jq -r .pull_request.comments_url)
     echo "${payload}" | curl -s -S -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data @- "${commentsURL}" > /dev/null
-
-    echo "${commentWrapper}"
   fi
 
   echo "::set-output name=has-changes::${hasChanges}"
