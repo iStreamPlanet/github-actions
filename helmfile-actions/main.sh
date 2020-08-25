@@ -11,6 +11,8 @@ function stripColors {
 
 workingDir="${INPUT_WORKING_DIRECTORY}"
 
+echo "${workingDir}"
+
 function main {
   command="$1"
   scriptDir=$(dirname ${0})
