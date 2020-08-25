@@ -4,7 +4,7 @@ inputs:
   command:
     description: "The helmfile command to run"
     required: true
-  working-directory:
+  working_directory:
     description: "The directory to run all the commands in"
     required: false
     default: "."
@@ -15,5 +15,5 @@ runs:
     - name: helmfile
       shell: bash
       id: main
-      working-directory: ${{ inputs.working-directory }}
+      working-directory: ${{ inputs.working_directory }}
       run: ${{ github.action_path }}/main.sh ${{ inputs.command }}
