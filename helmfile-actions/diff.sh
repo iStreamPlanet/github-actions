@@ -48,7 +48,7 @@ ${output}
 
     commentWrapper=$(stripColors "${commentWrapper}")
     payload=$(echo "${commentWrapper}" | jq -R --slurp '{body: .}')
-    commentsURL =$(cat ${GITHUB_EVENT_PATH} | jq -r .pull_request.comments_url)
+    commentsURL=$(cat ${GITHUB_EVENT_PATH} | jq -r .pull_request.comments_url)
     echo "${payload}" | curl -s -S -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data @- "${commentsURL}" > /dev/null
 
     echo "${commentWrapper}"
