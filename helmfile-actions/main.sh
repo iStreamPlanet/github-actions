@@ -5,10 +5,6 @@ if [ "$#" -ne 2 ]; then
   exit 1
 fi
 
-function stripColors {
-  echo "${1}" | sed 's/\x1b\[[0-9;]*m//g'
-}
-
 workingDir="$2"
 function main {
   command="$1"

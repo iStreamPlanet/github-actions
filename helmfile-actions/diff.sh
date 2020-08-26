@@ -24,11 +24,6 @@ function helmfileDiff {
     echo "${output}"
     echo
 
-    if echo "${output}" | egrep '^-{72}$' &> /dev/null; then
-        output=$(echo "${output}" | sed -n -r '/-{72}/,/-{72}/{ /-{72}/d; p }')
-    fi
-    output=$(echo "${output}" | sed -r -e 's/^  \+/\+/g' | sed -r -e 's/^  ~/~/g' | sed -r -e 's/^  -/-/g')
-
      # If output is longer than max length (65536 characters), keep last part
     output=$(echo "${output}" | tail -c 65000 )
   fi
@@ -39,7 +34,6 @@ function helmfileDiff {
     echo
   fi
 
-  env
   if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && ([ "${hasChanges}" == "true" ] || [ "${commentStatus}" == "Failed" ]); then
     commentWrapper="#### \`helmfile diff\` ${commentStatus} for \`${workingDir}\`
 <details><summary>Show Output</summary>
@@ -51,7 +45,6 @@ ${output}
 </details>
 "
 
-    commentWrapper=$(stripColors "${commentWrapper}")
     payload=$(echo "${commentWrapper}" | jq -R --slurp '{body: .}')
     commentsURL=$(cat ${GITHUB_EVENT_PATH} | jq -r .pull_request.comments_url)
     echo "${payload}" | curl -s -S -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data @- "${commentsURL}" > /dev/null
