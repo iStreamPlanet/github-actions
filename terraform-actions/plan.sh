@@ -24,6 +24,16 @@ function terraformPlan {
     echo "${output}"
     echo
 
+    if echo "${output}" | egrep '^-{72}$' &> /dev/null; then
+      # Reformat the 72 dashes that terraform uses as a horizontal divider in
+      # output.  This confuses the GitHub Flavored Markdown `diff` type because
+      # it thinks the dashes are all removal diffs.
+      output=$(echo "${output}" | sed -n -r '/-{72}/,/-{72}/{ /-{72}/d; p }')
+    fi
+    # Unindent the actual diff in the output of the plan. The plan text is
+    # indented once which breaks GHFM from highlighting the diff correctly.
+    output=$(echo "${output}" | sed -r -e 's/^  \+/\+/g' | sed -r -e 's/^  ~/~/g' | sed -r -e 's/^  -/-/g')
+
      # If output is longer than max length (65536 characters), keep last part
     output=$(echo "${output}" | tail -c 65000 )
   fi
