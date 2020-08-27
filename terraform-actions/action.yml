@@ -1,0 +1,19 @@
+name: "terraform action"
+description: "A composite action wrapper around terraform"
+inputs:
+  command:
+    description: "The terraform command to run"
+    required: true
+  working_directory:
+    description: "The directory to run all the commands in"
+    required: false
+    default: "."
+outputs: {}
+runs:
+  using: "composite"
+  steps:
+    - name: terraform
+      shell: bash
+      id: main
+      working-directory: ${{ inputs.working_directory }}
+      run: ${{ github.action_path }}/main.sh "${{ inputs.command }}" "${{ inputs.working_directory }}"
