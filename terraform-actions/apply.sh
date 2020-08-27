@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function terraformApply {
-  output=$(terraform apply -no-color ${*} 2>&1)
+  output=$(terraform apply -no-color -auto-approve -input=false ${*} 2>&1)
   exitCode=$?
 
   if [ ${exitCode} -eq 0 ]; then
