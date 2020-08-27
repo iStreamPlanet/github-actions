@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function terraformInit {
+function terraformFmt {
   output=$(terraform -check=true -write=false -diff -recursive -no-color -input=false ${*} 2>&1)
   exitCode=$?
   commentStatus="Failed"
