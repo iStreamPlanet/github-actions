@@ -12,13 +12,11 @@ function terraformFmt {
     exit ${exitCode}
   fi
 
-  if [ ${exitCode} -ne 0 ]; then
-    echo "Error: terraform fmt found changes"
-    echo "${output}"
-    echo
-  fi
+  echo "Error: terraform fmt found changes"
+  echo "${output}"
+  echo
 
-  if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && ([ "${commentStatus}" == "Failed" ]); then
+  if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && [ "${commentStatus}" == "Failed" ]; then
     commentWrapper="#### \`terraform fmt\` ${commentStatus} for \`${workingDir}\`
 <details><summary>Show Output</summary>
 

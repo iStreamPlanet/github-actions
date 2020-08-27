@@ -12,13 +12,11 @@ function terraformValidate {
     exit ${exitCode}
   fi
 
-  if [ ${exitCode} -ne 0 ]; then
-    echo "Error: Failed to run terraform validate"
-    echo "${output}"
-    echo
-  fi
+  echo "Error: Failed to run terraform validate"
+  echo "${output}"
+  echo
 
-  if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && ([ "${commentStatus}" == "Failed" ]); then
+  if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && [ "${commentStatus}" == "Failed" ]; then
     commentWrapper="#### \`terraform validate\` ${commentStatus} for \`${workingDir}\`
 <details><summary>Show Output</summary>
 
