@@ -65,18 +65,6 @@ async function run({ token, body, title, hasChanges }) {
         issue.number,
         "No changes detected in latest run, closing."
       );
-      // github.issues.createComment({
-      //   owner: context.repo.owner,
-      //   repo: context.repo.repo,
-      //   issue_number: issue.number,
-      //   body: "No changes detected in latest run, closing.",
-      // });
-      // github.issues.update({
-      //   owner: context.repo.owner,
-      //   repo: context.repo.repo,
-      //   issue_number: issue.number,
-      //   state: "closed",
-      // });
     }
     for (let i = 1; i < issues.length; i++) {
       const issue = issues[i];
@@ -84,18 +72,6 @@ async function run({ token, body, title, hasChanges }) {
         issue.number,
         `Closing as duplicate of #${issues[0].number}.`
       );
-      // github.issues.createComment({
-      //   owner: context.repo.owner,
-      //   repo: context.repo.repo,
-      //   issue_number: issue.number,
-      //   body: `Closing as duplicate of #${issues[0].number}.`,
-      // });
-      // github.issues.update({
-      //   owner: context.repo.owner,
-      //   repo: context.repo.repo,
-      //   issue_number: issue.number,
-      //   state: "closed",
-      // });
     }
   } catch (error) {
     setFailed(error.message);
