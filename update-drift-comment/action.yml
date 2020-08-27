@@ -1,0 +1,20 @@
+name: Update Drift Comment
+author: iStreamPlanet
+description: Updates (or creates) a drift comment based on presence of changes using a given title and body
+inputs:
+  github-token:
+    description: The GitHub token used to create an authenticated client
+    default: ${{ github.token }}
+    required: false
+  title:
+    description: The title to use to create or lookup issues
+    required: true
+  body:
+    description: The body of the created/updated issue
+    required: true
+  has-changes:
+    description: If 'true' indicates that there are changes and an issues should be created
+    required: true
+runs:
+  using: "node12"
+  main: "dist/index.js"
