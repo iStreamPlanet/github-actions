@@ -29,7 +29,7 @@ function terraformPlan {
   fi
 
   if [ ${exitCode} -ne 0 ]; then
-    echo "Error: Failed to run terraform diff"
+    echo "Error: Failed to run terraform plan"
     echo "${output}"
     echo
   fi
