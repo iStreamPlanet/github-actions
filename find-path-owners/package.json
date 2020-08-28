@@ -15,7 +15,7 @@
   "devDependencies": {
     "@types/minimatch": "^3.0.3",
     "@types/node": "^14.6.1",
-    "@zeit/ncc": "^0.22.1"
+    "@zeit/ncc": "^0.22.3"
   },
   "dependencies": {
     "@actions/core": "^1.2.5",
