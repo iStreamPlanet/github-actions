@@ -18,7 +18,7 @@
     "@zeit/ncc": "^0.22.1"
   },
   "dependencies": {
-    "@actions/core": "^1.2.4",
+    "@actions/core": "^1.2.5",
     "minimatch": "^3.0.4"
   }
 }
