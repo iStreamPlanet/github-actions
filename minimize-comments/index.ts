@@ -1,5 +1,5 @@
 import { getInput, setFailed } from "@actions/core";
-import { context, GitHub } from "@actions/github";
+import { context, getOctokit } from "@actions/github";
 
 run();
 
@@ -7,10 +7,13 @@ async function run() {
   try {
     const token = getInput("github-token", { required: true });
     const bodyIncludesInput = getInput("body-includes", { required: true });
-    const bodyStrings = bodyIncludesInput.split("\n").map(s => s.trim()).filter(s => s.length > 0)
+    const bodyStrings = bodyIncludesInput
+      .split("\n")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
     const byAuthor = getInput("by-author", { required: true });
 
-    const github = new GitHub(token);
+    const github = getOctokit(token);
 
     let execute = true;
     let nextCursor = undefined;
@@ -43,12 +46,12 @@ async function run() {
       const {
         pageInfo,
         nodes: comments,
-      } = result.repository.pullRequest.comments;
+      } = (result as any).repository.pullRequest.comments;
       for (const comment of comments) {
         if (
           !comment.isMinimized &&
           comment.author.login === byAuthor &&
-          bodyStrings.some(s => comment.body.includes(s))
+          bodyStrings.some((s) => comment.body.includes(s))
         ) {
           console.log("Minimizing " + comment.id);
           await github.graphql(

@@ -1,7 +1,7 @@
 import * as glob from "@actions/glob";
 import { getInput, setOutput, info, setFailed } from "@actions/core";
-import { context, GitHub } from "@actions/github";
-import Webhooks from "@octokit/webhooks";
+import { context, getOctokit } from "@actions/github";
+import { EventPayloads } from "@octokit/webhooks";
 import { relative } from "path";
 import * as minimatch from "minimatch";
 
@@ -19,16 +19,16 @@ import * as minimatch from "minimatch";
     if (context.eventName !== "schedule") {
       const changedFiles = await changedFiled();
       info(`Found changed files: ${changedFiles.join(", ")}`);
-      
+
       let depsChanged = false;
       const depsGlobsInput = getInput("global_dependencies");
       if (depsGlobsInput.length > 0) {
-        for (const glob of depsGlobsInput.split("\n").map(g => g.trim())) {
+        for (const glob of depsGlobsInput.split("\n").map((g) => g.trim())) {
           if (glob.length === 0 || glob.startsWith("#")) {
             continue;
           }
           if (changedFiles.some(minimatch.filter(glob))) {
-            info(`Found changed shared dependency matching glob '${glob}`)
+            info(`Found changed shared dependency matching glob '${glob}`);
             depsChanged = true;
             break;
           }
@@ -55,18 +55,18 @@ import * as minimatch from "minimatch";
 
 async function changedFiled(): Promise<string[]> {
   const token = getInput("github-token", { required: true });
-  const github = new GitHub(token);
+  const github = getOctokit(token);
 
   let head: string;
   let base: string;
   switch (context.eventName) {
     case "push":
-      const pushPayload = context.payload as Webhooks.WebhookPayloadPush;
+      const pushPayload = context.payload as EventPayloads.WebhookPayloadPush;
       head = pushPayload.after;
       base = pushPayload.before;
       break;
     case "pull_request":
-      const prPayload = context.payload as Webhooks.WebhookPayloadPullRequest;
+      const prPayload = context.payload as EventPayloads.WebhookPayloadPullRequest;
       head = prPayload.pull_request.head.sha;
       base = prPayload.pull_request.base.sha;
       break;

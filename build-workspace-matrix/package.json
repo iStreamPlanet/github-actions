@@ -13,14 +13,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@actions/core": "^1.2.4",
-    "@actions/github": "^2.2.0",
+    "@actions/core": "^1.2.5",
+    "@actions/github": "^4.0.0",
     "@actions/glob": "^0.1.0",
     "minimatch": "^3.0.4"
   },
   "devDependencies": {
     "@octokit/webhooks": "^7.11.2",
     "@types/minimatch": "^3.0.3",
-    "@zeit/ncc": "^0.22.3"
+    "@vercel/ncc": "^0.24.0",
+    "typescript": "^4.0.2"
   }
 }
