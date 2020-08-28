@@ -1,0 +1,4 @@
+## Linguist overrides (see https://github.com/github/linguist#using-gitattributes)
+
+# Any JS file under a dist folder is generated from the matching TS file
+*/dist/*.js linguist-generated
