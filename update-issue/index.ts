@@ -1,29 +1,26 @@
 import { getInput, setFailed } from "@actions/core";
 import { context, getOctokit } from "@actions/github";
 
-const token = getInput("github-token", { required: true });
-const body = getInput("body", { required: true });
-const title = getInput("title", { required: true });
-const hasChanges = getInput("has-changes", { required: true }) === "true";
+run();
 
-run({
-  token,
-  body,
-  title,
-  hasChanges,
-});
-
-async function run({ token, body, title, hasChanges }) {
+async function run() {
   try {
+    const token = getInput("github-token", { required: true });
+    const open = getInput("open", { required: true }).toLowerCase() === "true";
+    const title = getInput("title", { required: true });
+    const body = getInput("body");
+    const closeComment = getInput("close-comment");
     const github = getOctokit(token);
 
     async function closeIssue(issue: number, comment: string) {
-      await github.issues.createComment({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        issue_number: issue,
-        body: comment,
-      });
+      if (comment) {
+        await github.issues.createComment({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: issue,
+          body: comment,
+        });
+      }
       await github.issues.update({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -37,11 +34,10 @@ async function run({ token, body, title, hasChanges }) {
         owner: context.repo.owner,
         repo: context.repo.repo,
         state: "open",
-        // labels: "drift",
       })
     ).filter((i) => i.title === title);
 
-    if (hasChanges) {
+    if (open) {
       if (issues.length) {
         const issue = issues[0];
         await github.issues.update({
@@ -55,16 +51,12 @@ async function run({ token, body, title, hasChanges }) {
           owner: context.repo.owner,
           repo: context.repo.repo,
           title,
-          // labels: ["drift"],
           body,
         });
       }
     } else if (issues.length) {
       const issue = issues[0];
-      await closeIssue(
-        issue.number,
-        "No changes detected in latest run, closing."
-      );
+      await closeIssue(issue.number, closeComment);
     }
     for (let i = 1; i < issues.length; i++) {
       const issue = issues[i];

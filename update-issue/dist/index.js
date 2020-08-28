@@ -5762,28 +5762,26 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 };
 
 
-const token = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("github-token", { required: true });
-const body = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("body", { required: true });
-const title = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("title", { required: true });
-const hasChanges = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("has-changes", { required: true }) === "true";
-run({
-    token,
-    body,
-    title,
-    hasChanges,
-});
-function run({ token, body, title, hasChanges }) {
+run();
+function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            const token = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("github-token", { required: true });
+            const open = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("open", { required: true }).toLowerCase() === "true";
+            const title = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("title", { required: true });
+            const body = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("body");
+            const closeComment = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("close-comment");
             const github = (0,_actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit)(token);
             function closeIssue(issue, comment) {
                 return __awaiter(this, void 0, void 0, function* () {
-                    yield github.issues.createComment({
-                        owner: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.owner,
-                        repo: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.repo,
-                        issue_number: issue,
-                        body: comment,
-                    });
+                    if (comment) {
+                        yield github.issues.createComment({
+                            owner: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.owner,
+                            repo: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.repo,
+                            issue_number: issue,
+                            body: comment,
+                        });
+                    }
                     yield github.issues.update({
                         owner: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.owner,
                         repo: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.repo,
@@ -5797,7 +5795,7 @@ function run({ token, body, title, hasChanges }) {
                 repo: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.repo,
                 state: "open",
             })).filter((i) => i.title === title);
-            if (hasChanges) {
+            if (open) {
                 if (issues.length) {
                     const issue = issues[0];
                     yield github.issues.update({
@@ -5812,14 +5810,13 @@ function run({ token, body, title, hasChanges }) {
                         owner: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.owner,
                         repo: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.repo,
                         title,
-                        // labels: ["drift"],
                         body,
                     });
                 }
             }
             else if (issues.length) {
                 const issue = issues[0];
-                yield closeIssue(issue.number, "No changes detected in latest run, closing.");
+                yield closeIssue(issue.number, closeComment);
             }
             for (let i = 1; i < issues.length; i++) {
                 const issue = issues[i];

@@ -1,0 +1,23 @@
+name: Update Issue
+author: iStreamPlanet
+description: Updates/creates/closes an issue matching the given title based on the other parameters
+inputs:
+  github-token:
+    description: The GitHub token used to create an authenticated client
+    default: ${{ github.token }}
+    required: false
+  title:
+    description: The title to use to create or lookup issues
+    required: true
+  open:
+    description: If 'true' indicates that the issue should be created/updated with the given body. Any other value causes issues with the matching title to be closed
+    required: true
+  body:
+    description: The body to use when creating/updating an issue.
+    required: false
+  close-comment:
+    description: The comment to use when closing an existing issue.
+    required: false
+runs:
+  using: "node12"
+  main: "dist/index.js"
