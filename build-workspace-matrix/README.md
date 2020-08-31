@@ -46,7 +46,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - id: build-workspace-matrix
-        uses: iStreamPlanet/github-actions/build-workspace-matrix@master
+        uses: iStreamPlanet/github-actions/build-workspace-matrix@main
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           # Only matching workspaces that contain changes will be returned (except for /example, which is excluded)
@@ -87,7 +87,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - id: build-workspace-matrix
-        uses: iStreamPlanet/github-actions/build-workspace-matrix@master
+        uses: iStreamPlanet/github-actions/build-workspace-matrix@main
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           # All workspaces returned
@@ -115,7 +115,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - id: build-workspace-matrix
-        uses: iStreamPlanet/github-actions/build-workspace-matrix@master
+        uses: iStreamPlanet/github-actions/build-workspace-matrix@main
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           # A matrix with a single value provided by the input is returned
