@@ -34,7 +34,7 @@ The matrix object of the following shape:
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - "terraform/clusters/*/*.tf"
 
@@ -120,4 +120,3 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           # A matrix with a single value provided by the input is returned
           workflow_dispatch_workspace: ${{ github.event.inputs.workspace }}
-```
