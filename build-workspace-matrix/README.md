@@ -24,24 +24,21 @@ The matrix object of the following shape:
 
 ```json
 {
-  "workspace": [
-    "match1",
-    "match2"
-  ]
+  "workspace": ["match1", "match2"]
 }
 ```
 
 ## Example usage
 
-````
+```
 determine-matrix:
   runs-on: ubuntu-latest
   outputs:
     matrix: ${{ steps.build-workspace-matrix.outputs.matrix }}
   steps:
-  - uses: actions/checkout@master
+  - uses: actions/checkout@v2
   - id: build-workspace-matrix
-    uses: iStreamPlanet/github-actions/build-workspace-matrix@master
+    uses: iStreamPlanet/github-actions/build-workspace-matrix@main
     with:
       github-token: ${{secrets.GITHUB_TOKEN}}
       workspace_globs: |
@@ -49,4 +46,4 @@ determine-matrix:
       dependency_globs: |
         terraform/modules/**/*.tf
         .github/workflows/terraform_diff.yml
-````
+```
