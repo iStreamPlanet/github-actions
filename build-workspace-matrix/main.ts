@@ -7,43 +7,7 @@ import * as minimatch from "minimatch";
 
 (async function run() {
   try {
-    const workspaceGlobs = getInput("workspaces", { required: true });
-    const workspaceGlobber = await glob.create(workspaceGlobs, {
-      implicitDescendants: false,
-    });
-    const workspaces = (await workspaceGlobber.glob()).map(makeRelative());
-
-    info(`Found matching workspaces: ${workspaces.join(", ")}`);
-
-    let result = workspaces;
-    if (context.eventName !== "schedule") {
-      const changedFiles = await changedFiled();
-      info(`Found changed files: ${changedFiles.join(", ")}`);
-
-      let depsChanged = false;
-      const depsGlobsInput = getInput("global_dependencies");
-      if (depsGlobsInput.length > 0) {
-        for (const glob of depsGlobsInput.split("\n").map((g) => g.trim())) {
-          if (glob.length === 0 || glob.startsWith("#")) {
-            continue;
-          }
-          if (changedFiles.some(minimatch.filter(glob))) {
-            info(`Found changed shared dependency matching glob '${glob}`);
-            depsChanged = true;
-            break;
-          }
-        }
-      }
-
-      if (depsChanged) {
-        result = workspaces;
-      } else {
-        result = workspaces.filter((w) =>
-          changedFiles.some((f) => f.startsWith(w))
-        );
-      }
-    }
-
+    const result = await getWorkspaces();
     console.log(
       `Found ${result.length} impacted workspaces: ${result.join(", ")}`
     );
@@ -52,6 +16,51 @@ import * as minimatch from "minimatch";
     setFailed(error.message);
   }
 })();
+
+async function getWorkspaces(): Promise<string[]> {
+  if (context.eventName === "workflow_dispatch") {
+    const workspace = getInput("workflow_dispatch_workspace", {
+      required: true,
+    });
+    return [workspace];
+  }
+
+  const workspaceGlobs = getInput("workspaces", { required: true });
+  const workspaceGlobber = await glob.create(workspaceGlobs, {
+    implicitDescendants: false,
+  });
+  const workspaces = (await workspaceGlobber.glob()).map(makeRelative());
+
+  info(`Found matching workspaces: ${workspaces.join(", ")}`);
+
+  if (context.eventName === "schedule") {
+    return workspaces;
+  }
+
+  const changedFiles = await changedFiled();
+  info(`Found changed files: ${changedFiles.join(", ")}`);
+
+  let depsChanged = false;
+  const depsGlobsInput = getInput("global_dependencies");
+  if (depsGlobsInput.length > 0) {
+    for (const glob of depsGlobsInput.split("\n").map((g) => g.trim())) {
+      if (glob.length === 0 || glob.startsWith("#")) {
+        continue;
+      }
+      if (changedFiles.some(minimatch.filter(glob))) {
+        info(`Found changed shared dependency matching glob '${glob}`);
+        depsChanged = true;
+        break;
+      }
+    }
+  }
+
+  if (depsChanged) {
+    return workspaces;
+  } else {
+    return workspaces.filter((w) => changedFiles.some((f) => f.startsWith(w)));
+  }
+}
 
 async function changedFiled(): Promise<string[]> {
   const token = getInput("github-token", { required: true });
