@@ -12,6 +12,10 @@ Builds a matrix of workspaces based on glob patterns and analysis of which files
 
 **Required** A newline-separated list of globs representing specific workspaces.
 
+### `workflow_dispatch_workspace`
+
+A particular workspace to return when the event type is `workflow_dispatch`.
+
 ### `global_dependencies`
 
 A newline-separated list of globs representing dependencies of each workspace. If any of the dependencies have changed then all workspaces will be returned.
