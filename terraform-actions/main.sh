@@ -5,6 +5,10 @@ if [ "$#" -ne 2 ]; then
   exit 1
 fi
 
+# This will reduce certain non-actionable command output
+# See: https://learn.hashicorp.com/tutorials/terraform/automate-terraform#controlling-terraform-output-in-automation
+export TF_IN_AUTOMATION=true
+
 workingDir="$2"
 function main {
   command="$1"
