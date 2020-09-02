@@ -17,7 +17,7 @@ A JSON-encoded array of matched owners
 ## Example usage
 
 ```yaml
-uses: iStreamPlanet/github-actions/find-path-owners@master
+uses: iStreamPlanet/github-actions/find-path-owners@main
 with:
   path: my
   by-author: github-actions

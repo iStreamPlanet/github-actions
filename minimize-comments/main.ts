@@ -5,6 +5,13 @@ run();
 
 async function run() {
   try {
+    // Note: supporting other event types might require changing the query used
+    if (context.eventName !== "pull_request") {
+      throw new Error(
+        `This action is not supported for event of type '${context.eventName}'.`
+      );
+    }
+
     const token = getInput("github-token", { required: true });
     const bodyIncludesInput = getInput("body-includes", { required: true });
     const bodyStrings = bodyIncludesInput

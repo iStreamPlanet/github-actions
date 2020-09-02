@@ -4,19 +4,7 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
-    directory: "/build-workspace-matrix/"
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "npm"
-    directory: "/find-path-owners"
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "npm"
-    directory: "/minimize-comments"
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "npm"
-    directory: "/update-issue"
+    directory: "/"
     schedule:
       interval: "daily"
 

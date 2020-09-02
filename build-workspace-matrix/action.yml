@@ -7,8 +7,14 @@ inputs:
   workspaces:
     description: "A newline-separated list of globs representing specific workspaces"
     required: true
+  workflow_dispatch_workspace:
+    description: "A particular workspace to return when the event type is 'workflow_dispatch'"
+    required: false
   global_dependencies:
-    description: "A newline-separated list of globs representing dependencies of each workspace. If any of the dependencies have changed then all workspaces will be returned."
+    description: "A newline-separated list of globs representing dependencies of each workspace. If any of the dependencies have changed then all workspaces will be returned. Applies only to 'push' and 'pull_request' events."
+    required: false
+  relative_to_path:
+    description: "If provided, results will be relative to the given path"
     required: false
 outputs:
   matrix:

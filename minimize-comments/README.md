@@ -26,7 +26,7 @@ None
 ## Example usage
 
 ```yaml
-uses: iStreamPlanet/github-actions/minimize-comments@master
+uses: iStreamPlanet/github-actions/minimize-comments@main
 with:
   github-token: ${{secrets.GITHUB_TOKEN}}
   by-author: github-actions
