@@ -20,6 +20,10 @@ A particular workspace to return when the event type is `workflow_dispatch`.
 
 A newline-separated list of globs representing dependencies of each workspace. If any of the dependencies have changed then all workspaces will be returned.
 
+### `relative_to_path`
+
+If provided, results will be relative to the given path
+
 ## Outputs
 
 ### `matrix`
@@ -124,3 +128,4 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           # A matrix with a single value provided by the input is returned
           workflow_dispatch_workspace: ${{ github.event.inputs.workspace }}
+```

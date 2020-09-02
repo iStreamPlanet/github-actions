@@ -7,10 +7,16 @@ import * as minimatch from "minimatch";
 
 (async function run() {
   try {
-    const result = await getWorkspaces();
+    let result = await getWorkspaces();
     console.log(
       `Found ${result.length} impacted workspaces: ${result.join(", ")}`
     );
+
+    const relativeToPath = getInput("relative_to_path");
+    if (relativeToPath) {
+      console.log(`Making relative to ${relativeToPath}`);
+      result = result.map(makeRelative(relativeToPath));
+    }
     setOutput("matrix", { workspace: result });
   } catch (error) {
     setFailed(error.message);
@@ -29,7 +35,9 @@ async function getWorkspaces(): Promise<string[]> {
   const workspaceGlobber = await glob.create(workspaceGlobs, {
     implicitDescendants: false,
   });
-  const workspaces = (await workspaceGlobber.glob()).map(makeRelative());
+  const workspaces = (await workspaceGlobber.glob()).map(
+    makeRelative(process.cwd())
+  );
 
   info(`Found matching workspaces: ${workspaces.join(", ")}`);
 
@@ -101,9 +109,8 @@ async function changedFiled(): Promise<string[]> {
   return response.data.files.map((file) => file.filename);
 }
 
-function makeRelative() {
-  const cwd = process.cwd();
+function makeRelative(from: string) {
   return function (path: string) {
-    return relative(cwd, path);
+    return relative(from, path);
   };
 }
