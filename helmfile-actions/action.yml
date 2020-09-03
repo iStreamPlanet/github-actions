@@ -8,7 +8,13 @@ inputs:
     description: "The directory to run all the commands in"
     required: false
     default: "."
-outputs: {}
+outputs:
+  diff-output:
+    description: "The Helmfile diff command output"
+    value: ${{ steps.main.outputs.output }}
+  diff-has-changes:
+    description: "Whether the diff contained changes"
+    value: ${{ steps.main.outputs.has-changes }}
 runs:
   using: "composite"
   steps:
