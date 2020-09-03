@@ -32,10 +32,5 @@ ${output}
     echo "${payload}" | curl -s -S -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data @- "${commentsURL}" > /dev/null
   fi
 
-  # https://github.community/t5/GitHub-Actions/set-output-Truncates-Multiline-Strings/m-p/38372/highlight/true#M3322
-  output="${output//'%'/'%25'}"
-  output="${output//$'\n'/'%0A'}"
-  output="${output//$'\r'/'%0D'}"
-  echo "::set-output name=output::${output}"
   exit ${exitCode}
 }
