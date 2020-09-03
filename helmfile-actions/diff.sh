@@ -10,7 +10,7 @@ function helmfileDiff {
     echo "Successfully ran helmfile diff command. No changes were found"
     echo "${output}"
     echo
-    echo "::set-output name=has-changes::${hasChanges}"
+    echo "::set-output name=diff-has-changes::${hasChanges}"
     exit ${exitCode}
   fi
 
@@ -50,12 +50,12 @@ ${output}
     echo "${payload}" | curl -s -S -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data @- "${commentsURL}" > /dev/null
   fi
 
-  echo "::set-output name=has-changes::${hasChanges}"
+  echo "::set-output name=diff-has-changes::${hasChanges}"
 
   # https://github.community/t5/GitHub-Actions/set-output-Truncates-Multiline-Strings/m-p/38372/highlight/true#M3322
   output="${output//'%'/'%25'}"
   output="${output//$'\n'/'%0A'}"
   output="${output//$'\r'/'%0D'}"
-  echo "::set-output name=output::${output}"
+  echo "::set-output name=diff-output::${output}"
   exit ${exitCode}
 }
