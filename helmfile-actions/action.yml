@@ -11,10 +11,10 @@ inputs:
 outputs:
   diff-output:
     description: "The Helmfile diff command output"
-    value: ${{ steps.main.outputs.output }}
+    value: ${{ steps.main.outputs.diff-output }}
   diff-has-changes:
     description: "Whether the diff contained changes"
-    value: ${{ steps.main.outputs.has-changes }}
+    value: ${{ steps.main.outputs.diff-has-changes }}
 runs:
   using: "composite"
   steps:

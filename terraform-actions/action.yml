@@ -11,10 +11,10 @@ inputs:
 outputs:
   plan-output:
     description: "The Terraform plan command output"
-    value: ${{ steps.main.outputs.output }}
+    value: ${{ steps.main.outputs.plan-output }}
   plan-has-changes:
     description: "Whether the plan contained changes"
-    value: ${{ steps.main.outputs.has-changes }}
+    value: ${{ steps.main.outputs.plan-has-changes }}
 runs:
   using: "composite"
   steps:
