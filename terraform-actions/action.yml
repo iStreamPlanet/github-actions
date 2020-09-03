@@ -8,7 +8,13 @@ inputs:
     description: "The directory to run all the commands in"
     required: false
     default: "."
-outputs: {}
+outputs:
+  plan-output:
+    description: "The Terraform plan command output"
+    value: ${{ steps.main.outputs.output }}
+  plan-has-changes:
+    description: "Whether the plan contained changes"
+    value: ${{ steps.main.outputs.has-changes }}
 runs:
   using: "composite"
   steps:
