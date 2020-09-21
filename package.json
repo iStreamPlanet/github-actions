@@ -12,7 +12,7 @@
   "author": "iStreamPlanet",
   "license": "ISC",
   "devDependencies": {
-    "@octokit/webhooks": "^7.11.2",
+    "@octokit/webhooks": "^7.11.3",
     "@types/minimatch": "^3.0.3",
     "@vercel/ncc": "^0.24.1",
     "npm-run-all": "^4.1.5",
