@@ -13,7 +13,7 @@ function helmfileLockStaleness {
   exitStatus=$?
   isMissing=false
   isStale=false
-  dateDeltaDays=-1
+  dateDeltaDaysApprox=-1
 
   missingFileCode=1
   if [ ${exitStatus} -eq 0 ]; then
@@ -30,6 +30,7 @@ function helmfileLockStaleness {
     dateCurrentSinceEpoch=$(date +%s)
     dateDeltaSeconds=$((${dateCurrentSinceEpoch} - ${dateGeneratedSinceEpoch}))
     daysStaleSeconds=$((${daysStale} * (24 * 3600)))
+    dateDeltaDaysApprox=$((${dateDeltaSeconds} / (24*3600)))
 
     staleCode=2
     if [ ${dateDeltaSeconds} -le ${daysStaleSeconds} ]; then
@@ -43,7 +44,7 @@ function helmfileLockStaleness {
 
   echo "::set-output name=helmfile-lock-is-missing::${isMissing}"
   echo "::set-output name=helmfile-lock-is-stale::${isStale}"
-  echo "::set-output name=helmfile-lock-staleness-delta::${dateDeltaDays}"
+  echo "::set-output name=helmfile-lock-staleness-delta-approx::${dateDeltaDaysApprox}"
   echo
   exit $exitStatus
 }

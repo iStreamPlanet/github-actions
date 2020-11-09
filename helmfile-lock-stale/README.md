@@ -26,9 +26,9 @@ outputs:
   helmfile-lock-is-stale:
     description: "Whether the helmfile lock is stale or not"
     value: ${{ steps.main.outputs.helmfile-lock-is-stale }}
-  helmfile-lock-staleness-delta:
-    description: "How many days stale is the lock"
-    value: ${{ steps.main.outputs.helmfile-lock-staleness-delta }}
+  helmfile-lock-staleness-delta-approx:
+    description: "How many days stale is the lock approximately"
+    value: ${{ steps.main.outputs.helmfile-lock-staleness-delta-approx }}
 ```
 
 ## Examples
