@@ -1,0 +1,29 @@
+name: "helmfile lock stale"
+description: "A composite action to check if the helmfile lock is missing or stale"
+inputs:
+  working_directory:
+    description: "The directory to run the action in"
+    required: false
+    default: "."
+  days_stale:
+    description: "Threshold for determining if a helmfile lock is stale or not"
+    required: false
+    default: 30
+outputs:
+  helmfile-lock-is-missing:
+    description: "Whether the helmfile lock is missing or not"
+    value: ${{ steps.main.outputs.helmfile-lock-is-missing }}
+  helmfile-lock-is-stale:
+    description: "Whether the helmfile lock is stale or not"
+    value: ${{ steps.main.outputs.helmfile-lock-is-stale }}
+  helmfile-lock-staleness-delta:
+    description: "How many days stale is the lock"
+    value: ${{ steps.main.outputs.helmfile-lock-staleness-delta }}
+runs:
+  using: "composite"
+  steps:
+    - name: "staleness check"
+      shell: bash
+      id: main
+      working-directory: ${{ inputs.working_directory }}
+      run: ${{ github.action_path }}/main.sh "${{ inputs.working_directory }}" "${{ days_stale }}"

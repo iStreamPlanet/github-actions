@@ -1,6 +1,14 @@
 #!/bin/bash
 
-function helmfileStaleness {
+if [ "$#" -ne 2 ]; then
+  echo 'Usage: ./main.sh $working_directory $days_stale'
+  exit 1
+fi
+
+workingDir="$1"
+daysStale="$2"
+
+function helmfileLockStaleness {
   helmfileContent=$(<helmfile.lock)
   exitStatus=$?
   isMissing=false
@@ -21,10 +29,10 @@ function helmfileStaleness {
     dateGeneratedSinceEpoch=$(date -d ${dateGenerated} +%s)
     dateCurrentSinceEpoch=$(date +%s)
     dateDeltaSeconds=$((${dateCurrentSinceEpoch} - ${dateGeneratedSinceEpoch}))
-    dateDeltaDays=$((${dateDeltaSeconds} / (24*3600)))
+    daysStaleSeconds=$((${daysStale} * (24 * 3600)))
 
     staleCode=2
-    if [ ${dateDeltaDays} -le ${daysStale} ]; then
+    if [ ${dateDeltaSeconds} -le ${daysStaleSeconds} ]; then
       echo "Info: helmfile.lock is fresh"
     else
       echo "Warning: helmfile.lock is stale"
@@ -33,9 +41,11 @@ function helmfileStaleness {
     fi
   fi
 
-  echo "::set-output name=helmfile-is-missing::${isMissing}"
-  echo "::set-output name=helmfile-is-stale::${isStale}"
-  echo "::set-output name=helmfile-staleness-delta::${dateDeltaDays}"
+  echo "::set-output name=helmfile-lock-is-missing::${isMissing}"
+  echo "::set-output name=helmfile-lock-is-stale::${isStale}"
+  echo "::set-output name=helmfile-lock-staleness-delta::${dateDeltaDays}"
   echo
   exit $exitStatus
 }
+
+helmfileLockStaleness

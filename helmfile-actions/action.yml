@@ -8,10 +8,6 @@ inputs:
     description: "The directory to run all the commands in"
     required: false
     default: "."
-  days_stale:
-    description: "Threshold for determining if a helmfile lock is stale or not"
-    required: false
-    default: 30
 outputs:
   diff-output:
     description: "The Helmfile diff command output"
@@ -19,15 +15,6 @@ outputs:
   diff-has-changes:
     description: "Whether the diff contained changes"
     value: ${{ steps.main.outputs.diff-has-changes }}
-  helmfile-is-missing:
-    description: "Whether the helmfile lock is missing or not"
-    value: ${{ steps.main.outputs.helmfile-is-missing }}
-  helmfile-is-stale:
-    description: "Whether the helmfile lock is stale or not"
-    value: ${{ steps.main.outputs.helmfile-is-stale }}
-  helmfile-staleness-delta:
-    description: "How many days stale is the lock"
-    value: ${{ steps.main.outputs.helmfile-staleness-delta }}
 runs:
   using: "composite"
   steps:
