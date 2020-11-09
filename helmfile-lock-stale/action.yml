@@ -10,12 +10,9 @@ inputs:
     required: false
     default: 30
 outputs:
-  helmfile-lock-is-missing:
-    description: "Whether the helmfile lock is missing or not"
-    value: ${{ steps.main.outputs.helmfile-lock-is-missing }}
-  helmfile-lock-is-stale:
-    description: "Whether the helmfile lock is stale or not"
-    value: ${{ steps.main.outputs.helmfile-lock-is-stale }}
+  helmfile-lock-state:
+    description: "State of the helmfile lock. i.e. missing, stale, fresh"
+    value: ${{ steps.main.outputs.helmfile-lock-state }}
   helmfile-lock-staleness-delta-approx:
     description: "How many days stale is the lock approximately"
     value: ${{ steps.main.outputs.helmfile-lock-staleness-delta-approx }}

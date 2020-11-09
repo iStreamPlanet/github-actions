@@ -11,20 +11,18 @@ daysStale="$2"
 function helmfileLockStaleness {
   helmfileContent=$(<helmfile.lock)
   exitStatus=$?
-  isMissing=false
-  isStale=false
+  helmfileState=""
   dateDeltaDaysApprox=-1
 
-  missingFileCode=1
   if [ ${exitStatus} -eq 0 ]; then
     echo "Info: helmfile.lock was found"
+    helmfileState="found" 
   else
     echo "Error: helmfile.lock is missing"
-    isMissing=true
-    exitStatus=${missingFileCode}
+    helmfileState="missing" 
   fi
 
-  if [ ${isMissing} = "false" ]; then
+  if [ ${helmfileState} = "found" ]; then
     dateGenerated=`cat helmfile.lock | sed -n -r "s/^generated:\s\"(.*)\"/\1/gp"`
     dateGeneratedSinceEpoch=$(date -d ${dateGenerated} +%s)
     dateCurrentSinceEpoch=$(date +%s)
@@ -32,21 +30,19 @@ function helmfileLockStaleness {
     daysStaleSeconds=$((${daysStale} * (24 * 3600)))
     dateDeltaDaysApprox=$((${dateDeltaSeconds} / (24*3600)))
 
-    staleCode=2
     if [ ${dateDeltaSeconds} -le ${daysStaleSeconds} ]; then
       echo "Info: helmfile.lock is fresh"
+      helmfileState="fresh"
     else
       echo "Warning: helmfile.lock is stale"
-      isStale=true
-      exitStatus=${staleCode}
+      helmfileState="stale"
     fi
   fi
 
-  echo "::set-output name=helmfile-lock-is-missing::${isMissing}"
-  echo "::set-output name=helmfile-lock-is-stale::${isStale}"
+  echo "::set-output name=helmfile-lock-state::${helmfileState}"
   echo "::set-output name=helmfile-lock-staleness-delta-approx::${dateDeltaDaysApprox}"
   echo
-  exit $exitStatus
+  exit 0
 }
 
 helmfileLockStaleness
