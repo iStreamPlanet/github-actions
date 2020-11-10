@@ -3,6 +3,7 @@
 There is a single `./main.sh` file that delegates down to other scripts based on the `command` that you pass in.
 
 ## Inputs
+
 ```yaml
 inputs:
   command:
@@ -15,7 +16,9 @@ inputs:
 ```
 
 ## Examples
+
 Example usage of `helmfile diff`:
+
 ```yaml
 - uses: iStreamPlanet/github-actions/helmfile-actions@main
   if: github.event_name == 'pull_request'
@@ -27,6 +30,7 @@ Example usage of `helmfile diff`:
 ```
 
 Example usage of `helmfile apply`:
+
 ```yaml
 - uses: iStreamPlanet/github-actions/helmfile-actions@main
   with:
