@@ -23,4 +23,4 @@ runs:
       shell: bash
       id: main
       working-directory: ${{ inputs.working_directory }}
-      run: ${{ github.action_path }}/main.sh "${{ inputs.working_directory }}" "${{ days_stale }}"
+      run: ${{ github.action_path }}/main.sh "${{ inputs.working_directory }}" "${{ inputs.days_stale }}"
