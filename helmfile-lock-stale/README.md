@@ -1,6 +1,6 @@
 # helmfile-lock-stale
 
-Action to determine if a helmfile lock is missing or stale.
+Action to determine if a helmfile lock file is missing or stale.
 
 ## Inputs
 
