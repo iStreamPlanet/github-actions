@@ -22,7 +22,9 @@ export const run = async (): Promise<void> => {
 
         const workingDir = getInput("working-dir")
         const daysStale = parseInt(getInput("days-stale"))
-        const helmfilePath = path.join(process.cwd(), workingDir, "helmfile.yaml")
+        const helmfilePath = process.cwd() + "/" +  workingDir + "/helmfile.yaml"
+        // ncc doesn't seem to play nice with the below, or I am doing something dumb
+        // const helmfilePath = path.resolve(workingDir, "helmfile.yaml")
 
         if (!existsSync(helmfilePath)) {
             // Return early, because there is no helmfile
@@ -39,7 +41,8 @@ export const run = async (): Promise<void> => {
             return
         } 
 
-        const helmfileLockPath = path.join(process.cwd(), workingDir, "helmfile.lock")
+        const helmfileLockPath = process.cwd() + "/" +  workingDir + "/helmfile.lock"
+        // const helmfileLockPath = path.resolve(workingDir, "helmfile.lock")
 
         if (existsSync(helmfileLockPath)) {
             const helmfileLockContent = readFileSync(helmfileLockPath, "utf-8")
