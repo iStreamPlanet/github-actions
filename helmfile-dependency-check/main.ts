@@ -1,8 +1,7 @@
 import { getInput, setOutput, setFailed } from "@actions/core";
 import { existsSync, readFileSync } from "fs";
 import { safeLoad } from "js-yaml";
-import moment from "moment";
-import path from "path";
+import * as path from "path";
 
 interface ActionOutputs {
     helmfileLockState: string;
@@ -23,7 +22,7 @@ const run = async (): Promise<void> => {
 
         const workingDir = getInput("working-dir")
         const daysStale = parseInt(getInput("days-stale"))
-        const helmfilePath = path.join(__dirname, workingDir, "helmfile.yaml")
+        const helmfilePath = path.join(process.cwd(), workingDir, "helmfile.yaml")
 
         if (!existsSync(helmfilePath)) {
             // Return early, because there is no helmfile
@@ -40,18 +39,25 @@ const run = async (): Promise<void> => {
             return
         } 
 
-        const helmfileLockPath = path.join(__dirname, workingDir, "helmfile.lock")
+        const helmfileLockPath = path.join(process.cwd(), workingDir, "helmfile.lock")
 
         if (existsSync(helmfileLockPath)) {
             const helmfileLockContent = readFileSync(helmfileLockPath, "utf-8")
             const helmfileLockData = safeLoad(helmfileLockContent)
-            const helmfileLockGeneratedDate = moment(helmfileLockData["generated"])
-            const currentDate = moment();
-            const daysDiff = currentDate.diff(helmfileLockGeneratedDate, "days")
+            const helmfileLockGeneratedDate = new Date(helmfileLockData["generated"])
+            const currentDate = new Date()
+            const millisecondsPerDay = 24 * 3600 * 1000
+
+            const millisecondsDiff = currentDate.getTime() - helmfileLockGeneratedDate.getTime()
+            const millisecondsStale = daysStale * millisecondsPerDay
+            const daysDiff = Math.floor(millisecondsDiff / millisecondsPerDay)
+
             outputs.helmfileLockDelta = daysDiff
-            if (daysDiff > daysStale) {
+
+            if (millisecondsDiff > millisecondsStale) {
                 outputs.helmfileLockState = "stale"
             }
+
         } else {
             outputs.helmfileLockState = "missing"
         }

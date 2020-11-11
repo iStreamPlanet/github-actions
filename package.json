@@ -31,7 +31,6 @@
     "@actions/github": "^4.0.0",
     "@actions/glob": "^0.1.0",
     "js-yaml": "^3.14.0",
-    "minimatch": "^3.0.4",
-    "moment": "^2.29.1"
+    "minimatch": "^3.0.4"
   }
 }

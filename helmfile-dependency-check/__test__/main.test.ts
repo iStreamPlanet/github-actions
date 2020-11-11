@@ -1,28 +1,21 @@
 import * as core from "@actions/core"
-import { readFileSync } from "fs";
-import { safeLoad } from "js-yaml";
+import * as path from "path"
 import run from "../main"
 
+const relativeBasePath = "helmfile-dependency-check/__test__/test-data/"
 beforeEach(() => {
     jest.resetModules()
-    const doc = safeLoad(readFileSync(__dirname + "/../action.yml", "utf-8"))
-    Object.keys(doc["inputs"]).forEach(name => {
-        const envVar = `INPUT_${name.replace(/ /g, "_").toUpperCase()}`
-        process.env[envVar] = doc["inputs"][name]["default"]
-    })
+    process.env["INPUT_DAYS-STALE"] = "30"
 })
 
 afterEach(() => {
-    const doc = safeLoad(readFileSync(__dirname + "/../action.yml", "utf-8"))
-    Object.keys(doc["inputs"]).forEach(name => {
-        const envVar = `INPUT_${name.replace(/ /g, "_").toUpperCase()}`
-        delete process.env[envVar]
-    })
+    delete process.env["INPUT_WORKING-DIR"]
+    delete process.env["INPUT_DAYS-STALE"]
 })
 
 describe("helmfile-dep-update", () => {
     it("helmfile missing", async () => {
-        process.env["INPUT_WORKING-DIR"] = "__test__/test-data/helmfile-missing/"
+        process.env["INPUT_WORKING-DIR"] = path.join(relativeBasePath, "helmfile-missing")
         const setOutputMock = jest.spyOn(core, "setOutput")
 
         await run()
@@ -31,7 +24,7 @@ describe("helmfile-dep-update", () => {
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-delta", -1)
     })
     it("helmfile missing repositories", async () => {
-        process.env["INPUT_WORKING-DIR"] = "__test__/test-data/helmfile-no-repositories/"
+        process.env["INPUT_WORKING-DIR"] = path.join(relativeBasePath, "helmfile-no-respository")
         const setOutputMock = jest.spyOn(core, "setOutput")
 
         await run()
@@ -40,7 +33,7 @@ describe("helmfile-dep-update", () => {
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-delta", -1)
     })
     it("helmfile lock fresh", async () => {
-        process.env["INPUT_WORKING-DIR"] = "__test__/test-data/helmfile-lock-fresh/"
+        process.env["INPUT_WORKING-DIR"] = path.join(relativeBasePath, "helmfile-lock-fresh")
         const setOutputMock = jest.spyOn(core, "setOutput")
 
         await run()
@@ -49,7 +42,7 @@ describe("helmfile-dep-update", () => {
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-delta", 4)
     })
     it("helmfile lock stale", async () => {
-        process.env["INPUT_WORKING-DIR"] = "__test__/test-data/helmfile-lock-stale/"
+        process.env["INPUT_WORKING-DIR"] = path.join(relativeBasePath, "helmfile-lock-stale")
         const setOutputMock = jest.spyOn(core, "setOutput")
 
         await run()
@@ -58,7 +51,7 @@ describe("helmfile-dep-update", () => {
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-delta", 370)
     })
     it("helmfile lock missing", async () => {
-        process.env["INPUT_WORKING-DIR"] = "__test__/test-data/helmfile-lock-missing/"
+        process.env["INPUT_WORKING-DIR"] = path.join(relativeBasePath, "helmfile-lock-missing")
         const setOutputMock = jest.spyOn(core, "setOutput")
 
         await run()
