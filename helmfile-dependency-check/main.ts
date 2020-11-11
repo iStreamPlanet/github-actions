@@ -13,7 +13,7 @@ function setOutputs({helmfileLockState, helmfileLockDelta}: ActionOutputs): void
     setOutput("helmfile-lock-delta", helmfileLockDelta)
 }
 
-const run = async (): Promise<void> => {
+export const run = async (): Promise<void> => {
     try {
         const outputs: ActionOutputs = {
             helmfileLockState:  "fresh",
@@ -70,5 +70,3 @@ const run = async (): Promise<void> => {
 }
 
 run()
-
-export default run
