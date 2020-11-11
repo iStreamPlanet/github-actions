@@ -7,21 +7,31 @@
     "build:build-workspace-matrix": "ncc build build-workspace-matrix/main.ts -o build-workspace-matrix/dist -m",
     "build:find-path-owners": "ncc build find-path-owners/main.ts -o find-path-owners/dist -m",
     "build:minimize-comments": "ncc build minimize-comments/main.ts -o minimize-comments/dist -m",
-    "build:update-issue": "ncc build update-issue/main.ts -o update-issue/dist -m"
+    "build:update-issue": "ncc build update-issue/main.ts -o update-issue/dist -m",
+    "build:helmfile-dependency-check": "ncc build helmfile-dependency-check/main.ts -o helmfile-dependency-check/dist -m",
+    "test": "jest"
   },
   "author": "iStreamPlanet",
   "license": "ISC",
   "devDependencies": {
     "@octokit/webhooks": "^7.15.1",
+    "@types/jest": "^26.0.15",
+    "@types/js-yaml": "^3.12.5",
     "@types/minimatch": "^3.0.3",
+    "@types/nock": "^11.1.0",
     "@vercel/ncc": "^0.25.1",
+    "jest": "^26.6.3",
+    "nock": "^13.0.5",
     "npm-run-all": "^4.1.5",
+    "ts-jest": "^26.4.4",
     "typescript": "^4.0.5"
   },
   "dependencies": {
     "@actions/core": "^1.2.6",
     "@actions/github": "^4.0.0",
     "@actions/glob": "^0.1.0",
-    "minimatch": "^3.0.4"
+    "js-yaml": "^3.14.0",
+    "minimatch": "^3.0.4",
+    "moment": "^2.29.1"
   }
 }

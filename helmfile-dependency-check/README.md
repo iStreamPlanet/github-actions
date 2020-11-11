@@ -1,6 +1,12 @@
-# helmfile-lock-stale
+# helmfile-dependency-check
 
-Action to determine if a helmfile lock file is missing or stale.
+Current Features:
+
+- Determine if a helmfile lock file is missing or stale
+
+Roadmap:
+
+- Check upstream repositories for updates
 
 ## Inputs
 
@@ -23,9 +29,9 @@ outputs:
   helmfile-lock-state:
     description: "State of the helmfile lock. i.e. missing, stale, fresh"
     value: ${{ steps.main.outputs.helmfile-lock-state }}
-  helmfile-lock-staleness-delta-approx:
+  helmfile-lock-delta:
     description: "How many days stale is the lock approximately"
-    value: ${{ steps.main.outputs.helmfile-lock-staleness-delta-approx }}
+    value: ${{ steps.main.outputs.helmfile-lock-delta}}
 ```
 
 ## Examples
