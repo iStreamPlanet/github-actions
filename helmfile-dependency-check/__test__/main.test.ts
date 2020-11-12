@@ -1,6 +1,6 @@
 import * as core from "@actions/core"
 import * as path from "path"
-import { run } from "../helmfileDepCheck"
+import { helmfileDepCheck } from "../helmfileDepCheck"
 
 const baseDir = "helmfile-dependency-check/__test__/test-data/"
 
@@ -19,7 +19,7 @@ describe("helmfile-dep-update", () => {
         process.env["INPUT_WORKING-DIR"] = path.join(baseDir, "helmfile-missing")
         const setOutputMock = jest.spyOn(core, "setOutput")
 
-        await run()
+        await helmfileDepCheck()
 
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "fresh")
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-delta", -1)
@@ -28,7 +28,7 @@ describe("helmfile-dep-update", () => {
         process.env["INPUT_WORKING-DIR"] = path.join(baseDir, "helmfile-no-repository")
         const setOutputMock = jest.spyOn(core, "setOutput")
 
-        await run()
+        await helmfileDepCheck()
         
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "fresh")
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-delta", -1)
@@ -37,7 +37,7 @@ describe("helmfile-dep-update", () => {
         process.env["INPUT_WORKING-DIR"] = path.join(baseDir, "helmfile-lock-fresh")
         const setOutputMock = jest.spyOn(core, "setOutput")
 
-        await run()
+        await helmfileDepCheck()
 
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "fresh")
         expect(setOutputMock).toHaveBeenCalled()
@@ -46,7 +46,7 @@ describe("helmfile-dep-update", () => {
         process.env["INPUT_WORKING-DIR"] = path.join(baseDir, "helmfile-lock-stale")
         const setOutputMock = jest.spyOn(core, "setOutput")
 
-        await run()
+        await helmfileDepCheck()
         
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "stale")
         expect(setOutputMock).toHaveBeenCalled()
@@ -55,7 +55,7 @@ describe("helmfile-dep-update", () => {
         process.env["INPUT_WORKING-DIR"] = path.join(baseDir, "helmfile-lock-missing")
         const setOutputMock = jest.spyOn(core, "setOutput")
 
-        await run()
+        await helmfileDepCheck()
 
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "missing")
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-delta", -1)

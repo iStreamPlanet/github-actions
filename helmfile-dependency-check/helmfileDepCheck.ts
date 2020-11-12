@@ -12,7 +12,7 @@ function setOutputs({helmfileLockState, helmfileLockDelta}: ActionOutputs): void
     setOutput("helmfile-lock-delta", helmfileLockDelta)
 }
 
-export async function run() {
+export function helmfileDepCheck() {
     try {
         const outputs: ActionOutputs = {
             helmfileLockState:  "fresh",
