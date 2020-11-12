@@ -1,6 +1,6 @@
 import * as core from "@actions/core"
 import * as path from "path"
-import { run } from "../main"
+import { run } from "../helmfileDepCheck"
 
 const baseDir = "helmfile-dependency-check/__test__/test-data/"
 
