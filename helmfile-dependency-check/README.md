@@ -3,9 +3,6 @@
 Current Features:
 
 - Determine if a helmfile lock file is missing or stale
-
-Roadmap:
-
 - Check upstream repositories for updates
 
 ## Inputs
@@ -27,11 +24,14 @@ inputs:
 ```yaml
 outputs:
   helmfile-lock-state:
-    description: "State of the helmfile lock. i.e. missing, stale, fresh"
+    description: "State of the helmfile lock. [missing, stale, fresh, update_available]"
     value: ${{ steps.main.outputs.helmfile-lock-state }}
   helmfile-lock-delta:
-    description: "How many days stale is the lock approximately"
-    value: ${{ steps.main.outputs.helmfile-lock-delta}}
+    description: "How many days stale is the lock approximately."
+    value: ${{ steps.main.outputs.helmfile-lock-delta }}
+  helmfile-lock-updates:
+    description: "JSON list of available updates."
+    value: ${{ steps.main.outputs.helmfile-lock-updates }}
 ```
 
 ## Examples

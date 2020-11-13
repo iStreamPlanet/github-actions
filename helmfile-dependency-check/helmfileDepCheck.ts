@@ -1,22 +1,59 @@
-import { getInput, setOutput, setFailed } from "@actions/core";
-import { existsSync, readFileSync } from "fs";
-import { safeLoad } from "js-yaml";
+import { getInput, setOutput, setFailed } from "@actions/core"
+import { existsSync, readFileSync } from "fs"
+import { safeLoad } from "js-yaml"
+import * as https from "https"
+import * as semver from "semver"
+
+enum HelmfileLockState {
+    FRESH = "fresh",
+    STALE = "stale",
+    MISSING = "missing",
+    UPDATE_AVAILABLE = "update_available"
+}
+
+interface HelmfileLockUpdate {
+    name: string;
+    repository: string;
+    currentVer: string;
+    latestVer: string;
+}
 
 interface ActionOutputs {
-    helmfileLockState: string;
+    helmfileLockState: HelmfileLockState;
     helmfileLockDelta: number;
+    helmfileLockUpdates: HelmfileLockUpdate[];
 }
 
-function setOutputs({helmfileLockState, helmfileLockDelta}: ActionOutputs): void {
+function setOutputs({helmfileLockState, helmfileLockDelta, helmfileLockUpdates}: ActionOutputs): void {
     setOutput("helmfile-lock-state", helmfileLockState)
     setOutput("helmfile-lock-delta", helmfileLockDelta)
+    setOutput("helmfile-lock-updates", helmfileLockUpdates)
 }
 
-export function helmfileDepCheck() {
+async function getIndexYAMLData(indexURL: string) {
+    return new Promise((resolve, reject) => {
+        https.get(indexURL, resp => {
+            let data = ""
+
+            resp.on("data", chunk => {
+                data += chunk
+            })
+
+            resp.on("end", () => {
+                resolve(safeLoad(data))
+            })
+        }).on("error", error => {
+            reject(error.message)
+        })
+    })
+}
+
+export async function helmfileDepCheck() {
     try {
         const outputs: ActionOutputs = {
-            helmfileLockState:  "fresh",
-            helmfileLockDelta:  -1
+            helmfileLockState:  HelmfileLockState.FRESH,
+            helmfileLockDelta:  -1,
+            helmfileLockUpdates: []
         }
 
         const workingDir = getInput("working-dir")
@@ -54,11 +91,44 @@ export function helmfileDepCheck() {
             outputs.helmfileLockDelta = daysDiff
 
             if (millisecondsDiff > millisecondsStale) {
-                outputs.helmfileLockState = "stale"
+                outputs.helmfileLockState = HelmfileLockState.STALE
+            }
+
+            // Check upstream repos for upgrades
+            for (const dependency of helmfileLockData["dependencies"]) {
+                const indexURL = dependency["repository"] + "/index.yaml"
+                const indexData = await getIndexYAMLData(indexURL)
+
+                const dependencyName = dependency["name"]
+                const dependencyVer = dependency["version"]
+                if (!indexData["entries"][dependencyName]) {
+                    console.log(`Could not find list of versions for ${dependencyName}`)
+                    continue
+                }
+                const latestVer = indexData["entries"][dependencyName][0]["version"]
+
+                if (!semver.valid(dependencyVer) || !semver.valid(latestVer)) {
+                    console.log(`Invalid semantic version found: ${dependencyVer} or ${latestVer}`)
+                    continue
+                }
+
+                const dependencyVerClean = semver.clean(dependencyVer)
+                const latestVerClean = semver.clean(latestVer)
+
+                if (semver.lt(dependencyVerClean, latestVerClean)) {
+                    const updateData = {
+                        name: dependencyName,
+                        repository: indexURL,
+                        currentVer: dependencyVerClean,
+                        latestVer: latestVerClean
+                    }
+                    outputs.helmfileLockUpdates.push(updateData)
+                    outputs.helmfileLockState = HelmfileLockState.UPDATE_AVAILABLE
+                }
             }
 
         } else {
-            outputs.helmfileLockState = "missing"
+            outputs.helmfileLockState = HelmfileLockState.MISSING
         }
 
         setOutputs(outputs)
