@@ -71,6 +71,7 @@ export async function helmfileDepCheck() {
             return
         } 
 
+        // path.join is not used, because of issues when building with ncc
         const helmfileLockPath = process.cwd() + "/" +  workingDir + "/helmfile.lock"
 
         if (existsSync(helmfileLockPath)) {
