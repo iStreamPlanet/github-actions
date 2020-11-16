@@ -7,16 +7,10 @@ inputs:
   working-dir:
     description: "The directory to run the action in"
     default: "."
-  days-stale:
-    description: "Threshold for determining if a helmfile lock is stale or not"
-    default: 30
 outputs:
   helmfile-lock-state:
     description: "State of the helmfile lock. [missing, stale, fresh, update_available]"
     value: ${{ steps.main.outputs.helmfile-lock-state }}
-  helmfile-lock-delta:
-    description: "How many days stale is the lock approximately."
-    value: ${{ steps.main.outputs.helmfile-lock-delta }}
   helmfile-lock-updates:
     description: "JSON list of available updates."
     value: ${{ steps.main.outputs.helmfile-lock-updates }}

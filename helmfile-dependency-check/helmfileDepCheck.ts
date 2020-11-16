@@ -6,7 +6,6 @@ import * as semver from "semver"
 
 enum HelmfileLockState {
     FRESH = "fresh",
-    STALE = "stale",
     MISSING = "missing",
     UPDATE_AVAILABLE = "update_available"
 }
@@ -20,17 +19,15 @@ interface HelmfileLockUpdate {
 
 interface ActionOutputs {
     helmfileLockState: HelmfileLockState;
-    helmfileLockDelta: number;
     helmfileLockUpdates: HelmfileLockUpdate[];
 }
 
-function setOutputs({helmfileLockState, helmfileLockDelta, helmfileLockUpdates}: ActionOutputs): void {
+function setOutputs({helmfileLockState, helmfileLockUpdates}: ActionOutputs): void {
     setOutput("helmfile-lock-state", helmfileLockState)
-    setOutput("helmfile-lock-delta", helmfileLockDelta)
     setOutput("helmfile-lock-updates", helmfileLockUpdates)
 }
 
-async function getIndexYAMLData(indexURL: string) {
+function getIndexYAMLData(indexURL: string) {
     return new Promise((resolve, reject) => {
         https.get(indexURL, resp => {
             let data = ""
@@ -52,12 +49,11 @@ export async function helmfileDepCheck() {
     try {
         const outputs: ActionOutputs = {
             helmfileLockState:  HelmfileLockState.FRESH,
-            helmfileLockDelta:  -1,
             helmfileLockUpdates: []
         }
 
         const workingDir = getInput("working-dir")
-        const daysStale = parseInt(getInput("days-stale"))
+        // path.join is not used, because of issues when building with ncc
         const helmfilePath = process.cwd() + "/" +  workingDir + "/helmfile.yaml"
 
         if (!existsSync(helmfilePath)) {
@@ -80,19 +76,6 @@ export async function helmfileDepCheck() {
         if (existsSync(helmfileLockPath)) {
             const helmfileLockContent = readFileSync(helmfileLockPath, "utf-8")
             const helmfileLockData = safeLoad(helmfileLockContent)
-            const helmfileLockGeneratedDate = new Date(helmfileLockData["generated"])
-            const currentDate = new Date()
-            const millisecondsPerDay = 24 * 3600 * 1000
-
-            const millisecondsDiff = currentDate.getTime() - helmfileLockGeneratedDate.getTime()
-            const millisecondsStale = daysStale * millisecondsPerDay
-            const daysDiff = Math.floor(millisecondsDiff / millisecondsPerDay)
-
-            outputs.helmfileLockDelta = daysDiff
-
-            if (millisecondsDiff > millisecondsStale) {
-                outputs.helmfileLockState = HelmfileLockState.STALE
-            }
 
             // Check upstream repos for upgrades
             for (const dependency of helmfileLockData["dependencies"]) {

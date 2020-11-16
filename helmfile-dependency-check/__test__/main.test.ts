@@ -8,7 +8,6 @@ const baseDir = "helmfile-dependency-check/__test__/test-data/"
 
 beforeEach(() => {
     jest.resetModules()
-    process.env["INPUT_DAYS-STALE"] = "30"
 
     // index.yaml will be returned for all https GET requests
     const helmfilePath = path.join(baseDir, "index.yaml")
@@ -18,7 +17,6 @@ beforeEach(() => {
 
 afterEach(() => {
     delete process.env["INPUT_WORKING-DIR"]
-    delete process.env["INPUT_DAYS-STALE"]
 })
 
 describe("helmfile-dep-update", () => {
@@ -29,7 +27,6 @@ describe("helmfile-dep-update", () => {
         await helmfileDepCheck()
 
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "fresh")
-        expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-delta", -1)
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
     })
     it("helmfile missing repositories", async () => {
@@ -39,7 +36,6 @@ describe("helmfile-dep-update", () => {
         await helmfileDepCheck()
         
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "fresh")
-        expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-delta", -1)
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
     })
     it("helmfile lock fresh", async () => {
@@ -50,7 +46,6 @@ describe("helmfile-dep-update", () => {
 
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "fresh")
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
-        expect(setOutputMock).toHaveBeenCalledTimes(3)
     })
     it("helmfile lock update", async () => {
         process.env["INPUT_WORKING-DIR"] = path.join(baseDir, "helmfile-lock-update")
@@ -66,17 +61,6 @@ describe("helmfile-dep-update", () => {
         }
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "update_available")
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [updateData])
-        expect(setOutputMock).toHaveBeenCalledTimes(3)
-    })
-    it("helmfile lock stale", async () => {
-        process.env["INPUT_WORKING-DIR"] = path.join(baseDir, "helmfile-lock-stale")
-        const setOutputMock = jest.spyOn(core, "setOutput")
-
-        await helmfileDepCheck()
-        
-        expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "stale")
-        expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
-        expect(setOutputMock).toHaveBeenCalledTimes(3)
     })
     it("helmfile lock missing", async () => {
         process.env["INPUT_WORKING-DIR"] = path.join(baseDir, "helmfile-lock-missing")
@@ -85,7 +69,6 @@ describe("helmfile-dep-update", () => {
         await helmfileDepCheck()
 
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "missing")
-        expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-delta", -1)
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
     })
 })
