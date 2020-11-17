@@ -1,8 +1,14 @@
 # helmfile-dependency-check
 
-Check upstream repositories for chart updates
+Simple action to check if there are updates available for charts defined in a `helmfile.yaml`
 
-## Inputs
+Helmfile Lock States:
+
+- `missing` - helmfile.lock is missing (helmfile.yaml had repositories to check against)
+- `update_available` - Chart updates were found in upstream repos
+- `fresh` - Charts are all up to date
+
+## Optional Inputs
 
 ```yaml
 inputs:
@@ -24,10 +30,10 @@ outputs:
     value: ${{ steps.main.outputs.helmfile-lock-updates }}
 ```
 
-## Examples
+## Example
 
 ```yaml
-- uses: iStreamPlanet/github-actions/helmfile-lock-stale@main
+- uses: iStreamPlanet/github-actions/helmfile-dependency-check@main
   with:
     working_directory: .
 ```
