@@ -9,7 +9,7 @@ inputs:
     default: "."
 outputs:
   helmfile-lock-state:
-    description: "State of the helmfile lock. [missing, stale, fresh, update_available]"
+    description: "State of the helmfile lock. [missing, fresh, update_available]"
     value: ${{ steps.main.outputs.helmfile-lock-state }}
   helmfile-lock-updates:
     description: "JSON list of available updates."
