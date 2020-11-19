@@ -4,7 +4,7 @@ runs:
   using: "node12"
   main: "dist/index.js"
 inputs:
-  working-dir:
+  working_directory:
     description: "The directory to run the action in"
     default: "."
 outputs:
