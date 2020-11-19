@@ -20,10 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install asdf on the Action Runner
-        uses: asdf-vm/actions/setup@v1
-      - name: Set up Node.js using asdf
-        run: asdf install
+      - name: Install Node.js using asdf
+        uses: asdf-vm/actions/install@v1
       - name: Cache Node.js modules
         uses: actions/cache@v2
         with:
