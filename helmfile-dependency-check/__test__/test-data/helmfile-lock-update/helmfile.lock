@@ -1,0 +1,19 @@
+version: v0.125.0
+dependencies:
+- name: datadog
+  repository: https://helm.datadoghq.com
+  version: 2.4.39
+- name: external-dns
+  repository: https://charts.bitnami.com/bitnami
+  version: 2.24.1
+- name: kube-state-metrics
+  repository: https://charts.helm.sh/stable
+  version: 2.9.2
+- name: metrics-server
+  repository: https://charts.helm.sh/stable
+  version: 2.11.2
+- name: spotinst-kubernetes-cluster-controller
+  repository: https://spotinst.github.io/spotinst-kubernetes-helm-charts
+  version: 1.0.78
+digest: sha256:aa71df80f65944a2281269415dc193943f50d9d7bf2763017ee1d9d9539ac116
+generated: "2019-11-06T15:12:37.407096-08:00"

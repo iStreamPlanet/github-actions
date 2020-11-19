@@ -1,0 +1,16 @@
+name: "helmfile-dependency-check"
+description: "Check for helmfile dependency updates"
+runs:
+  using: "node12"
+  main: "dist/index.js"
+inputs:
+  working-dir:
+    description: "The directory to run the action in"
+    default: "."
+outputs:
+  helmfile-lock-state:
+    description: "State of the helmfile lock. [missing, fresh, update_available]"
+    value: ${{ steps.main.outputs.helmfile-lock-state }}
+  helmfile-lock-updates:
+    description: "JSON list of available updates."
+    value: ${{ steps.main.outputs.helmfile-lock-updates }}

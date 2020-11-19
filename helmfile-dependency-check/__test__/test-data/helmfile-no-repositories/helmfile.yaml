@@ -1,0 +1,10 @@
+helmfiles:
+  - path: ../../applications/origin-dev/helmfile.yaml
+    values:
+      - cluster.yaml
+      - { { toYaml .Values | nindent 8 } }
+
+environments:
+  default:
+    secrets:
+      - secrets.yaml
