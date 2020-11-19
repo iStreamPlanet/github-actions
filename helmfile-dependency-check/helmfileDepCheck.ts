@@ -52,7 +52,7 @@ export async function helmfileDepCheck() {
             helmfileLockUpdates: []
         }
 
-        const workingDir = getInput("working-dir")
+        const workingDir = getInput("working_directory")
         // path.join is not used, because of issues when building with ncc
         const helmfilePath = process.cwd() + "/" +  workingDir + "/helmfile.yaml"
 
