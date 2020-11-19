@@ -4,12 +4,16 @@ on:
     paths:
       - '**/*.js'
       - '**/*.ts'
+      - '**/package.json'
+      - '**/package-lock.json'
   push:
     branches:
       - main
     paths:
       - '**/*.js'
       - '**/*.ts'
+      - '**/package.json'
+      - '**/package-lock.json'
 
 jobs:
   test:
