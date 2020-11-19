@@ -1,0 +1,39 @@
+name: 'test'
+on:
+  pull_request:
+    paths:
+      - '**/*.js'
+      - '**/*.ts'
+      - '**/package.json'
+      - '**/package-lock.json'
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.js'
+      - '**/*.ts'
+      - '**/package.json'
+      - '**/package-lock.json'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Node.js using asdf
+        uses: asdf-vm/actions/install@v1
+        env:
+          NODEJS_CHECK_SIGNATURES: 'no'
+      - name: Cache Node.js modules
+        uses: actions/cache@v2
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: ~/.npm 
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
+            ${{ runner.OS }}-
+      - run: npm ci
+      - run: npm run test
+        env:
+          CI: true
