@@ -16,12 +16,12 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-    delete process.env["INPUT_WORKING-DIR"]
+    delete process.env["INPUT_WORKING_DIRECTORY"]
 })
 
 describe("helmfile-dep-update", () => {
     it("helmfile missing", async () => {
-        process.env["INPUT_WORKING-DIR"] = path.join(baseDir, "helmfile-missing")
+        process.env["INPUT_WORKING_DIRECTORY"] = path.join(baseDir, "helmfile-missing")
         const setOutputMock = jest.spyOn(core, "setOutput")
 
         await helmfileDepCheck()
@@ -30,7 +30,7 @@ describe("helmfile-dep-update", () => {
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
     })
     it("helmfile missing repositories", async () => {
-        process.env["INPUT_WORKING-DIR"] = path.join(baseDir, "helmfile-no-repository")
+        process.env["INPUT_WORKING_DIRECTORY"] = path.join(baseDir, "helmfile-no-repository")
         const setOutputMock = jest.spyOn(core, "setOutput")
 
         await helmfileDepCheck()
@@ -39,7 +39,7 @@ describe("helmfile-dep-update", () => {
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
     })
     it("helmfile lock fresh", async () => {
-        process.env["INPUT_WORKING-DIR"] = path.join(baseDir, "helmfile-lock-fresh")
+        process.env["INPUT_WORKING_DIRECTORY"] = path.join(baseDir, "helmfile-lock-fresh")
         const setOutputMock = jest.spyOn(core, "setOutput")
 
         await helmfileDepCheck()
@@ -48,7 +48,7 @@ describe("helmfile-dep-update", () => {
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
     })
     it("helmfile lock update", async () => {
-        process.env["INPUT_WORKING-DIR"] = path.join(baseDir, "helmfile-lock-update")
+        process.env["INPUT_WORKING_DIRECTORY"] = path.join(baseDir, "helmfile-lock-update")
         const setOutputMock = jest.spyOn(core, "setOutput")
 
         await helmfileDepCheck()
@@ -63,7 +63,7 @@ describe("helmfile-dep-update", () => {
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [updateData])
     })
     it("helmfile lock missing", async () => {
-        process.env["INPUT_WORKING-DIR"] = path.join(baseDir, "helmfile-lock-missing")
+        process.env["INPUT_WORKING_DIRECTORY"] = path.join(baseDir, "helmfile-lock-missing")
         const setOutputMock = jest.spyOn(core, "setOutput")
 
         await helmfileDepCheck()
