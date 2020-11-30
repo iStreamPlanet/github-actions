@@ -74,7 +74,7 @@ describe("helmfile-dep-update", () => {
 
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "fresh")
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
-        expect(logMock).toHaveBeenCalledWith("executed helmfile deps")
+        expect(logMock).toHaveBeenCalledWith("executed: helmfile deps")
     })
     it("helmfile lock no updates", () => {
         const workingDir = path.join(baseDir, "helmfile-lock-fresh")
@@ -147,7 +147,7 @@ describe("helmfile-dep-update", () => {
 
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "update_available")
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", updateData)
-        expect(logMock).toHaveBeenCalledWith("executed helmfile deps")
+        expect(logMock).toHaveBeenCalledWith("executed: helmfile deps")
     })
     it("helmfile lock missing", () => {
         const workingDir = path.join(baseDir, "helmfile-lock-missing")
