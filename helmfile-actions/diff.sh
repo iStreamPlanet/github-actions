@@ -32,6 +32,9 @@ function helmfileDiff {
     echo "Error: Failed to run helmfile diff"
     echo "${output}"
     echo
+    
+    # If output is longer than max length (65536 characters), keep last part
+    output=$(echo "${output}" | tail -c 65000 )
   fi
 
   if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && ([ "${hasChanges}" == "true" ] || [ "${commentStatus}" == "Failed" ]); then
