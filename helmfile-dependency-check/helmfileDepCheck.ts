@@ -78,7 +78,7 @@ export function helmfileDepCheck() {
         const newGenerated: string = newHelmfileLockData["generated"]
 
         if (Date.parse(currentGenerated) >= Date.parse(newGenerated)) {
-            console.log(`new generated date is not greater than previous after running helmfile deps`)
+            console.log(`new helmfile.lock was not generated`)
             setOutputs(outputs)
             return
         }

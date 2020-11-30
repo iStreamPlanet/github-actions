@@ -76,7 +76,7 @@ describe("helmfile-dep-update", () => {
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
         expect(logMock).toHaveBeenCalledWith("executed helmfile deps")
     })
-    it("helmfile deps generation failure", () => {
+    it("helmfile lock no updates", () => {
         const workingDir = path.join(baseDir, "helmfile-lock-fresh")
         process.env["INPUT_WORKING_DIRECTORY"] =  workingDir
 
@@ -103,7 +103,7 @@ describe("helmfile-dep-update", () => {
 
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "fresh")
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
-        expect(logMock).toHaveBeenCalledWith("new generated date is not greater than previous after running helmfile deps")
+        expect(logMock).toHaveBeenCalledWith("new helmfile.lock was not generated")
     })
     it("helmfile lock update", () => {
         const workingDir = path.join(baseDir, "helmfile-lock-update")
