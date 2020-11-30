@@ -1,4 +1,5 @@
 # github-actions
+
 Repository of generic reusable Github Actions
 
 #### [`build-workspace-matrix`](build-workspace-matrix)
@@ -20,3 +21,7 @@ Wraps certain [`terraform`](https://www.terraform.io/docs/commands/index.html) c
 #### [`update-issue`](update-issue)
 
 Creates, updates, or closes an issue matching a given title based on other parameters.
+
+#### [`helmfile-dependency-check`](helmfile-dependency-check)
+
+Checks if there is a valid `helmfile.yaml` in the working directory. Executes `helmfile deps` and checks if there are any chart upgrades available.
