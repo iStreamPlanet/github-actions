@@ -130,12 +130,20 @@ describe("helmfile-dep-update", () => {
 
         require("../helmfileDepCheck").helmfileDepCheck()
 
-        const updateData = [{
-            name: "datadog",
-            repository: "https://helm.datadoghq.com",
-            currentVer: "2.4.39",
-            upgradeVer: "2.5.1"
-        }]
+        const updateData = [
+            {
+                name: "datadog",
+                repository: "https://helm.datadoghq.com",
+                currentVer: "2.4.39",
+                upgradeVer: "2.5.1"
+            },
+            {
+                name: "spotinst-kubernetes-cluster-controller",
+                repository: "https://spotinst.github.io/spotinst-kubernetes-helm-charts",
+                currentVer: "1.0.78",
+                upgradeVer: "1.0.79"
+            }
+        ]
 
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "update_available")
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", updateData)
