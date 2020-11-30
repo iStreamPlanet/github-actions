@@ -1,6 +1,6 @@
 import { helmfileDepCheck } from "./helmfileDepCheck";
 
-async function run() {
+function run() {
     helmfileDepCheck()
 }
 

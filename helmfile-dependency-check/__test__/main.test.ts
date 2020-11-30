@@ -1,18 +1,15 @@
-import * as core from "@actions/core"
+jest.mock("fs")
+jest.mock("child_process")
+
 import * as path from "path"
-import * as nock from "nock"
-import { readFileSync } from "fs"
-import { helmfileDepCheck } from "../helmfileDepCheck"
 
 const baseDir = "helmfile-dependency-check/__test__/test-data/"
 
+const {readFileSync} = jest.requireActual("fs")
+
 beforeEach(() => {
     jest.resetModules()
-
-    // index.yaml will be returned for all https GET requests
-    const helmfilePath = path.join(baseDir, "index.yaml")
-    const helmfileContent = readFileSync(helmfilePath, "utf-8")
-    nock(/.*/).persist().get(/.*index.yaml/).reply(200, helmfileContent)
+    require("fs").__setMockFiles([])
 })
 
 afterEach(() => {
@@ -20,53 +17,145 @@ afterEach(() => {
 })
 
 describe("helmfile-dep-update", () => {
-    it("helmfile missing", async () => {
-        process.env["INPUT_WORKING_DIRECTORY"] = path.join(baseDir, "helmfile-missing")
-        const setOutputMock = jest.spyOn(core, "setOutput")
+    it("helmfile missing", () => {
+        const workingDir = path.join(baseDir, "helmfile-missing")
+        process.env["INPUT_WORKING_DIRECTORY"] =  workingDir
 
-        await helmfileDepCheck()
+        const setOutputMock = jest.spyOn(require("@actions/core"), "setOutput")
+
+        require("../helmfileDepCheck").helmfileDepCheck()
 
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "fresh")
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
     })
-    it("helmfile missing repositories", async () => {
-        process.env["INPUT_WORKING_DIRECTORY"] = path.join(baseDir, "helmfile-no-repository")
-        const setOutputMock = jest.spyOn(core, "setOutput")
+    it("helmfile missing repositories", () => {
+        const workingDir = path.join(baseDir, "helmfile-no-repositories")
+        process.env["INPUT_WORKING_DIRECTORY"] =  workingDir
 
-        await helmfileDepCheck()
+        const helmfilePath = path.join(workingDir, "helmfile.yaml")
+        const helmfileContent = readFileSync(helmfilePath, "utf-8")
+
+        const mockFiles = [
+            helmfileContent,
+        ]
+        require("fs").__setMockFiles(mockFiles)
+
+        const setOutputMock = jest.spyOn(require("@actions/core"), "setOutput")
+
+        require("../helmfileDepCheck").helmfileDepCheck()
         
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "fresh")
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
     })
-    it("helmfile lock fresh", async () => {
-        process.env["INPUT_WORKING_DIRECTORY"] = path.join(baseDir, "helmfile-lock-fresh")
-        const setOutputMock = jest.spyOn(core, "setOutput")
+    it("helmfile lock fresh", () => {
+        const workingDir = path.join(baseDir, "helmfile-lock-fresh")
+        process.env["INPUT_WORKING_DIRECTORY"] =  workingDir
 
-        await helmfileDepCheck()
+        const helmfilePath = path.join(workingDir, "helmfile.yaml")
+        const helmfileContent = readFileSync(helmfilePath, "utf-8")
+
+        const helmfileLockPath = path.join(workingDir, "helmfile.lock")
+        const helmfileLockContent = readFileSync(helmfileLockPath, "utf-8")
+
+        const freshHelmfileLockPath = path.join(workingDir, "helmfile_fresh.lock")
+        const freshHelmfileLockContent = readFileSync(freshHelmfileLockPath, "utf-8")
+
+        const mockFiles = [
+            helmfileContent,
+            helmfileLockContent,
+            freshHelmfileLockContent,
+        ]
+        require("fs").__setMockFiles(mockFiles)
+
+        const setOutputMock = jest.spyOn(require("@actions/core"), "setOutput")
+        const logMock = jest.spyOn(global.console, "log")
+
+        require("../helmfileDepCheck").helmfileDepCheck()
 
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "fresh")
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
+        expect(logMock).toHaveBeenCalledWith("executed helmfile deps")
     })
-    it("helmfile lock update", async () => {
-        process.env["INPUT_WORKING_DIRECTORY"] = path.join(baseDir, "helmfile-lock-update")
-        const setOutputMock = jest.spyOn(core, "setOutput")
+    it("helmfile deps generation failure", () => {
+        const workingDir = path.join(baseDir, "helmfile-lock-fresh")
+        process.env["INPUT_WORKING_DIRECTORY"] =  workingDir
 
-        await helmfileDepCheck()
+        const helmfilePath = path.join(workingDir, "helmfile.yaml")
+        const helmfileContent = readFileSync(helmfilePath, "utf-8")
 
-        const updateData = {
+        const helmfileLockPath = path.join(workingDir, "helmfile.lock")
+        const helmfileLockContent = readFileSync(helmfileLockPath, "utf-8")
+
+        const freshHelmfileLockPath = path.join(workingDir, "helmfile.lock")
+        const freshHelmfileLockContent = readFileSync(freshHelmfileLockPath, "utf-8")
+
+        const mockFiles = [
+            helmfileContent,
+            helmfileLockContent,
+            freshHelmfileLockContent,
+        ]
+        require("fs").__setMockFiles(mockFiles)
+
+        const setOutputMock = jest.spyOn(require("@actions/core"), "setOutput")
+        const logMock = jest.spyOn(global.console, "log")
+
+        require("../helmfileDepCheck").helmfileDepCheck()
+
+        expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "fresh")
+        expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
+        expect(logMock).toHaveBeenCalledWith("new generated date is not greater than previous after running helmfile deps")
+    })
+    it("helmfile lock update", () => {
+        const workingDir = path.join(baseDir, "helmfile-lock-update")
+        process.env["INPUT_WORKING_DIRECTORY"] =  workingDir
+
+        const helmfilePath = path.join(workingDir, "helmfile.yaml")
+        const helmfileContent = readFileSync(helmfilePath, "utf-8")
+
+        const helmfileLockPath = path.join(workingDir, "helmfile.lock")
+        const helmfileLockContent = readFileSync(helmfileLockPath, "utf-8")
+
+        const updatedHelmfileLockPath = path.join(workingDir, "helmfile_updated.lock")
+        const updatedHelmfileLockContent = readFileSync(updatedHelmfileLockPath, "utf-8")
+
+        const mockFiles = [
+            helmfileContent,
+            helmfileLockContent,
+            updatedHelmfileLockContent,
+        ]
+        require("fs").__setMockFiles(mockFiles)
+
+        const setOutputMock = jest.spyOn(require("@actions/core"), "setOutput")
+        const logMock = jest.spyOn(global.console, "log")
+
+        require("../helmfileDepCheck").helmfileDepCheck()
+
+        const updateData = [{
             name: "datadog",
-            repository: "https://helm.datadoghq.com/index.yaml",
+            repository: "https://helm.datadoghq.com",
             currentVer: "2.4.39",
-            latestVer: "2.5.1"
-        }
-        expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "update_available")
-        expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [updateData])
-    })
-    it("helmfile lock missing", async () => {
-        process.env["INPUT_WORKING_DIRECTORY"] = path.join(baseDir, "helmfile-lock-missing")
-        const setOutputMock = jest.spyOn(core, "setOutput")
+            upgradeVer: "2.5.1"
+        }]
 
-        await helmfileDepCheck()
+        expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "update_available")
+        expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", updateData)
+        expect(logMock).toHaveBeenCalledWith("executed helmfile deps")
+    })
+    it("helmfile lock missing", () => {
+        const workingDir = path.join(baseDir, "helmfile-lock-missing")
+        process.env["INPUT_WORKING_DIRECTORY"] =  workingDir
+
+        const helmfilePath = path.join(workingDir, "helmfile.yaml")
+        const helmfileContent = readFileSync(helmfilePath, "utf-8")
+
+        const mockFiles = [
+            helmfileContent,
+        ]
+        require("fs").__setMockFiles(mockFiles)
+
+        const setOutputMock = jest.spyOn(require("@actions/core"), "setOutput")
+
+        require("../helmfileDepCheck").helmfileDepCheck()
 
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "missing")
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
