@@ -2,6 +2,7 @@ import { getInput, setOutput, setFailed } from "@actions/core"
 import { existsSync, readFileSync } from "fs"
 import { safeLoad } from "js-yaml"
 import { execSync } from "child_process"
+import { join } from "path"
 
 enum HelmfileLockState {
     FRESH = "fresh",
@@ -33,8 +34,8 @@ export function helmfileDepCheck() {
             helmfileLockUpdates: []
         }
 
-        const workingDir = getInput("working_directory")
-        const helmfilePath = process.cwd() + "/" +  workingDir + "/helmfile.yaml"
+        const workingDir = join(process.cwd(), getInput("working_directory"))
+        const helmfilePath = workingDir + "/helmfile.yaml"
 
         if (!existsSync(helmfilePath)) {
             // Return early, because there is no helmfile
@@ -50,7 +51,7 @@ export function helmfileDepCheck() {
             return
         } 
 
-        const helmfileLockPath = process.cwd() + "/" +  workingDir + "/helmfile.lock"
+        const helmfileLockPath = workingDir + "/helmfile.lock"
 
         if (!existsSync(helmfileLockPath)) {
             outputs.helmfileLockState = HelmfileLockState.MISSING
@@ -64,7 +65,7 @@ export function helmfileDepCheck() {
         const currentGenerated: string = currentHelmfileLockData["generated"]
 
         try {
-            const execResult = execSync("helmfile deps").toString();
+            const execResult = execSync("helmfile deps", { cwd: workingDir }).toString();
             console.log(execResult)
         } catch (error) {
             console.error(error.message)
