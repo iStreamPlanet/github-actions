@@ -1,8 +1,8 @@
 import { getInput, setOutput, setFailed } from "@actions/core"
 import { existsSync, readFileSync } from "fs"
 import { safeLoad } from "js-yaml"
-import * as https from "https"
-import * as semver from "semver"
+import { execSync } from "child_process"
+import { join } from "path"
 
 enum HelmfileLockState {
     FRESH = "fresh",
@@ -14,7 +14,7 @@ interface HelmfileLockUpdate {
     name: string;
     repository: string;
     currentVer: string;
-    latestVer: string;
+    upgradeVer: string;
 }
 
 interface ActionOutputs {
@@ -27,41 +27,21 @@ function setOutputs({helmfileLockState, helmfileLockUpdates}: ActionOutputs): vo
     setOutput("helmfile-lock-updates", helmfileLockUpdates)
 }
 
-function getIndexYAMLData(indexURL: string) {
-    return new Promise((resolve, reject) => {
-        https.get(indexURL, resp => {
-            let data = ""
-
-            resp.on("data", chunk => {
-                data += chunk
-            })
-
-            resp.on("end", () => {
-                resolve(safeLoad(data))
-            })
-        }).on("error", error => {
-            reject(error.message)
-        })
-    })
-}
-
-export async function helmfileDepCheck() {
+export function helmfileDepCheck() {
     try {
         const outputs: ActionOutputs = {
             helmfileLockState:  HelmfileLockState.FRESH,
             helmfileLockUpdates: []
         }
 
-        const workingDir = getInput("working_directory")
-        // path.join is not used, because of issues when building with ncc
-        const helmfilePath = process.cwd() + "/" +  workingDir + "/helmfile.yaml"
+        const workingDir = join(process.cwd(), getInput("working_directory"))
+        const helmfilePath = workingDir + "/helmfile.yaml"
 
         if (!existsSync(helmfilePath)) {
             // Return early, because there is no helmfile
             setOutputs(outputs)
             return
         }
-
         const helmfileContent = readFileSync(helmfilePath, "utf-8")
         const helmfileData = safeLoad(helmfileContent)
 
@@ -71,48 +51,67 @@ export async function helmfileDepCheck() {
             return
         } 
 
-        // path.join is not used, because of issues when building with ncc
-        const helmfileLockPath = process.cwd() + "/" +  workingDir + "/helmfile.lock"
+        const helmfileLockPath = workingDir + "/helmfile.lock"
 
-        if (existsSync(helmfileLockPath)) {
-            const helmfileLockContent = readFileSync(helmfileLockPath, "utf-8")
-            const helmfileLockData = safeLoad(helmfileLockContent)
-
-            // Check upstream repos for upgrades
-            for (const dependency of helmfileLockData["dependencies"]) {
-                const indexURL = dependency["repository"] + "/index.yaml"
-                const indexData = await getIndexYAMLData(indexURL)
-
-                const dependencyName = dependency["name"]
-                const dependencyVer = dependency["version"]
-                if (!indexData["entries"][dependencyName]) {
-                    console.log(`Could not find list of versions for ${dependencyName}`)
-                    continue
-                }
-                const latestVer = indexData["entries"][dependencyName][0]["version"]
-
-                if (!semver.valid(dependencyVer) || !semver.valid(latestVer)) {
-                    console.log(`Invalid semantic version found: ${dependencyVer} or ${latestVer}`)
-                    continue
-                }
-
-                const dependencyVerClean = semver.clean(dependencyVer)
-                const latestVerClean = semver.clean(latestVer)
-
-                if (semver.lt(dependencyVerClean, latestVerClean)) {
-                    const updateData = {
-                        name: dependencyName,
-                        repository: indexURL,
-                        currentVer: dependencyVerClean,
-                        latestVer: latestVerClean
-                    }
-                    outputs.helmfileLockUpdates.push(updateData)
-                    outputs.helmfileLockState = HelmfileLockState.UPDATE_AVAILABLE
-                }
-            }
-
-        } else {
+        if (!existsSync(helmfileLockPath)) {
             outputs.helmfileLockState = HelmfileLockState.MISSING
+            setOutputs(outputs)
+            return
+        }
+
+        const currentHelmfileLockContent = readFileSync(helmfileLockPath, "utf-8")
+        const currentHelmfileLockData = safeLoad(currentHelmfileLockContent)
+        const currentDependencies: Record<string, string>[] = currentHelmfileLockData["dependencies"]
+        const currentGenerated: string = currentHelmfileLockData["generated"]
+
+        try {
+            const execResult = execSync("helmfile deps", { cwd: workingDir }).toString();
+            console.log(execResult)
+        } catch (error) {
+            console.error(error.message)
+            setOutputs(outputs)
+            return
+        }
+
+        const newHelmfileLockContent = readFileSync(helmfileLockPath, "utf-8")
+        const newHelmfileLockData = safeLoad(newHelmfileLockContent)
+        const newDependencies: Record<string, string>[] = newHelmfileLockData["dependencies"]
+        const newGenerated: string = newHelmfileLockData["generated"]
+
+        if (Date.parse(currentGenerated) >= Date.parse(newGenerated)) {
+            console.log(`new helmfile.lock was not generated`)
+            setOutputs(outputs)
+            return
+        }
+        
+        if (currentDependencies.length !== newDependencies.length) {
+            console.log(`dependency length mismatch after running helmfile deps`)
+            setOutputs(outputs)
+            return
+        }
+
+        for (let i = 0; i < currentDependencies.length; i++) {
+            const curDependency = currentDependencies[i]
+            const curRepo = curDependency["repository"]
+            const curDependencyName = curDependency["name"]
+            const curDependencyVer = curDependency["version"]
+
+            const newDependency = newDependencies[i]
+            const newDependencyVer = newDependency["version"]
+
+            if (curDependencyVer !== newDependencyVer) {
+                const updateData = {
+                    name: curDependencyName,
+                    repository: curRepo,
+                    currentVer: curDependencyVer,
+                    upgradeVer: newDependencyVer
+                }
+                outputs.helmfileLockUpdates.push(updateData)
+            }
+        }
+
+        if (outputs.helmfileLockUpdates.length) {
+            outputs.helmfileLockState = HelmfileLockState.UPDATE_AVAILABLE
         }
 
         setOutputs(outputs)
