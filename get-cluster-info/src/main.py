@@ -1,31 +1,36 @@
 import os
 import re
 import subprocess
-from multiprocessing import Pool
+from multiprocessing.dummy import Pool
 
 from jinja2 import Template
 
 
 THREADPOOL_SIZE = 5
-BASE_PATH = os.environ.get('CLUSTERS_PATH', '/workspaces/repos/kubernetes_management')
+BASE_PATH = os.environ.get('INPUT_PATH', '')
 HELM_VERSION_REGEX = re.compile(r"helm\s+(\d+\.\d+\.\d+)")
+ENVS = os.environ.copy()
+ENVS['AWS_ACCESS_KEY_ID'] = os.environ.get('INPUT_AWS_KEY', '')
+ENVS['AWS_SECRET_ACCESS_KEY'] = os.environ.get('INPUT_AWS_SECRET', '')
+
+
 
 TEMPLATE_DATA = """
-|  Cluster    |   Version   | Region | Helm Version |
+|  Cluster    |  EKS Version   | Region | Helm Version |
 | ----------- | ----------- | ------ | ------------ |
 {% for cluster in clusters -%}
-| {{cluster.name}} | {{cluster.cluster_version}} | {{cluster.region}} | {{cluster.helm_version}}
+| {{cluster.name}} | {{cluster.cluster_version}} | {{cluster.region}} | {{cluster.helm_version}} |
 {% endfor %}
 """
 
-class Cluster:
 
+class Cluster:
     def __init__(self, cluster_path):
         self.cluster_path = cluster_path
         self.helm_path = (self.cluster_path).replace('clusters', 'helmfiles')
         self.name = os.path.basename(self.cluster_path)
         self.region = os.path.basename(os.path.dirname(self.cluster_path))
-    
+
     def get_helm_version(self):
         tools_file = f"{self.helm_path}/.tool-versions"
         try:
@@ -37,20 +42,24 @@ class Cluster:
 
     def get_cluster_version(self):
         try:
-            subprocess.run(["asdf", "install"], check=True, capture_output=True, cwd=self.cluster_path, text=True)
-            subprocess.run(["terraform", "init"], cwd=self.cluster_path, check=True, capture_output=True, text=True)
-            version = subprocess.run(["terraform", "output", "-json", "cluster_version"], cwd=self.cluster_path, capture_output=True,  text=True)
+            subprocess.run(["asdf", "install"], check=True, capture_output=True,
+                           cwd=self.cluster_path, text=True)
+            subprocess.run(["terraform", "init"], cwd=self.cluster_path,
+                           check=True, capture_output=True, text=True, env=ENVS)
+            version = subprocess.run(["terraform", "output", "-json", "cluster_version"],
+                                     cwd=self.cluster_path, capture_output=True, text=True, env=ENVS)
             if version.stdout:
                 self.cluster_version = ((version.stdout).strip()).strip('"')
             else:
                 self.cluster_version = 'unknown'
-           
         except Exception:
             self.cluster_version = 'unknown'
+
 
 def create_markdown(clusters: list, template: str):
     temp = Template(template)
     return temp.render(clusters=clusters)
+
 
 def generate_file_list(path: str, file_name: str):
     file_list = []
@@ -60,26 +69,31 @@ def generate_file_list(path: str, file_name: str):
                 file_list.append(root)
     return file_list
 
+
 def write_file(path: str, data: str):
     with open(path, "w") as f:
         f.write(data)
 
+
 def runner(cluster):
     cluster.get_helm_version()
     cluster.get_cluster_version()
+
 
 def main():
     clusters = []
     file_list = sorted(generate_file_list(BASE_PATH, 'provider.tf'))
     for f in file_list:
         clusters.append(Cluster(f))
-    
+
     pool = Pool(THREADPOOL_SIZE)
     pool.map(runner, clusters)
     pool.close()
     pool.join()
 
     md_data = create_markdown(clusters, TEMPLATE_DATA)
+    write_file(f"{BASE_PATH}/CLUSTERINFO.md", md_data)
     print(md_data)
+
 
 main()

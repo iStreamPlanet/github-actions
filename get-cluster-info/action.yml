@@ -1,0 +1,17 @@
+name: "Get Cluster Info"
+author: iStreamPlanet
+description: "Gets info from clusters such as kubernetes and helm versions"
+inputs:
+  path:
+    description: "repo base path"
+    required: true
+    default: "/github/workspace"
+  aws_key:
+    description: "AWS Access Key"
+    required: true
+  aws_secret:
+    description: "AWS Secret Access Key"
+    required: true
+runs:
+  using: "docker"
+  image: "Dockerfile"
