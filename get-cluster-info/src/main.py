@@ -7,13 +7,8 @@ from jinja2 import Template
 
 
 THREADPOOL_SIZE = 5
-BASE_PATH = os.environ.get('INPUT_PATH', '')
+BASE_PATH = os.getcwd()
 HELM_VERSION_REGEX = re.compile(r"helm\s+(\d+\.\d+\.\d+)")
-ENVS = os.environ.copy()
-ENVS['AWS_ACCESS_KEY_ID'] = os.environ.get('INPUT_AWS_KEY', '')
-ENVS['AWS_SECRET_ACCESS_KEY'] = os.environ.get('INPUT_AWS_SECRET', '')
-
-
 
 TEMPLATE_DATA = """
 |  Cluster    |  EKS Version   | Region | Helm Version |
@@ -45,9 +40,9 @@ class Cluster:
             subprocess.run(["asdf", "install"], check=True, capture_output=True,
                            cwd=self.cluster_path, text=True)
             subprocess.run(["terraform", "init"], cwd=self.cluster_path,
-                           check=True, capture_output=True, text=True, env=ENVS)
+                           check=True, capture_output=True, text=True)
             version = subprocess.run(["terraform", "output", "-json", "cluster_version"],
-                                     cwd=self.cluster_path, capture_output=True, text=True, env=ENVS)
+                                     cwd=self.cluster_path, capture_output=True, text=True)
             if version.stdout:
                 self.cluster_version = ((version.stdout).strip()).strip('"')
             else:

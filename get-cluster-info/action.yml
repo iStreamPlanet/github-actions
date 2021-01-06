@@ -2,16 +2,17 @@ name: "Get Cluster Info"
 author: iStreamPlanet
 description: "Gets info from clusters such as kubernetes and helm versions"
 inputs:
-  path:
-    description: "repo base path"
-    required: true
-    default: "/github/workspace"
-  aws_key:
-    description: "AWS Access Key"
-    required: true
-  aws_secret:
-    description: "AWS Secret Access Key"
+  working_directory:
+    description: "The base path for a repository"
     required: true
 runs:
-  using: "docker"
-  image: "Dockerfile"
+  using: "composite"
+  steps:
+    - name: install-deps
+      shell: bash
+      run: pip install --no-cache-dir -r ${{ github.action_path }}/requirements.txt
+    
+    - name: get-info
+      shell: bash
+      working-directory: ${{ inputs.working_directory }}
+      run: python ${{ github.action_path }}/src/main.py
