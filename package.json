@@ -15,7 +15,7 @@
   "license": "ISC",
   "devDependencies": {
     "@octokit/webhooks": "^7.21.0",
-    "@types/jest": "^26.0.19",
+    "@types/jest": "^26.0.20",
     "@types/js-yaml": "^3.12.5",
     "@types/minimatch": "^3.0.3",
     "@vercel/ncc": "^0.26.1",
