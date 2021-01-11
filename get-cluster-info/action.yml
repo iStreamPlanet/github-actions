@@ -5,6 +5,9 @@ inputs:
   working_directory:
     description: "The base path for a repository"
     required: true
+  output_path:
+    description: "Path of the output markdown file"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -15,4 +18,4 @@ runs:
     - name: get-info
       shell: bash
       working-directory: ${{ inputs.working_directory }}
-      run: python ${{ github.action_path }}/src/main.py
+      run: python ${{ github.action_path }}/src/main.py --output_path ${{ inputs.output_path }}

@@ -1,3 +1,4 @@
+import argparse
 import os
 import re
 import subprocess
@@ -5,7 +6,13 @@ from multiprocessing.dummy import Pool
 
 from jinja2 import Template
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--output_path", 
+                    default="CLUSTERINFO.md", 
+                    type=str)
+args = parser.parse_args()
 
+OUTPUT_PATH = args.output_path
 THREADPOOL_SIZE = 5
 BASE_PATH = os.getcwd()
 HELM_VERSION_REGEX = re.compile(r"helm\s+(\d+\.\d+\.\d+)")
@@ -87,7 +94,7 @@ def main():
     pool.join()
 
     md_data = create_markdown(clusters, TEMPLATE_DATA)
-    write_file(f"{BASE_PATH}/CLUSTERINFO.md", md_data)
+    write_file(OUTPUT_PATH, md_data)
     print(md_data)
 
 

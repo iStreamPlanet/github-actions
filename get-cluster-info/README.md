@@ -11,6 +11,9 @@ inputs:
   working_directory:
     description: "The base path for a repository"
     required: true
+  output_path:
+    description: "Path of the output markdown file"
+    required: false
 ```
 
 ## Outputs
