@@ -58,7 +58,7 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           # Only matching workspaces that contain changes will be returned (except for /example, which is excluded)
-          workspace_globs: |
+          workspaces: |
             terraform/clusters/*/
             !terraform/clusters/example/
           # Unless something in global dependencies changes, in which case all workspaces are returned
@@ -99,7 +99,7 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           # All workspaces returned
-          workspace_globs: |
+          workspaces: |
             terraform/clusters/*/
           # Global dependencies not evaluated in this case
           global_dependencies: ""
