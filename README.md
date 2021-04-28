@@ -25,3 +25,7 @@ Creates, updates, or closes an issue matching a given title based on other param
 #### [`helmfile-dependency-check`](helmfile-dependency-check)
 
 Checks if there is a valid `helmfile.yaml` in the working directory. Executes `helmfile deps` and checks if there are any chart upgrades available.
+
+#### [`trufflehog-actions-scan`](trufflehog-actions-scan)
+
+Runs Trufflehog as a GitHub Action.  Based off of [`https://github.com/edplato/trufflehog-actions-scan`](https://github.com/edplato/trufflehog-actions-scan).  Uses Dependabot to stay up-to-date with the latest version.
