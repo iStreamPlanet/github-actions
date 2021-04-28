@@ -1,5 +1,5 @@
 gitdb2==3.0.0
-GitPython==2.1.1
+GitPython==3.0.6
 smmap==4.0.0
 smmap2==3.0.1
 truffleHog==2.2.1
