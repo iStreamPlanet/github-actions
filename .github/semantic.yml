@@ -1,0 +1,13 @@
+# Always validate the PR title
+titleOnly: true
+
+# https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#type
+types:
+  - feat
+  - fix
+  - docs
+  - style
+  - refactor
+  - perf
+  - test
+  - chore
