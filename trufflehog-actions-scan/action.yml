@@ -7,6 +7,9 @@ inputs:
   scanArguments:
     description: 'Argument options for scan.'
     required: false
+  scanPath:
+    description: 'Path to scan'
+    required: false  
 branding:
   icon: 'shield'
   color: 'yellow'
