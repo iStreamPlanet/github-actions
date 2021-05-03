@@ -11,7 +11,7 @@ fi
 githubRepo="file://$(pwd)" # Default target repository
 
 if [ -n "${INPUT_SCANPATH}" ]; then
-  githubRepo="${INPUT_SCANPATH}" # Overwrite if new options string is provided
+  githubRepo="${INPUT_SCANPATH}"
 fi
 
 # By default the 'WORKDIR' of our Docker image is set to the 'GITHUB_WORKSPACE'
