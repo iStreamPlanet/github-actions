@@ -2,5 +2,5 @@ gitdb2==3.0.0
 GitPython==3.0.6
 smmap==4.0.0
 smmap2==3.0.1
-truffleHog==2.2.1
+git+https://github.com/iStreamPlanet/truffleHog.git@dev
 truffleHogRegexes==0.0.7
