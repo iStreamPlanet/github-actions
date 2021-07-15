@@ -1,6 +1,7 @@
 #!/bin/bash
 
 function helmfileApply {
+  # suppress secrets in workflows #incident-150567
   output=$(helmfile --no-color apply --suppress-secrets ${*} 2>&1)
   exitCode=$?
 

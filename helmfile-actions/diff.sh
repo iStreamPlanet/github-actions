@@ -1,6 +1,7 @@
 #!/bin/bash
 
 function helmfileDiff {
+  # suppress secrets in workflows #incident-150567
   output=$(helmfile --no-color diff --detailed-exitcode --suppress-secrets ${*} 2>&1)
   exitCode=$?
   hasChanges=false
