@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function helmfileDiff {
-  output=$(helmfile --no-color diff --detailed-exitcode ${*} 2>&1)
+  output=$(helmfile --no-color diff --detailed-exitcode --suppress-secrets ${*} 2>&1)
   exitCode=$?
   hasChanges=false
   commentStatus="Failed"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function helmfileApply {
-  output=$(helmfile --no-color apply ${*} 2>&1)
+  output=$(helmfile --no-color apply --suppress-secrets ${*} 2>&1)
   exitCode=$?
 
   if [ ${exitCode} -eq 0 ]; then
