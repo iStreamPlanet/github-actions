@@ -12,6 +12,9 @@ export TF_IN_AUTOMATION=true
 workingDir="$2"
 function main {
   command="$1"
+  firstWord=$(echo ${command} | cut -d' ' -f1)
+  remainingArgs=$(echo ${command} | cut -d' ' -f2-)
+
   scriptDir=$(dirname ${0})
   source ${scriptDir}/apply.sh
   source ${scriptDir}/fmt.sh
@@ -19,21 +22,21 @@ function main {
   source ${scriptDir}/plan.sh
   source ${scriptDir}/validate.sh
 
-  case "${command}" in
+  case "${firstWord}" in
     apply)
-      terraformApply
+      terraformApply ${remainingArgs}
       ;;
     fmt)
-      terraformFmt
+      terraformFmt ${remainingArgs}
       ;;
     init)
-      terraformInit
+      terraformInit ${remainingArgs}
       ;;
     plan)
-      terraformPlan
+      terraformPlan ${remainingArgs}
       ;;
     validate)
-      terraformValidate
+      terraformValidate ${remainingArgs}
       ;;
     *)
       echo "Error: Unrecognized command ${command}"
