@@ -48,7 +48,7 @@ function terraformPlan {
     commentWrapper="#### \`terraform plan\` ${commentStatus} for \`${workingDir}\`
 <details><summary>Show Output</summary>
 
-\`\`\`diff
+\`\`\`terraform
 ${output}
 \`\`\`
 
