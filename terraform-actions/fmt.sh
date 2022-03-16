@@ -1,19 +1,18 @@
 #!/bin/bash
 
 function terraformFmt {
-  output=$(terraform fmt -check=true -write=false -diff -recursive -no-color ${*} 2>&1)
+  set -o pipefail
+  output=$(terraform fmt -check=true -write=false -diff -recursive -no-color ${*} 2>&1 | tee /dev/tty)
   exitCode=$?
   commentStatus="Failed"
 
   if [ ${exitCode} -eq 0 ]; then
     echo "Successfully ran terraform fmt command."
-    echo "${output}"
     echo
     exit ${exitCode}
   fi
 
   echo "Error: terraform fmt found changes"
-  echo "${output}"
   echo
 
   if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && [ "${commentStatus}" == "Failed" ]; then

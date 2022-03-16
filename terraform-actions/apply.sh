@@ -1,7 +1,8 @@
 #!/bin/bash
 
 function terraformApply {
-  output=$(terraform apply -no-color -auto-approve -input=false ${*} 2>&1)
+  set -o pipefail
+  output=$(terraform apply -no-color -auto-approve -input=false ${*} 2>&1 | tee /dev/tty)
   exitCode=$?
 
   if [ ${exitCode} -eq 0 ]; then
@@ -10,7 +11,5 @@ function terraformApply {
     echo "Error: Failed to run terraform apply"
   fi
 
-  echo "${output}"
-  echo
   exit ${exitCode}
 }
