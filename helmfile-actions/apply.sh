@@ -1,9 +1,9 @@
 #!/bin/bash
 
 function helmfileApply {
-  # suppress secrets in workflows #incident-150567
   set -o pipefail
   tempfile=$(mktemp)
+  # suppress secrets in workflows #incident-150567
   helmfile --no-color apply --suppress-secrets ${*} 2>&1 | tee $tempfile
   exitCode=$?
   output=$(cat $tempfile)

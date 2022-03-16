@@ -2,7 +2,6 @@
 
 function terraformFmt {
   set -o pipefail
-  echo "Attempting tempfile"
   tempfile=$(mktemp)
   terraform fmt -check=true -write=false -diff -recursive -no-color ${*} 2>&1 | tee $tempfile
   exitCode=$?
