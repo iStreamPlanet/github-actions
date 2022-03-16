@@ -1,19 +1,21 @@
 #!/bin/bash
 
 function terraformInit {
-  output=$(terraform init -no-color -input=false ${*} 2>&1)
+  set -o pipefail
+  tempfile=$(mktemp)
+  terraform init -no-color -input=false ${*} 2>&1 | tee $tempfile
   exitCode=$?
+  output=$(cat $tempfile)
+  rm $tempfile
   commentStatus="Failed"
 
   if [ ${exitCode} -eq 0 ]; then
     echo "Successfully ran terraform init command."
-    echo "${output}"
     echo
     exit ${exitCode}
   fi
 
   echo "Error: Failed to run terraform init"
-  echo "${output}"
   echo
 
   if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && [ "${commentStatus}" == "Failed" ]; then

@@ -1,15 +1,18 @@
 #!/bin/bash
 
 function helmfileDiff {
+  set -o pipefail
+  tempfile=$(mktemp)
   # suppress secrets in workflows #incident-150567
-  output=$(helmfile --no-color diff --detailed-exitcode --suppress-secrets ${*} 2>&1)
+  helmfile --no-color diff --detailed-exitcode --suppress-secrets ${*} 2>&1 | tee $tempfile
   exitCode=$?
+  output=$(cat $tempfile)
+  rm $tempfile
   hasChanges=false
   commentStatus="Failed"
 
   if [ ${exitCode} -eq 0 ]; then
     echo "Successfully ran helmfile diff command. No changes were found"
-    echo "${output}"
     echo
     echo "::set-output name=diff-has-changes::${hasChanges}"
     exit ${exitCode}
@@ -22,7 +25,6 @@ function helmfileDiff {
     commentStatus="Success"
 
     echo "Successfully ran helmfile diff command. Changes were found"
-    echo "${output}"
     echo
 
      # If output is longer than max length (65536 characters), keep last part
@@ -31,7 +33,6 @@ function helmfileDiff {
 
   if [ ${exitCode} -ne 0 ]; then
     echo "Error: Failed to run helmfile diff"
-    echo "${output}"
     echo
     
     # If output is longer than max length (65536 characters), keep last part

@@ -1,14 +1,17 @@
 #!/bin/bash
 
 function terraformPlan {
-  output=$(terraform plan -no-color -detailed-exitcode ${*} 2>&1)
+  set -o pipefail
+  tempfile=$(mktemp)
+  terraform plan -no-color -detailed-exitcode ${*} 2>&1 | tee $tempfile
   exitCode=$?
+  output=$(cat $tempfile)
+  rm $tempfile
   hasChanges=false
   commentStatus="Failed"
 
   if [ ${exitCode} -eq 0 ]; then
     echo "Successfully ran terraform plan command. No changes were found"
-    echo "${output}"
     echo
     echo "::set-output name=plan-has-changes::${hasChanges}"
     exit ${exitCode}
@@ -21,7 +24,6 @@ function terraformPlan {
     commentStatus="Success"
 
     echo "Successfully ran terraform plan command. Changes were found"
-    echo "${output}"
     echo
 
     if echo "${output}" | egrep '^-{72}$' &> /dev/null; then
@@ -40,7 +42,6 @@ function terraformPlan {
 
   if [ ${exitCode} -ne 0 ]; then
     echo "Error: Failed to run terraform plan"
-    echo "${output}"
     echo
   fi
 
