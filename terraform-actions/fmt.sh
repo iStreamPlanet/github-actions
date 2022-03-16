@@ -2,9 +2,12 @@
 
 function terraformFmt {
   set -o pipefail
-  echo "Attempting sudo"
-  output=$(terraform fmt -check=true -write=false -diff -recursive -no-color ${*} 2>&1 | sudo tee /dev/tty)
+  echo "Attempting tempfile"
+  tempfile=$(mktemp)
+  terraform fmt -check=true -write=false -diff -recursive -no-color ${*} 2>&1 | tee $tempfile
   exitCode=$?
+  output=$(cat $tempfile)
+  rm $tempfile
   commentStatus="Failed"
 
   if [ ${exitCode} -eq 0 ]; then
