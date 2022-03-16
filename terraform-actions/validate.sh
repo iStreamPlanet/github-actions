@@ -2,8 +2,11 @@
 
 function terraformValidate {
   set -o pipefail
-  output=$(terraform validate -no-color ${*} 2>&1 | sudo tee /dev/tty)
+  tempfile=$(mktemp)
+  terraform validate -no-color ${*} 2>&1 | tee $tempfile
   exitCode=$?
+  output=$(cat $tempfile)
+  rm $tempfile
   commentStatus="Failed"
 
   if [ ${exitCode} -eq 0 ]; then

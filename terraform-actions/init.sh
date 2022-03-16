@@ -2,8 +2,11 @@
 
 function terraformInit {
   set -o pipefail
-  output=$(terraform init -no-color -input=false ${*} 2>&1 | sudo tee /dev/tty)
+  tempfile=$(mktemp)
+  terraform init -no-color -input=false ${*} 2>&1 | tee $tempfile
   exitCode=$?
+  output=$(cat $tempfile)
+  rm $tempfile
   commentStatus="Failed"
 
   if [ ${exitCode} -eq 0 ]; then

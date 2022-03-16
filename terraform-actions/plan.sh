@@ -2,8 +2,11 @@
 
 function terraformPlan {
   set -o pipefail
-  output=$(terraform plan -no-color -detailed-exitcode ${*} 2>&1 | sudo tee /dev/tty)
+  tempfile=$(mktemp)
+  terraform plan -no-color -detailed-exitcode ${*} 2>&1 | tee $tempfile
   exitCode=$?
+  output=$(cat $tempfile)
+  rm $tempfile
   hasChanges=false
   commentStatus="Failed"
 
