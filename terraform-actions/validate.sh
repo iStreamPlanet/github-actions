@@ -2,7 +2,7 @@
 
 function terraformValidate {
   set -o pipefail
-  output=$(terraform validate -no-color ${*} 2>&1 | tee /dev/tty)
+  output=$(terraform validate -no-color ${*} 2>&1 | sudo tee /dev/tty)
   exitCode=$?
   commentStatus="Failed"
 

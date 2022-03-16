@@ -2,7 +2,7 @@
 
 function terraformApply {
   set -o pipefail
-  output=$(terraform apply -no-color -auto-approve -input=false ${*} 2>&1 | tee /dev/tty)
+  output=$(terraform apply -no-color -auto-approve -input=false ${*} 2>&1 | sudo tee /dev/tty)
   exitCode=$?
 
   if [ ${exitCode} -eq 0 ]; then

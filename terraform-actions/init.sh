@@ -2,7 +2,7 @@
 
 function terraformInit {
   set -o pipefail
-  output=$(terraform init -no-color -input=false ${*} 2>&1 | tee /dev/tty)
+  output=$(terraform init -no-color -input=false ${*} 2>&1 | sudo tee /dev/tty)
   exitCode=$?
   commentStatus="Failed"
 

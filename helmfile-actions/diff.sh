@@ -3,7 +3,7 @@
 function helmfileDiff {
   # suppress secrets in workflows #incident-150567
   set -o pipefail
-  output=$(helmfile --no-color diff --detailed-exitcode --suppress-secrets ${*} 2>&1 | tee /dev/tty)
+  output=$(helmfile --no-color diff --detailed-exitcode --suppress-secrets ${*} 2>&1 | sudo tee /dev/tty)
   exitCode=$?
   hasChanges=false
   commentStatus="Failed"

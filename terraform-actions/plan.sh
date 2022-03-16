@@ -2,7 +2,7 @@
 
 function terraformPlan {
   set -o pipefail
-  output=$(terraform plan -no-color -detailed-exitcode ${*} 2>&1 | tee /dev/tty)
+  output=$(terraform plan -no-color -detailed-exitcode ${*} 2>&1 | sudo tee /dev/tty)
   exitCode=$?
   hasChanges=false
   commentStatus="Failed"

@@ -2,7 +2,7 @@
 
 function terraformFmt {
   set -o pipefail
-  output=$(terraform fmt -check=true -write=false -diff -recursive -no-color ${*} 2>&1 | tee /dev/tty)
+  output=$(terraform fmt -check=true -write=false -diff -recursive -no-color ${*} 2>&1 | sudo tee /dev/tty)
   exitCode=$?
   commentStatus="Failed"
 
