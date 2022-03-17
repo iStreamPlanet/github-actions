@@ -3,13 +3,15 @@ import { createReadStream } from "fs";
 import * as readline from "readline";
 import * as minimatch from "minimatch";
 
-const path = getInput("path", { required: true });
-const codeOwnersFile = ".github/CODEOWNERS";
+const paths = getInput("path", { required: true });
+const codeOwnersFile = getInput("codeowners", { required: true });
 
 run(codeOwnersFile);
 
 async function run(ownersPath: string) {
   const fileStream = createReadStream(ownersPath);
+  console.log('Getting owners for the following paths:')
+  console.log(`${paths.split(",").join("\n")}`)
 
   const rl = readline.createInterface({
     input: fileStream,
@@ -18,7 +20,7 @@ async function run(ownersPath: string) {
   // Note: we use the crlfDelay option to recognize all instances of CR LF
   // ('\r\n') in input.txt as a single line break.
 
-  let matchedOwners = [];
+  let matchedOwners = new Set<string>();
   for await (let line of rl) {
     line = line.trim();
     if (line.length === 0 || line.startsWith("#")) {
@@ -30,10 +32,13 @@ async function run(ownersPath: string) {
       continue;
     }
 
-    if (minimatch(path, glob)) {
-      matchedOwners = owners;
+    for (let path in paths.split(",")) {
+      path = path.trim();
+      if (minimatch(path, glob)) {
+        owners.forEach(item => matchedOwners.add(item))
+      }
     }
   }
 
-  setOutput("owners", matchedOwners);
+  setOutput("owners", [...matchedOwners]);
 }

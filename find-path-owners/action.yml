@@ -3,8 +3,12 @@ author: iStreamPlanet
 description: Finds owners of a given path based on the GitHub CODEOWNERS file
 inputs:
   path:
-    description: The path to match against the CODEOWNERS file
+    description: The path(s) to match against the CODEOWNERS file. Multiple paths are provided as a comma-separated list
     required: true
+  codeowners:
+    description: "Path to the CODEOWNERS file"
+    required: false
+    default: ".github/CODEOWNERS"
 outputs:
   owners:
     description: A JSON-encoded array of matched owners
