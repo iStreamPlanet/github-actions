@@ -1,0 +1,25 @@
+name: Manipulate String Array
+author: iStreamPlanet
+description: Manipulates an existing array of strings based on the optional prefix, suffix, and string replace rules.
+inputs:
+  string_array:
+    description: "The initial array of strings"
+    required: true
+  string_prefix:
+    description: "String to apply as the prefix for every string in the array"
+    required: false
+    default: ""
+  string_replace_rules:
+    description: "JSON encoded list of regex that will be applied for replacing characters in the new string array. The key is the regex, and value is the replacement"
+    required: false
+    default: "[]"
+  string_suffix:
+    description: "String to apply as the suffix for every string in the array"
+    required: false
+    default: ""
+outputs:
+  new_string_array:
+    description: "A JSON-encoded array containing the modified strings"
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

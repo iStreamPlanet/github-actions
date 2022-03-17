@@ -7,6 +7,7 @@
     "build:build-workspace-matrix": "ncc build build-workspace-matrix/main.ts -o build-workspace-matrix/dist -m",
     "build:find-path-owners": "ncc build find-path-owners/main.ts -o find-path-owners/dist -m",
     "build:minimize-comments": "ncc build minimize-comments/main.ts -o minimize-comments/dist -m",
+    "build:manipulate-string-array": "ncc build manipulate-string-array/main.ts -o manipulate-string-array/dist -m",
     "build:update-issue": "ncc build update-issue/main.ts -o update-issue/dist -m",
     "build:helmfile-dependency-check": "ncc build helmfile-dependency-check/main.ts -o helmfile-dependency-check/dist -m",
     "test": "jest"
@@ -26,7 +27,7 @@
   },
   "dependencies": {
     "@actions/core": "^1.2.7",
-    "@actions/github": "^5.0.0",
+    "@actions/github": "^4.0.0",
     "@actions/glob": "^0.2.0",
     "js-yaml": "^3.14.1",
     "minimatch": "^3.0.4"
