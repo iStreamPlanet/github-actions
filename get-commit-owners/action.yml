@@ -1,0 +1,47 @@
+name: "get commit owners action"
+description: "A composite action to get the owners for a commit based on the paths specified in CODEOWNERS"
+inputs:
+  auth_token:
+    description: "Token used for authenticating the API call"
+    required: true
+  codeowners:
+    description: "Path to the CODEOWNERS file"
+    required: false
+    default: ".github/CODEOWNERS"
+  repository:
+    description: "The repository to which the commit belongs in the form {owner}/{repo}"
+    required: true
+  sha:
+    description: "The commit sha"
+    required: true
+outputs:
+  owners:
+    description: "The owners of the commit"
+    value: ${{ steps.file_path_owners.outputs.owners }}
+runs:
+  using: "composite"
+  steps:
+    - name: Get modified files
+      shell: bash
+      id: get_modified_files
+      run: |
+        join() {
+          IFS=$1
+          shift
+          echo "$*"
+        }
+        
+        modified_files=$(curl -s --request GET \
+        --url https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }} \
+        --header 'Accept: application/vnd.github.v3+json' \
+        --header 'Authorization: token ${{ github.token }}' \
+        | jq -r '.files[].filename')
+        
+        echo "::set-output name=modified_files::$(join , $modified_files)"
+
+    - name: Get list of path owners
+      id: file_path_owners
+      uses: iStreamPlanet/github-actions/find-path-owners@main
+      with:
+        path: ${{ steps.get_modified_files.outputs.modified_files }}
+        codeowners: ${{ inputs.codeowners }}
