@@ -68,7 +68,7 @@ on:
       - main
 jobs:
   wait_for_commits:
-    uses: iStreamPlanet/github-actions/.github/workflows/wait-for-commit.yml@master
+    uses: iStreamPlanet/github-actions/.github/workflows/wait-for-commit.yml@main
     with:
       # This value has to be added manually and must match the job name. This argument ensures that this job is ignored,
       # when waiting for status checks to complete, otherwise this job will get stuck waiting for itself to finish. 
