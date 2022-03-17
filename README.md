@@ -8,6 +8,10 @@ Repository of generic reusable Github Actions and Workflows
 
 Builds a [workflow build matrix](https://docs.github.com/en/actions/configuring-and-managing-workflows/configuring-a-workflow#configuring-a-build-matrix) based on glob patterns and which files have changed in a PR/push.
 
+#### [`find-path-owners`](find-path-owners)
+
+This action finds the owners of one or more paths based on the [GitHub CODEOWNERS file](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners)
+
 #### [`helmfile-actions`](helmfile-actions)
 
 Wraps certain [`helmfile`](https://github.com/roboll/helmfile) commands and annotates PRs with their output.
