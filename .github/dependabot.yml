@@ -3,20 +3,20 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "daily"
+- package-ecosystem: "npm"
+  directory: "/"
+  schedule:
+    interval: "daily"
   commit-message:
     prefix: fix
     include: scope
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "daily"
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: "daily"
 
-  - package-ecosystem: "pip"
-    directory: "/trufflehog-actions-scan"
-    schedule:
-      interval: "daily"
+- package-ecosystem: "pip"
+  directory: "/trufflehog-actions-scan"
+  schedule:
+    interval: "daily"
