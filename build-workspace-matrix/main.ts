@@ -95,7 +95,7 @@ async function changedFiled(): Promise<string[]> {
   }
 
   const { owner, repo } = context.repo;
-  const response = await github.repos.compareCommits({
+  const response = await github.rest.repos.compareCommits({
     owner,
     repo,
     head,
