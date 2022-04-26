@@ -4,11 +4,11 @@
   "description": "iStreamPlanet's github actions",
   "scripts": {
     "build": "npm-run-all -p build:*",
-    "build:build-workspace-matrix": "ncc build build-workspace-matrix/main.ts -o build-workspace-matrix/dist -m",
-    "build:find-path-owners": "ncc build find-path-owners/main.ts -o find-path-owners/dist -m",
-    "build:minimize-comments": "ncc build minimize-comments/main.ts -o minimize-comments/dist -m",
-    "build:update-issue": "ncc build update-issue/main.ts -o update-issue/dist -m",
-    "build:helmfile-dependency-check": "ncc build helmfile-dependency-check/main.ts -o helmfile-dependency-check/dist -m",
+    "build:build-workspace-matrix": "ncc build build-workspace-matrix/main.ts -o build-workspace-matrix/dist",
+    "build:find-path-owners": "ncc build find-path-owners/main.ts -o find-path-owners/dist",
+    "build:minimize-comments": "ncc build minimize-comments/main.ts -o minimize-comments/dist",
+    "build:update-issue": "ncc build update-issue/main.ts -o update-issue/dist",
+    "build:helmfile-dependency-check": "ncc build helmfile-dependency-check/main.ts -o helmfile-dependency-check/dist",
     "test": "jest"
   },
   "author": "iStreamPlanet",

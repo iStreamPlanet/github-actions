@@ -14,14 +14,14 @@ async function run() {
 
     async function closeIssue(issue: number, comment: string) {
       if (comment) {
-        await github.issues.createComment({
+        await github.rest.issues.createComment({
           owner: context.repo.owner,
           repo: context.repo.repo,
           issue_number: issue,
           body: comment,
         });
       }
-      await github.issues.update({
+      await github.rest.issues.update({
         owner: context.repo.owner,
         repo: context.repo.repo,
         issue_number: issue,
@@ -30,7 +30,7 @@ async function run() {
     }
 
     let issues = (
-      await github.paginate(github.issues.listForRepo, {
+      await github.paginate(github.rest.issues.listForRepo, {
         owner: context.repo.owner,
         repo: context.repo.repo,
         state: "open",
@@ -40,14 +40,14 @@ async function run() {
     if (open) {
       if (issues.length) {
         const issue = issues[0];
-        await github.issues.update({
+        await github.rest.issues.update({
           owner: context.repo.owner,
           repo: context.repo.repo,
           issue_number: issue.number,
           body,
         });
       } else {
-        await github.issues.create({
+        await github.rest.issues.create({
           owner: context.repo.owner,
           repo: context.repo.repo,
           title,
