@@ -25,5 +25,6 @@ function existsSync(path: string): boolean {
 (fs as any).__setMockFiles = __setMockFiles;
 (fs as any).readFileSync = readFileSync;
 (fs as any).existsSync = existsSync;
+(fs as any).promises = {};
 
 module.exports = fs;
