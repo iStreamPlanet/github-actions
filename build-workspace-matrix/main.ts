@@ -1,7 +1,7 @@
 import * as glob from "@actions/glob";
 import { getInput, setOutput, info, setFailed } from "@actions/core";
 import { context, getOctokit } from "@actions/github";
-import { EventPayloads } from "@octokit/webhooks";
+import { PullRequestEvent, PushEvent } from "@octokit/webhooks-types";
 import { relative } from "path";
 import * as minimatch from "minimatch";
 
@@ -78,12 +78,12 @@ async function changedFiled(): Promise<string[]> {
   let base: string;
   switch (context.eventName) {
     case "push":
-      const pushPayload = context.payload as EventPayloads.WebhookPayloadPush;
+      const pushPayload = context.payload as PushEvent;
       head = pushPayload.after;
       base = pushPayload.before;
       break;
     case "pull_request":
-      const prPayload = context.payload as EventPayloads.WebhookPayloadPullRequest;
+      const prPayload = context.payload as PullRequestEvent;
       head = prPayload.pull_request.head.sha;
       base = prPayload.pull_request.base.sha;
       break;
