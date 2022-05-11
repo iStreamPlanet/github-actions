@@ -13,5 +13,5 @@ inputs:
     description: Newline-separated list of strings that must be present in the body of the comment for it to be minimized. If at least one of the strings in the body is found the comment will be minimized.
     required: true
 runs:
-  using: "node12"
+  using: "node16"
   main: "dist/index.js"

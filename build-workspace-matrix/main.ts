@@ -3,7 +3,7 @@ import { getInput, setOutput, info, setFailed } from "@actions/core";
 import { context } from "@actions/github";
 import { WebhookEventName } from "@octokit/webhooks-types";
 import { relative } from "path";
-import * as minimatch from "minimatch";
+import minimatch from "minimatch";
 import { changedFiles } from "./changedFiles"
 
 type supportedEvents = (("workflow_dispatch" | "push" | "pull_request") & WebhookEventName) | "schedule";

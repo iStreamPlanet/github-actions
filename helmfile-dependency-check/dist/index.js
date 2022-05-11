@@ -6013,11 +6013,126 @@ exports.debug = debug; // for test
 
 /***/ }),
 
+/***/ 3312:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.helmfileDepCheck = void 0;
+const core_1 = __nccwpck_require__(2186);
+const fs_1 = __nccwpck_require__(7147);
+const js_yaml_1 = __nccwpck_require__(1917);
+const child_process_1 = __nccwpck_require__(2081);
+const path_1 = __nccwpck_require__(1017);
+var HelmfileLockState;
+(function (HelmfileLockState) {
+    HelmfileLockState["FRESH"] = "fresh";
+    HelmfileLockState["MISSING"] = "missing";
+    HelmfileLockState["UPDATE_AVAILABLE"] = "update_available";
+})(HelmfileLockState || (HelmfileLockState = {}));
+function setOutputs({ helmfileLockState, helmfileLockUpdates }) {
+    (0, core_1.setOutput)("helmfile-lock-state", helmfileLockState);
+    (0, core_1.setOutput)("helmfile-lock-updates", helmfileLockUpdates);
+}
+function helmfileDepCheck() {
+    try {
+        const outputs = {
+            helmfileLockState: HelmfileLockState.FRESH,
+            helmfileLockUpdates: []
+        };
+        const workingDir = (0, path_1.join)(process.cwd(), (0, core_1.getInput)("working_directory"));
+        const helmfilePath = workingDir + "/helmfile.yaml";
+        if (!(0, fs_1.existsSync)(helmfilePath)) {
+            // Return early, because there is no helmfile
+            setOutputs(outputs);
+            return;
+        }
+        const helmfileContent = (0, fs_1.readFileSync)(helmfilePath, "utf-8");
+        const helmfileData = (0, js_yaml_1.safeLoad)(helmfileContent);
+        if (!helmfileData["repositories"]) {
+            // Return early, because there are no dependencies to check
+            setOutputs(outputs);
+            return;
+        }
+        const helmfileLockPath = workingDir + "/helmfile.lock";
+        if (!(0, fs_1.existsSync)(helmfileLockPath)) {
+            outputs.helmfileLockState = HelmfileLockState.MISSING;
+            setOutputs(outputs);
+            return;
+        }
+        const currentHelmfileLockContent = (0, fs_1.readFileSync)(helmfileLockPath, "utf-8");
+        const currentHelmfileLockData = (0, js_yaml_1.safeLoad)(currentHelmfileLockContent);
+        const currentDependencies = currentHelmfileLockData["dependencies"];
+        const currentGenerated = currentHelmfileLockData["generated"];
+        try {
+            const execResult = (0, child_process_1.execSync)("helmfile deps", { cwd: workingDir }).toString();
+            console.log(execResult);
+        }
+        catch (error) {
+            console.error(error.message);
+            setOutputs(outputs);
+            return;
+        }
+        const newHelmfileLockContent = (0, fs_1.readFileSync)(helmfileLockPath, "utf-8");
+        const newHelmfileLockData = (0, js_yaml_1.safeLoad)(newHelmfileLockContent);
+        const newDependencies = newHelmfileLockData["dependencies"];
+        const newGenerated = newHelmfileLockData["generated"];
+        if (Date.parse(currentGenerated) >= Date.parse(newGenerated)) {
+            console.log(`new helmfile.lock was not generated`);
+            setOutputs(outputs);
+            return;
+        }
+        if (currentDependencies.length !== newDependencies.length) {
+            console.log(`dependency length mismatch after running helmfile deps`);
+            setOutputs(outputs);
+            return;
+        }
+        for (let i = 0; i < currentDependencies.length; i++) {
+            const curDependency = currentDependencies[i];
+            const curRepo = curDependency["repository"];
+            const curDependencyName = curDependency["name"];
+            const curDependencyVer = curDependency["version"];
+            const newDependency = newDependencies[i];
+            const newDependencyVer = newDependency["version"];
+            if (curDependencyVer !== newDependencyVer) {
+                const updateData = {
+                    name: curDependencyName,
+                    repository: curRepo,
+                    currentVer: curDependencyVer,
+                    upgradeVer: newDependencyVer
+                };
+                outputs.helmfileLockUpdates.push(updateData);
+            }
+        }
+        if (outputs.helmfileLockUpdates.length) {
+            outputs.helmfileLockState = HelmfileLockState.UPDATE_AVAILABLE;
+        }
+        setOutputs(outputs);
+    }
+    catch (error) {
+        console.error(error.message);
+        (0, core_1.setFailed)(`Helmfile-dep-update failure: ${error}`);
+    }
+}
+exports.helmfileDepCheck = helmfileDepCheck;
+
+
+/***/ }),
+
 /***/ 9491:
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("assert");
+
+/***/ }),
+
+/***/ 2081:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("child_process");
 
 /***/ }),
 
@@ -6126,17 +6241,6 @@ module.exports = require("util");
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__nccwpck_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
@@ -6146,120 +6250,12 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be in strict mode.
 (() => {
 "use strict";
-// ESM COMPAT FLAG
-__nccwpck_require__.r(__webpack_exports__);
+var exports = __webpack_exports__;
 
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(2186);
-// EXTERNAL MODULE: external "fs"
-var external_fs_ = __nccwpck_require__(7147);
-// EXTERNAL MODULE: ./node_modules/js-yaml/index.js
-var js_yaml = __nccwpck_require__(1917);
-;// CONCATENATED MODULE: external "child_process"
-const external_child_process_namespaceObject = require("child_process");
-// EXTERNAL MODULE: external "path"
-var external_path_ = __nccwpck_require__(1017);
-;// CONCATENATED MODULE: ./helmfile-dependency-check/helmfileDepCheck.ts
-
-
-
-
-
-var HelmfileLockState;
-(function (HelmfileLockState) {
-    HelmfileLockState["FRESH"] = "fresh";
-    HelmfileLockState["MISSING"] = "missing";
-    HelmfileLockState["UPDATE_AVAILABLE"] = "update_available";
-})(HelmfileLockState || (HelmfileLockState = {}));
-function setOutputs({ helmfileLockState, helmfileLockUpdates }) {
-    (0,core.setOutput)("helmfile-lock-state", helmfileLockState);
-    (0,core.setOutput)("helmfile-lock-updates", helmfileLockUpdates);
-}
-function helmfileDepCheck() {
-    try {
-        const outputs = {
-            helmfileLockState: HelmfileLockState.FRESH,
-            helmfileLockUpdates: []
-        };
-        const workingDir = (0,external_path_.join)(process.cwd(), (0,core.getInput)("working_directory"));
-        const helmfilePath = workingDir + "/helmfile.yaml";
-        if (!(0,external_fs_.existsSync)(helmfilePath)) {
-            // Return early, because there is no helmfile
-            setOutputs(outputs);
-            return;
-        }
-        const helmfileContent = (0,external_fs_.readFileSync)(helmfilePath, "utf-8");
-        const helmfileData = (0,js_yaml.safeLoad)(helmfileContent);
-        if (!helmfileData["repositories"]) {
-            // Return early, because there are no dependencies to check
-            setOutputs(outputs);
-            return;
-        }
-        const helmfileLockPath = workingDir + "/helmfile.lock";
-        if (!(0,external_fs_.existsSync)(helmfileLockPath)) {
-            outputs.helmfileLockState = HelmfileLockState.MISSING;
-            setOutputs(outputs);
-            return;
-        }
-        const currentHelmfileLockContent = (0,external_fs_.readFileSync)(helmfileLockPath, "utf-8");
-        const currentHelmfileLockData = (0,js_yaml.safeLoad)(currentHelmfileLockContent);
-        const currentDependencies = currentHelmfileLockData["dependencies"];
-        const currentGenerated = currentHelmfileLockData["generated"];
-        try {
-            const execResult = (0,external_child_process_namespaceObject.execSync)("helmfile deps", { cwd: workingDir }).toString();
-            console.log(execResult);
-        }
-        catch (error) {
-            console.error(error.message);
-            setOutputs(outputs);
-            return;
-        }
-        const newHelmfileLockContent = (0,external_fs_.readFileSync)(helmfileLockPath, "utf-8");
-        const newHelmfileLockData = (0,js_yaml.safeLoad)(newHelmfileLockContent);
-        const newDependencies = newHelmfileLockData["dependencies"];
-        const newGenerated = newHelmfileLockData["generated"];
-        if (Date.parse(currentGenerated) >= Date.parse(newGenerated)) {
-            console.log(`new helmfile.lock was not generated`);
-            setOutputs(outputs);
-            return;
-        }
-        if (currentDependencies.length !== newDependencies.length) {
-            console.log(`dependency length mismatch after running helmfile deps`);
-            setOutputs(outputs);
-            return;
-        }
-        for (let i = 0; i < currentDependencies.length; i++) {
-            const curDependency = currentDependencies[i];
-            const curRepo = curDependency["repository"];
-            const curDependencyName = curDependency["name"];
-            const curDependencyVer = curDependency["version"];
-            const newDependency = newDependencies[i];
-            const newDependencyVer = newDependency["version"];
-            if (curDependencyVer !== newDependencyVer) {
-                const updateData = {
-                    name: curDependencyName,
-                    repository: curRepo,
-                    currentVer: curDependencyVer,
-                    upgradeVer: newDependencyVer
-                };
-                outputs.helmfileLockUpdates.push(updateData);
-            }
-        }
-        if (outputs.helmfileLockUpdates.length) {
-            outputs.helmfileLockState = HelmfileLockState.UPDATE_AVAILABLE;
-        }
-        setOutputs(outputs);
-    }
-    catch (error) {
-        console.error(error.message);
-        (0,core.setFailed)(`Helmfile-dep-update failure: ${error}`);
-    }
-}
-
-;// CONCATENATED MODULE: ./helmfile-dependency-check/main.ts
-
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const helmfileDepCheck_1 = __nccwpck_require__(3312);
 function run() {
-    helmfileDepCheck();
+    (0, helmfileDepCheck_1.helmfileDepCheck)();
 }
 run();
 

@@ -1,7 +1,7 @@
 import { getInput, setOutput } from "@actions/core";
 import { createReadStream } from "fs";
 import * as readline from "readline";
-import * as minimatch from "minimatch";
+import minimatch from "minimatch";
 
 const path = getInput("path", { required: true });
 const codeOwnersFile = ".github/CODEOWNERS";

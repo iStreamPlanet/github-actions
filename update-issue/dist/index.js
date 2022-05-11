@@ -8751,46 +8751,6 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	(() => {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__nccwpck_require__.n = (module) => {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				() => (module['default']) :
-/******/ 				() => (module);
-/******/ 			__nccwpck_require__.d(getter, { a: getter });
-/******/ 			return getter;
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__nccwpck_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
-/******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__nccwpck_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
@@ -8800,87 +8760,72 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be in strict mode.
 (() => {
 "use strict";
-__nccwpck_require__.r(__webpack_exports__);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2186);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(5438);
-/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_1__);
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+var exports = __webpack_exports__;
 
-
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core_1 = __nccwpck_require__(2186);
+const github_1 = __nccwpck_require__(5438);
 run();
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const token = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("github-token", { required: true });
-            const open = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("open", { required: true }).toLowerCase() === "true";
-            const title = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("title", { required: true });
-            const body = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("body");
-            const closeComment = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("close-comment");
-            const github = (0,_actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit)(token);
-            function closeIssue(issue, comment) {
-                return __awaiter(this, void 0, void 0, function* () {
-                    if (comment) {
-                        yield github.rest.issues.createComment({
-                            owner: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.owner,
-                            repo: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.repo,
-                            issue_number: issue,
-                            body: comment,
-                        });
-                    }
-                    yield github.rest.issues.update({
-                        owner: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.owner,
-                        repo: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.repo,
-                        issue_number: issue,
-                        state: "closed",
-                    });
+async function run() {
+    try {
+        const token = (0, core_1.getInput)("github-token", { required: true });
+        const open = (0, core_1.getInput)("open", { required: true }).toLowerCase() === "true";
+        const title = (0, core_1.getInput)("title", { required: true });
+        const body = (0, core_1.getInput)("body");
+        const closeComment = (0, core_1.getInput)("close-comment");
+        const github = (0, github_1.getOctokit)(token);
+        async function closeIssue(issue, comment) {
+            if (comment) {
+                await github.rest.issues.createComment({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    issue_number: issue,
+                    body: comment,
                 });
             }
-            let issues = (yield github.paginate(github.rest.issues.listForRepo, {
-                owner: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.owner,
-                repo: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.repo,
-                state: "open",
-            })).filter((i) => i.title === title);
-            if (open) {
-                if (issues.length) {
-                    const issue = issues[0];
-                    yield github.rest.issues.update({
-                        owner: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.owner,
-                        repo: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.repo,
-                        issue_number: issue.number,
-                        body,
-                    });
-                }
-                else {
-                    yield github.rest.issues.create({
-                        owner: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.owner,
-                        repo: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.repo,
-                        title,
-                        body,
-                    });
-                }
-            }
-            else if (issues.length) {
+            await github.rest.issues.update({
+                owner: github_1.context.repo.owner,
+                repo: github_1.context.repo.repo,
+                issue_number: issue,
+                state: "closed",
+            });
+        }
+        let issues = (await github.paginate(github.rest.issues.listForRepo, {
+            owner: github_1.context.repo.owner,
+            repo: github_1.context.repo.repo,
+            state: "open",
+        })).filter((i) => i.title === title);
+        if (open) {
+            if (issues.length) {
                 const issue = issues[0];
-                yield closeIssue(issue.number, closeComment);
+                await github.rest.issues.update({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    issue_number: issue.number,
+                    body,
+                });
             }
-            for (let i = 1; i < issues.length; i++) {
-                const issue = issues[i];
-                yield closeIssue(issue.number, `Closing as duplicate of #${issues[0].number}.`);
+            else {
+                await github.rest.issues.create({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    title,
+                    body,
+                });
             }
         }
-        catch (error) {
-            (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed)(error.message);
+        else if (issues.length) {
+            const issue = issues[0];
+            await closeIssue(issue.number, closeComment);
         }
-    });
+        for (let i = 1; i < issues.length; i++) {
+            const issue = issues[i];
+            await closeIssue(issue.number, `Closing as duplicate of #${issues[0].number}.`);
+        }
+    }
+    catch (error) {
+        (0, core_1.setFailed)(error.message);
+    }
 }
 
 })();
