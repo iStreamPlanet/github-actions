@@ -3071,6 +3071,73 @@ exports.debug = debug; // for test
 
 /***/ }),
 
+/***/ 319:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core_1 = __nccwpck_require__(186);
+const fs_1 = __nccwpck_require__(147);
+const readline = __importStar(__nccwpck_require__(521));
+const minimatch_1 = __importDefault(__nccwpck_require__(973));
+const path = (0, core_1.getInput)("path", { required: true });
+const codeOwnersFile = ".github/CODEOWNERS";
+run(codeOwnersFile);
+async function run(ownersPath) {
+    const fileStream = (0, fs_1.createReadStream)(ownersPath);
+    const rl = readline.createInterface({
+        input: fileStream,
+        crlfDelay: Infinity,
+    });
+    // Note: we use the crlfDelay option to recognize all instances of CR LF
+    // ('\r\n') in input.txt as a single line break.
+    let matchedOwners = [];
+    for await (let line of rl) {
+        line = line.trim();
+        if (line.length === 0 || line.startsWith("#")) {
+            continue;
+        }
+        const [glob, ...owners] = line.split(" ");
+        if (owners.length === 0) {
+            continue;
+        }
+        if ((0, minimatch_1.default)(path, glob)) {
+            matchedOwners = owners;
+        }
+    }
+    (0, core_1.setOutput)("owners", matchedOwners);
+}
+
+
+/***/ }),
+
 /***/ 491:
 /***/ ((module) => {
 
@@ -3135,6 +3202,14 @@ module.exports = require("path");
 
 /***/ }),
 
+/***/ 521:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("readline");
+
+/***/ }),
+
 /***/ 404:
 /***/ ((module) => {
 
@@ -3184,101 +3259,17 @@ module.exports = require("util");
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__nccwpck_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
-(() => {
-"use strict";
-// ESM COMPAT FLAG
-__nccwpck_require__.r(__webpack_exports__);
-
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(186);
-// EXTERNAL MODULE: external "fs"
-var external_fs_ = __nccwpck_require__(147);
-;// CONCATENATED MODULE: external "readline"
-const external_readline_namespaceObject = require("readline");
-// EXTERNAL MODULE: ./node_modules/minimatch/minimatch.js
-var minimatch = __nccwpck_require__(973);
-;// CONCATENATED MODULE: ./find-path-owners/main.ts
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __asyncValues = (undefined && undefined.__asyncValues) || function (o) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var m = o[Symbol.asyncIterator], i;
-    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
-    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
-    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
-};
-
-
-
-
-const path = (0,core.getInput)("path", { required: true });
-const codeOwnersFile = ".github/CODEOWNERS";
-run(codeOwnersFile);
-function run(ownersPath) {
-    var e_1, _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        const fileStream = (0,external_fs_.createReadStream)(ownersPath);
-        const rl = external_readline_namespaceObject.createInterface({
-            input: fileStream,
-            crlfDelay: Infinity,
-        });
-        // Note: we use the crlfDelay option to recognize all instances of CR LF
-        // ('\r\n') in input.txt as a single line break.
-        let matchedOwners = [];
-        try {
-            for (var rl_1 = __asyncValues(rl), rl_1_1; rl_1_1 = yield rl_1.next(), !rl_1_1.done;) {
-                let line = rl_1_1.value;
-                line = line.trim();
-                if (line.length === 0 || line.startsWith("#")) {
-                    continue;
-                }
-                const [glob, ...owners] = line.split(" ");
-                if (owners.length === 0) {
-                    continue;
-                }
-                if (minimatch(path, glob)) {
-                    matchedOwners = owners;
-                }
-            }
-        }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
-            try {
-                if (rl_1_1 && !rl_1_1.done && (_a = rl_1.return)) yield _a.call(rl_1);
-            }
-            finally { if (e_1) throw e_1.error; }
-        }
-        (0,core.setOutput)("owners", matchedOwners);
-    });
-}
-
-})();
-
-module.exports = __webpack_exports__;
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __nccwpck_require__(319);
+/******/ 	module.exports = __webpack_exports__;
+/******/ 	
 /******/ })()
 ;

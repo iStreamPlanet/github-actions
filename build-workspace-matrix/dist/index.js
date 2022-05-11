@@ -11003,6 +11003,185 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 2077:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.changedFiles = void 0;
+const core_1 = __nccwpck_require__(2186);
+const github_1 = __nccwpck_require__(5438);
+async function changedFiles(eventName, token) {
+    const github = (0, github_1.getOctokit)(token);
+    let head;
+    let base;
+    switch (eventName) {
+        case "push":
+            const pushPayload = github_1.context.payload;
+            head = pushPayload.after;
+            base = pushPayload.before;
+            break;
+        case "pull_request":
+            const prPayload = github_1.context.payload;
+            head = prPayload.pull_request.head.sha;
+            base = prPayload.pull_request.base.sha;
+            break;
+        default:
+            (0, core_1.setFailed)(`${eventName} is not supported when determining changed files.`);
+            return [];
+    }
+    const { owner, repo } = github_1.context.repo;
+    const response = await github.rest.repos.compareCommits({
+        owner,
+        repo,
+        head,
+        base,
+    });
+    if (response.status !== 200) {
+        (0, core_1.setFailed)(`GitHub API returned response with status ${response.status}`);
+        return [];
+    }
+    return response.data.files.map((file) => file.filename);
+}
+exports.changedFiles = changedFiles;
+
+
+/***/ }),
+
+/***/ 6238:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getWorkspaces = void 0;
+const glob = __importStar(__nccwpck_require__(8090));
+const core_1 = __nccwpck_require__(2186);
+const github_1 = __nccwpck_require__(5438);
+const path_1 = __nccwpck_require__(1017);
+const minimatch_1 = __importDefault(__nccwpck_require__(3973));
+const changedFiles_1 = __nccwpck_require__(2077);
+(async function run() {
+    try {
+        let result = await getWorkspaces({
+            eventName: github_1.context.eventName,
+            githubToken: (0, core_1.getInput)("github-token", { required: true }),
+            workspaceGlobs: (0, core_1.getInput)("workspaces", { required: true }),
+            workspaceDependencyGlobPatterns: (0, core_1.getInput)("workspace_dependencies"),
+            globalDependencyGlobs: (0, core_1.getInput)("global_dependencies"),
+            dispatchWorkspace: (0, core_1.getInput)("workflow_dispatch_workspace", {
+                required: github_1.context.eventName === "workflow_dispatch",
+            }),
+        });
+        console.log(`Found ${result.length} impacted workspaces: ${result.join(", ")}`);
+        const relativeToPath = (0, core_1.getInput)("relative_to_path");
+        if (relativeToPath) {
+            console.log(`Making relative to ${relativeToPath}`);
+            result = result.map(makeRelative(relativeToPath));
+        }
+        (0, core_1.setOutput)("matrix", { workspace: result });
+    }
+    catch (error) {
+        (0, core_1.setFailed)(error.message);
+    }
+})();
+async function getWorkspaces(input) {
+    if (input.eventName === "workflow_dispatch") {
+        return [input.dispatchWorkspace];
+    }
+    const workspaces = await newFunction(input.workspaceGlobs);
+    (0, core_1.info)(`Found matching workspaces: ${workspaces.join(", ")}`);
+    if (input.eventName === "schedule") {
+        return workspaces;
+    }
+    const changedFilesList = await (0, changedFiles_1.changedFiles)(input.eventName, input.githubToken);
+    (0, core_1.info)(`Found changed files: ${changedFilesList.join(", ")}`);
+    let globalDepsChanged = false;
+    for (const glob of getInputLines(input.globalDependencyGlobs)) {
+        if (glob.length === 0 || glob.startsWith("#")) {
+            continue;
+        }
+        if (changedFilesList.some(minimatch_1.default.filter(glob))) {
+            (0, core_1.info)(`Found changed shared dependency matching glob '${glob}`);
+            globalDepsChanged = true;
+            break;
+        }
+    }
+    if (globalDepsChanged) {
+        return workspaces;
+    }
+    const foo = new Set();
+    const workspaceDependencies = [];
+    for (const dependencyExpression of getInputLines(input.workspaceDependencyGlobPatterns)) {
+        const [dependentGlob, dependencyGlob] = dependencyExpression.split(":").map(s => s.trim());
+        (0, core_1.info)(`Evaluating ${dependentGlob} ${dependencyGlob}`);
+        const changed = changedFilesList.some(minimatch_1.default.filter(dependencyGlob));
+        if (changed) {
+            const affectedWorkspaces = await newFunction(dependentGlob);
+            (0, core_1.info)(`Found changed workspace dependency matching glob '${dependencyGlob}: ${affectedWorkspaces.join(", ")}`);
+            affectedWorkspaces.forEach(w => foo.add(w));
+            workspaceDependencies.push({
+                glob: dependentGlob,
+                changed,
+            });
+        }
+    }
+    return workspaces.filter((w) => changedFilesList.some((f) => f.startsWith(w)) || foo.has(w));
+}
+exports.getWorkspaces = getWorkspaces;
+async function newFunction(globs) {
+    const workspaceGlobber = await glob.create(globs, {
+        implicitDescendants: false,
+    });
+    const workspaces = (await workspaceGlobber.glob()).map(makeRelative(process.cwd()));
+    return workspaces;
+}
+function makeRelative(from) {
+    return function (path) {
+        return (0, path_1.relative)(from, path);
+    };
+}
+function getInputLines(input) {
+    const result = [];
+    for (const line of input.split("\n").map((g) => g.trim())) {
+        if (line.length === 0 || line.startsWith("#")) {
+            continue;
+        }
+        result.push(line);
+    }
+    return result;
+}
+
+
+/***/ }),
+
 /***/ 2877:
 /***/ ((module) => {
 
@@ -11172,222 +11351,17 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__nccwpck_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
-/******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__nccwpck_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
-(() => {
-"use strict";
-// ESM COMPAT FLAG
-__nccwpck_require__.r(__webpack_exports__);
-
-// EXPORTS
-__nccwpck_require__.d(__webpack_exports__, {
-  "getWorkspaces": () => (/* binding */ getWorkspaces)
-});
-
-// EXTERNAL MODULE: ./node_modules/@actions/glob/lib/glob.js
-var glob = __nccwpck_require__(8090);
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(2186);
-// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
-var lib_github = __nccwpck_require__(5438);
-// EXTERNAL MODULE: external "path"
-var external_path_ = __nccwpck_require__(1017);
-// EXTERNAL MODULE: ./node_modules/minimatch/minimatch.js
-var minimatch = __nccwpck_require__(3973);
-;// CONCATENATED MODULE: ./build-workspace-matrix/changedFiles.ts
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-
-
-function changedFiles(eventName, token) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const github = (0,lib_github.getOctokit)(token);
-        let head;
-        let base;
-        switch (eventName) {
-            case "push":
-                const pushPayload = lib_github.context.payload;
-                head = pushPayload.after;
-                base = pushPayload.before;
-                break;
-            case "pull_request":
-                const prPayload = lib_github.context.payload;
-                head = prPayload.pull_request.head.sha;
-                base = prPayload.pull_request.base.sha;
-                break;
-            default:
-                (0,core.setFailed)(`${eventName} is not supported when determining changed files.`);
-                return [];
-        }
-        const { owner, repo } = lib_github.context.repo;
-        const response = yield github.rest.repos.compareCommits({
-            owner,
-            repo,
-            head,
-            base,
-        });
-        if (response.status !== 200) {
-            (0,core.setFailed)(`GitHub API returned response with status ${response.status}`);
-            return [];
-        }
-        return response.data.files.map((file) => file.filename);
-    });
-}
-
-;// CONCATENATED MODULE: ./build-workspace-matrix/main.ts
-var main_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-
-
-
-
-
-
-(function run() {
-    return main_awaiter(this, void 0, void 0, function* () {
-        try {
-            let result = yield getWorkspaces({
-                eventName: lib_github.context.eventName,
-                githubToken: (0,core.getInput)("github-token", { required: true }),
-                workspaceGlobs: (0,core.getInput)("workspaces", { required: true }),
-                workspaceDependencyGlobPatterns: (0,core.getInput)("workspace_dependencies"),
-                globalDependencyGlobs: (0,core.getInput)("global_dependencies"),
-                dispatchWorkspace: (0,core.getInput)("workflow_dispatch_workspace", {
-                    required: lib_github.context.eventName === "workflow_dispatch",
-                }),
-            });
-            console.log(`Found ${result.length} impacted workspaces: ${result.join(", ")}`);
-            const relativeToPath = (0,core.getInput)("relative_to_path");
-            if (relativeToPath) {
-                console.log(`Making relative to ${relativeToPath}`);
-                result = result.map(makeRelative(relativeToPath));
-            }
-            (0,core.setOutput)("matrix", { workspace: result });
-        }
-        catch (error) {
-            (0,core.setFailed)(error.message);
-        }
-    });
-})();
-function getWorkspaces(input) {
-    return main_awaiter(this, void 0, void 0, function* () {
-        if (input.eventName === "workflow_dispatch") {
-            return [input.dispatchWorkspace];
-        }
-        const workspaces = yield newFunction(input.workspaceGlobs);
-        (0,core.info)(`Found matching workspaces: ${workspaces.join(", ")}`);
-        if (input.eventName === "schedule") {
-            return workspaces;
-        }
-        const changedFilesList = yield changedFiles(input.eventName, input.githubToken);
-        (0,core.info)(`Found changed files: ${changedFilesList.join(", ")}`);
-        let globalDepsChanged = false;
-        for (const glob of getInputLines(input.globalDependencyGlobs)) {
-            if (glob.length === 0 || glob.startsWith("#")) {
-                continue;
-            }
-            if (changedFilesList.some(minimatch.filter(glob))) {
-                (0,core.info)(`Found changed shared dependency matching glob '${glob}`);
-                globalDepsChanged = true;
-                break;
-            }
-        }
-        if (globalDepsChanged) {
-            return workspaces;
-        }
-        const foo = new Set();
-        const workspaceDependencies = [];
-        for (const dependencyExpression of getInputLines(input.workspaceDependencyGlobPatterns)) {
-            const [dependentGlob, dependencyGlob] = dependencyExpression.split(":").map(s => s.trim());
-            (0,core.info)(`Evaluating ${dependentGlob} ${dependencyGlob}`);
-            const changed = changedFilesList.some(minimatch.filter(dependencyGlob));
-            if (changed) {
-                const affectedWorkspaces = yield newFunction(dependentGlob);
-                (0,core.info)(`Found changed workspace dependency matching glob '${dependencyGlob}: ${affectedWorkspaces.join(", ")}`);
-                affectedWorkspaces.forEach(w => foo.add(w));
-                workspaceDependencies.push({
-                    glob: dependentGlob,
-                    changed,
-                });
-            }
-        }
-        return workspaces.filter((w) => changedFilesList.some((f) => f.startsWith(w)) || foo.has(w));
-    });
-}
-function newFunction(globs) {
-    return main_awaiter(this, void 0, void 0, function* () {
-        const workspaceGlobber = yield glob.create(globs, {
-            implicitDescendants: false,
-        });
-        const workspaces = (yield workspaceGlobber.glob()).map(makeRelative(process.cwd()));
-        return workspaces;
-    });
-}
-function makeRelative(from) {
-    return function (path) {
-        return (0,external_path_.relative)(from, path);
-    };
-}
-function getInputLines(input) {
-    const result = [];
-    for (const line of input.split("\n").map((g) => g.trim())) {
-        if (line.length === 0 || line.startsWith("#")) {
-            continue;
-        }
-        result.push(line);
-    }
-    return result;
-}
-
-})();
-
-module.exports = __webpack_exports__;
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __nccwpck_require__(6238);
+/******/ 	module.exports = __webpack_exports__;
+/******/ 	
 /******/ })()
 ;

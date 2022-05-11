@@ -23,5 +23,5 @@ outputs:
   matrix:
     description: "The matrix object of the shape: { workspace: [] }"
 runs:
-  using: "node12"
+  using: "node16"
   main: "dist/index.js"

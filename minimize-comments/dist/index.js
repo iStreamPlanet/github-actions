@@ -8751,46 +8751,6 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	(() => {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__nccwpck_require__.n = (module) => {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				() => (module['default']) :
-/******/ 				() => (module);
-/******/ 			__nccwpck_require__.d(getter, { a: getter });
-/******/ 			return getter;
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__nccwpck_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
-/******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__nccwpck_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
@@ -8800,42 +8760,30 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be in strict mode.
 (() => {
 "use strict";
-__nccwpck_require__.r(__webpack_exports__);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2186);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(5438);
-/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_1__);
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+var exports = __webpack_exports__;
 
-
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core_1 = __nccwpck_require__(2186);
+const github_1 = __nccwpck_require__(5438);
 run();
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            // Note: supporting other event types might require changing the query used
-            if (_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.eventName !== "pull_request") {
-                throw new Error(`This action is not supported for event of type '${_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.eventName}'.`);
-            }
-            const token = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("github-token", { required: true });
-            const bodyIncludesInput = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("body-includes", { required: true });
-            const bodyStrings = bodyIncludesInput
-                .split("\n")
-                .map((s) => s.trim())
-                .filter((s) => s.length > 0);
-            const byAuthor = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("by-author", { required: true });
-            const github = (0,_actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit)(token);
-            let execute = true;
-            let nextCursor = undefined;
-            while (execute) {
-                const result = yield github.graphql(`query FindComments($owner: String!, $repo: String!, $number: Int!, $nextCursor: String) {
+async function run() {
+    try {
+        // Note: supporting other event types might require changing the query used
+        if (github_1.context.eventName !== "pull_request") {
+            throw new Error(`This action is not supported for event of type '${github_1.context.eventName}'.`);
+        }
+        const token = (0, core_1.getInput)("github-token", { required: true });
+        const bodyIncludesInput = (0, core_1.getInput)("body-includes", { required: true });
+        const bodyStrings = bodyIncludesInput
+            .split("\n")
+            .map((s) => s.trim())
+            .filter((s) => s.length > 0);
+        const byAuthor = (0, core_1.getInput)("by-author", { required: true });
+        const github = (0, github_1.getOctokit)(token);
+        let execute = true;
+        let nextCursor = undefined;
+        while (execute) {
+            const result = await github.graphql(`query FindComments($owner: String!, $repo: String!, $number: Int!, $nextCursor: String) {
           repository(owner: $owner, name: $repo) {
             pullRequest(number: $number) {
               comments(first: 50, after: $nextCursor) {
@@ -8856,28 +8804,27 @@ function run() {
               }
             }
           }
-        }`, Object.assign(Object.assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.issue), { nextCursor }));
-                const { pageInfo, nodes: comments, } = result.repository.pullRequest.comments;
-                for (const comment of comments) {
-                    if (!comment.isMinimized &&
-                        comment.author.login === byAuthor &&
-                        bodyStrings.some((s) => comment.body.includes(s))) {
-                        console.log("Minimizing " + comment.id);
-                        yield github.graphql(`mutation MarkCommentOutdated($commentId: ID!) {
+        }`, { ...github_1.context.issue, nextCursor });
+            const { pageInfo, nodes: comments, } = result.repository.pullRequest.comments;
+            for (const comment of comments) {
+                if (!comment.isMinimized &&
+                    comment.author.login === byAuthor &&
+                    bodyStrings.some((s) => comment.body.includes(s))) {
+                    console.log("Minimizing " + comment.id);
+                    await github.graphql(`mutation MarkCommentOutdated($commentId: ID!) {
               minimizeComment(input: {subjectId: $commentId, classifier: OUTDATED}) {
                 clientMutationId
               }
             }`, { commentId: comment.id });
-                    }
                 }
-                execute = pageInfo.hasNextPage;
-                nextCursor = pageInfo.endCursor;
             }
+            execute = pageInfo.hasNextPage;
+            nextCursor = pageInfo.endCursor;
         }
-        catch (error) {
-            (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed)(error.message);
-        }
-    });
+    }
+    catch (error) {
+        (0, core_1.setFailed)(error.message);
+    }
 }
 
 })();
