@@ -7,6 +7,9 @@ inputs:
   workspaces:
     description: "A newline-separated list of globs representing specific workspaces"
     required: true
+  workspace_dependencies:
+    description: "A newline-separated list workspace dependencies represented as 'workspace-glob : dependency-glob'"
+    required: false
   workflow_dispatch_workspace:
     description: "A particular workspace to return when the event type is 'workflow_dispatch'"
     required: false
