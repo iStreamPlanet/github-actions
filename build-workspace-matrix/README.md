@@ -64,6 +64,10 @@ jobs:
           # Unless something in global dependencies changes, in which case all workspaces are returned
           global_dependencies: |
             terraform/modules/**/*.tf
+          # Or if something in specific workspace dependencies changes, in which case those dependent workspaces get returned
+          workspace_dependencies: |
+            terraform/clusters/product-a-*/ : shared_modules/foo/*.tf
+            terraform/clusters/product-a-*/ : shared_modules/bar/**/*.tf
 
   build:
     needs: [determine-matrix]
