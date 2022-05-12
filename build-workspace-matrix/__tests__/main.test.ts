@@ -24,14 +24,13 @@ const shared = {
   workspaceGlobs: `
 # a comment
 clusters/*/
-# the below is excluded
-!clusters/modules/`,
-  workspaceDependencyGlobPatterns: `
-# a comment
+# these specify particular dependencies
 clusters/stream-*/ : clusters/modules/stream/**/*.txt
 clusters/stream-*/ : clusters/modules/origin-and-stream/**/*.txt
 clusters/origin-*/ : clusters/modules/origin/**/*.txt
 clusters/origin-*/ : clusters/modules/origin-and-stream/**/*.txt
+# the below is excluded
+!clusters/modules/
 `,
   globalDependencyGlobs: `
 # a comment

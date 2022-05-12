@@ -11094,7 +11094,6 @@ const changedFiles_1 = __nccwpck_require__(2077);
             eventName: github_1.context.eventName,
             githubToken: (0, core_1.getInput)("github-token", { required: true }),
             workspaceGlobs: (0, core_1.getInput)("workspaces", { required: true }),
-            workspaceDependencyGlobPatterns: (0, core_1.getInput)("workspace_dependencies"),
             globalDependencyGlobs: (0, core_1.getInput)("global_dependencies"),
             dispatchWorkspace: (0, core_1.getInput)("workflow_dispatch_workspace", {
                 required: github_1.context.eventName === "workflow_dispatch",
@@ -11116,7 +11115,16 @@ async function getWorkspaces(input) {
     if (input.eventName === "workflow_dispatch") {
         return [input.dispatchWorkspace];
     }
-    const workspaces = await newFunction(input.workspaceGlobs);
+    const workspaceDependencies = [];
+    const globberInputLines = [];
+    for (const line of getInputLines(input.workspaceGlobs)) {
+        const [workspaceGlob, dependencyGlob] = line.split(":").map(s => s.trim());
+        globberInputLines.push(workspaceGlob);
+        if (typeof dependencyGlob === "string") {
+            workspaceDependencies.push({ workspaceGlob, dependencyGlob });
+        }
+    }
+    const workspaces = await getMatchingWorkspaces(globberInputLines.join("\n"));
     (0, core_1.info)(`Found matching workspaces: ${workspaces.join(", ")}`);
     if (input.eventName === "schedule") {
         return workspaces;
@@ -11125,9 +11133,6 @@ async function getWorkspaces(input) {
     (0, core_1.info)(`Found changed files: ${changedFilesList.join(", ")}`);
     let globalDepsChanged = false;
     for (const glob of getInputLines(input.globalDependencyGlobs)) {
-        if (glob.length === 0 || glob.startsWith("#")) {
-            continue;
-        }
         if (changedFilesList.some(minimatch_1.default.filter(glob))) {
             (0, core_1.info)(`Found changed shared dependency matching glob '${glob}`);
             globalDepsChanged = true;
@@ -11137,26 +11142,19 @@ async function getWorkspaces(input) {
     if (globalDepsChanged) {
         return workspaces;
     }
-    const foo = new Set();
-    const workspaceDependencies = [];
-    for (const dependencyExpression of getInputLines(input.workspaceDependencyGlobPatterns)) {
-        const [dependentGlob, dependencyGlob] = dependencyExpression.split(":").map(s => s.trim());
-        (0, core_1.info)(`Evaluating ${dependentGlob} ${dependencyGlob}`);
+    const workspacesWithChangedDependencies = new Set();
+    for (const { workspaceGlob, dependencyGlob } of workspaceDependencies) {
         const changed = changedFilesList.some(minimatch_1.default.filter(dependencyGlob));
         if (changed) {
-            const affectedWorkspaces = await newFunction(dependentGlob);
+            const affectedWorkspaces = await getMatchingWorkspaces(workspaceGlob);
             (0, core_1.info)(`Found changed workspace dependency matching glob '${dependencyGlob}: ${affectedWorkspaces.join(", ")}`);
-            affectedWorkspaces.forEach(w => foo.add(w));
-            workspaceDependencies.push({
-                glob: dependentGlob,
-                changed,
-            });
+            affectedWorkspaces.forEach(w => workspacesWithChangedDependencies.add(w));
         }
     }
-    return workspaces.filter((w) => changedFilesList.some((f) => f.startsWith(w)) || foo.has(w));
+    return workspaces.filter((w) => changedFilesList.some((f) => f.startsWith(w)) || workspacesWithChangedDependencies.has(w));
 }
 exports.getWorkspaces = getWorkspaces;
-async function newFunction(globs) {
+async function getMatchingWorkspaces(globs) {
     const workspaceGlobber = await glob.create(globs, {
         implicitDescendants: false,
     });
