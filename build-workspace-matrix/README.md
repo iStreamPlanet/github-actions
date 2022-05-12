@@ -10,7 +10,8 @@ Builds a matrix of workspaces based on glob patterns and analysis of which files
 
 ### `workspaces`
 
-**Required** A newline-separated list of globs representing specific workspaces.
+**Required** A newline-separated list of globs or dependency glob expressions representing specific workspaces. A `!` can be used to exclude certain patterns.
+A dependency glob expression looks like `foo/*/ : bar/**/*` - if anything under `bar` changes then all workspaces matching `foo/*/` are returned.
 
 ### `workflow_dispatch_workspace`
 
@@ -57,17 +58,18 @@ jobs:
         uses: iStreamPlanet/github-actions/build-workspace-matrix@main
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-          # Only matching workspaces that contain changes will be returned (except for /example, which is excluded)
           workspaces: |
+            # Only matching workspaces that contain changes will be returned
             terraform/clusters/*/
+            # except for /example, which is excluded
             !terraform/clusters/example/
-          # Unless something in global dependencies changes, in which case all workspaces are returned
-          global_dependencies: |
-            terraform/modules/**/*.tf
-          # Or if something in specific workspace dependencies changes, in which case those dependent workspaces get returned
-          workspace_dependencies: |
+            # additionally, if any *.tf file under shared_modules/foo or shared_modules/bar (recursively)
+            # is changed, all workspaces matching product-a-* will be returned
             terraform/clusters/product-a-*/ : shared_modules/foo/*.tf
             terraform/clusters/product-a-*/ : shared_modules/bar/**/*.tf
+          global_dependencies: |
+            # If something in global dependencies changes then all matched workspaces are returned
+            terraform/modules/**/*.tf
 
   build:
     needs: [determine-matrix]
