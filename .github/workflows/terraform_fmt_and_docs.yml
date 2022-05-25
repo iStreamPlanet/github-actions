@@ -2,9 +2,16 @@ name: PR fmt and docs
 on:
   workflow_call:
     inputs:
-      path:
+      terraform-root-path:
         required: false
         type: string
+      module-path:
+        required: false
+        type: string
+      module-update-recursive:
+        default: false
+        required: false
+        type: boolean
       git-push:
         default: false
         required: false
@@ -30,7 +37,7 @@ jobs:
         uses: EndBug/add-and-commit@v9.0.0
         with:
           message: "Automated: terraform fmt"
-          path: "${{ inputs.path }}"
+          path: "${{ inputs.terraform-root-path }}"
 
   module_docs:
     runs-on: ubuntu-latest
@@ -44,10 +51,10 @@ jobs:
       - name: module terraform-docs
         uses: terraform-docs/gh-actions@v1.0.0
         with:
-          working-dir: terraform/modules/project
+          working-dir: "${{ inputs.module-path }}"
           output-file: README.md
           output-method: inject
-          recursive: false
+          recursive: ${{ inputs.module-update-recursive }}
           git-push: "${{ inputs.git-push }}"
           git-commit-message: "Automated: terraform-docs"
           git-push-user-name: "${{ github.actor }}"
