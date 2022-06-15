@@ -11,6 +11,7 @@ function main {
   scriptDir=$(dirname ${0})
   source ${scriptDir}/diff.sh
   source ${scriptDir}/apply.sh
+  source ${scriptDir}/sync.sh
 
   case "${command}" in
     diff)
@@ -18,6 +19,9 @@ function main {
       ;;
     apply)
       helmfileApply
+      ;;
+    sync)
+      helmfileSync
       ;;
     *)
       echo "Error: Unrecognized command ${command}"
