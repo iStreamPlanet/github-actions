@@ -37,3 +37,12 @@ Example usage of `helmfile apply`:
     command: apply
     working_directory: helmfile/
 ```
+
+Example usage of `helmfile sync`:
+
+```yaml
+- uses: iStreamPlanet/github-actions/helmfile-actions@main
+  with:
+    command: sync
+    working_directory: helmfile/
+```
