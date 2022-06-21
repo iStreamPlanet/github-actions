@@ -6221,13 +6221,6 @@ function helmfileDepCheck() {
             setOutputs(outputs);
             return;
         }
-        const helmfileContent = (0, fs_1.readFileSync)(helmfilePath, "utf-8");
-        const helmfileData = (0, js_yaml_1.safeLoad)(helmfileContent);
-        if (!helmfileData["repositories"]) {
-            // Return early, because there are no dependencies to check
-            setOutputs(outputs);
-            return;
-        }
         const helmfileLockPath = workingDir + "/helmfile.lock";
         if (!(0, fs_1.existsSync)(helmfileLockPath)) {
             outputs.helmfileLockState = HelmfileLockState.MISSING;
