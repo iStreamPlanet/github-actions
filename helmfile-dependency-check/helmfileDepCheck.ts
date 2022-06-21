@@ -22,7 +22,7 @@ interface ActionOutputs {
     helmfileLockUpdates: HelmfileLockUpdate[];
 }
 
-function setOutputs({helmfileLockState, helmfileLockUpdates}: ActionOutputs): void {
+function setOutputs({ helmfileLockState, helmfileLockUpdates }: ActionOutputs): void {
     setOutput("helmfile-lock-state", helmfileLockState)
     setOutput("helmfile-lock-updates", helmfileLockUpdates)
 }
@@ -30,7 +30,7 @@ function setOutputs({helmfileLockState, helmfileLockUpdates}: ActionOutputs): vo
 export function helmfileDepCheck() {
     try {
         const outputs: ActionOutputs = {
-            helmfileLockState:  HelmfileLockState.FRESH,
+            helmfileLockState: HelmfileLockState.FRESH,
             helmfileLockUpdates: []
         }
 
@@ -42,14 +42,6 @@ export function helmfileDepCheck() {
             setOutputs(outputs)
             return
         }
-        const helmfileContent = readFileSync(helmfilePath, "utf-8")
-        const helmfileData = safeLoad(helmfileContent)
-
-        if (!helmfileData["repositories"]) {
-            // Return early, because there are no dependencies to check
-            setOutputs(outputs)
-            return
-        } 
 
         const helmfileLockPath = workingDir + "/helmfile.lock"
 
@@ -83,7 +75,7 @@ export function helmfileDepCheck() {
             setOutputs(outputs)
             return
         }
-        
+
         if (currentDependencies.length !== newDependencies.length) {
             console.log(`dependency length mismatch after running helmfile deps`)
             setOutputs(outputs)
