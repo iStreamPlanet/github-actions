@@ -5,7 +5,7 @@ import * as path from "path"
 
 const baseDir = "helmfile-dependency-check/__test__/test-data/"
 
-const {readFileSync} = jest.requireActual("fs")
+const { readFileSync } = jest.requireActual("fs")
 
 beforeEach(() => {
     jest.resetModules()
@@ -19,7 +19,7 @@ afterEach(() => {
 describe("helmfile-dep-update", () => {
     it("helmfile missing", () => {
         const workingDir = path.join(baseDir, "helmfile-missing")
-        process.env["INPUT_WORKING_DIRECTORY"] =  workingDir
+        process.env["INPUT_WORKING_DIRECTORY"] = workingDir
 
         const setOutputMock = jest.spyOn(require("@actions/core"), "setOutput")
 
@@ -30,29 +30,22 @@ describe("helmfile-dep-update", () => {
     })
     it("helmfile missing repositories", () => {
         const workingDir = path.join(baseDir, "helmfile-no-repositories")
-        process.env["INPUT_WORKING_DIRECTORY"] =  workingDir
+        process.env["INPUT_WORKING_DIRECTORY"] = workingDir
 
         const helmfilePath = path.join(workingDir, "helmfile.yaml")
-        const helmfileContent = readFileSync(helmfilePath, "utf-8")
-
-        const mockFiles = [
-            helmfileContent,
-        ]
-        require("fs").__setMockFiles(mockFiles)
 
         const setOutputMock = jest.spyOn(require("@actions/core"), "setOutput")
 
         require("../helmfileDepCheck").helmfileDepCheck()
-        
+
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-state", "fresh")
         expect(setOutputMock).toHaveBeenCalledWith("helmfile-lock-updates", [])
     })
     it("helmfile lock fresh", () => {
         const workingDir = path.join(baseDir, "helmfile-lock-fresh")
-        process.env["INPUT_WORKING_DIRECTORY"] =  workingDir
+        process.env["INPUT_WORKING_DIRECTORY"] = workingDir
 
         const helmfilePath = path.join(workingDir, "helmfile.yaml")
-        const helmfileContent = readFileSync(helmfilePath, "utf-8")
 
         const helmfileLockPath = path.join(workingDir, "helmfile.lock")
         const helmfileLockContent = readFileSync(helmfileLockPath, "utf-8")
@@ -61,7 +54,6 @@ describe("helmfile-dep-update", () => {
         const freshHelmfileLockContent = readFileSync(freshHelmfileLockPath, "utf-8")
 
         const mockFiles = [
-            helmfileContent,
             helmfileLockContent,
             freshHelmfileLockContent,
         ]
@@ -78,10 +70,9 @@ describe("helmfile-dep-update", () => {
     })
     it("helmfile lock no updates", () => {
         const workingDir = path.join(baseDir, "helmfile-lock-fresh")
-        process.env["INPUT_WORKING_DIRECTORY"] =  workingDir
+        process.env["INPUT_WORKING_DIRECTORY"] = workingDir
 
         const helmfilePath = path.join(workingDir, "helmfile.yaml")
-        const helmfileContent = readFileSync(helmfilePath, "utf-8")
 
         const helmfileLockPath = path.join(workingDir, "helmfile.lock")
         const helmfileLockContent = readFileSync(helmfileLockPath, "utf-8")
@@ -90,7 +81,6 @@ describe("helmfile-dep-update", () => {
         const freshHelmfileLockContent = readFileSync(freshHelmfileLockPath, "utf-8")
 
         const mockFiles = [
-            helmfileContent,
             helmfileLockContent,
             freshHelmfileLockContent,
         ]
@@ -107,10 +97,9 @@ describe("helmfile-dep-update", () => {
     })
     it("helmfile lock update", () => {
         const workingDir = path.join(baseDir, "helmfile-lock-update")
-        process.env["INPUT_WORKING_DIRECTORY"] =  workingDir
+        process.env["INPUT_WORKING_DIRECTORY"] = workingDir
 
         const helmfilePath = path.join(workingDir, "helmfile.yaml")
-        const helmfileContent = readFileSync(helmfilePath, "utf-8")
 
         const helmfileLockPath = path.join(workingDir, "helmfile.lock")
         const helmfileLockContent = readFileSync(helmfileLockPath, "utf-8")
@@ -119,7 +108,6 @@ describe("helmfile-dep-update", () => {
         const updatedHelmfileLockContent = readFileSync(updatedHelmfileLockPath, "utf-8")
 
         const mockFiles = [
-            helmfileContent,
             helmfileLockContent,
             updatedHelmfileLockContent,
         ]
@@ -151,15 +139,9 @@ describe("helmfile-dep-update", () => {
     })
     it("helmfile lock missing", () => {
         const workingDir = path.join(baseDir, "helmfile-lock-missing")
-        process.env["INPUT_WORKING_DIRECTORY"] =  workingDir
+        process.env["INPUT_WORKING_DIRECTORY"] = workingDir
 
         const helmfilePath = path.join(workingDir, "helmfile.yaml")
-        const helmfileContent = readFileSync(helmfilePath, "utf-8")
-
-        const mockFiles = [
-            helmfileContent,
-        ]
-        require("fs").__setMockFiles(mockFiles)
 
         const setOutputMock = jest.spyOn(require("@actions/core"), "setOutput")
 
