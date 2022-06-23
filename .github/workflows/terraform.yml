@@ -1,14 +1,14 @@
 name: Terraform
+
+# This reusable workflow will perform terraform related actions like verify the validity of
+# the terraform modules and update the PR with the terraform plan output. It also has steps
+# to apply the respective terraform changes when a commit is pushed.
 on:
   workflow_call:
     inputs:
       workspaces:
         description: "A newline-separated list of globs or dependency glob expressions ('workspace-glob : dependency-glob') representing specific workspaces"
         required: true
-        type: string
-      workflow_dispatch_workspace:
-        description: "A particular workspace to return when the event type is 'workflow_dispatch'"
-        required: false
         type: string
       global_dependencies:
         description: "A newline-separated list of globs representing dependencies of each workspace. If any of the dependencies have changed then all workspaces will be returned. Applies only to 'push' and 'pull_request' events."
@@ -26,7 +26,6 @@ on:
       ssh_private_key:
         required: true
 
-
 jobs:
   minimize-previous-comments:
     runs-on: ubuntu-latest
@@ -42,6 +41,7 @@ jobs:
             terraform fmt
             terraform validate
             terraform plan
+
   determine-matrix:
     runs-on: ubuntu-latest
     outputs:
@@ -53,9 +53,10 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           workspaces: ${{ inputs.workspaces }}
-          workflow_dispatch_workspace: ${{ inputs.workflow_dispatch_workspace }}
+          workflow_dispatch_workspace: ${{ github.event.inputs.workspace }}
           global_dependencies: ${{ inputs.global_dependencies }}
           relative_to_path: ${{ inputs.relative_to_path }}
+
   terraform:
     needs: [determine-matrix]
     runs-on: ubuntu-latest
