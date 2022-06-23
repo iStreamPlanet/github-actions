@@ -73,6 +73,7 @@ jobs:
         uses: terraform-docs/gh-actions@v1.0.0
         with:
           working-dir: "${{ matrix.workspace }}"
+          template: '<!-- BEGIN_TF_DOCS -->\n\n<!-- prettier-ignore-start -->\n{{ .Content }}\n<!-- prettier-ignore-end -->\n\n<!-- END_TF_DOCS -->'
           output-file: "${{ inputs.output_file }}"
           output-method: ${{ inputs.output_method }}
           recursive: ${{ inputs.recursive }}
