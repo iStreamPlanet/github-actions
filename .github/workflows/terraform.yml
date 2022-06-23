@@ -78,7 +78,7 @@ jobs:
       - name: Install asdf on the Action Runner
         uses: asdf-vm/actions/setup@v1.1.0
         with:
-          asdf_branch: "v0.8.0"
+          asdf_branch: "v0.10.2"
       - name: Install asdf tools
         working-directory: ${{ env.WORKSPACE }}
         run: |
