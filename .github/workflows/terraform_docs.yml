@@ -39,7 +39,6 @@ on:
         required: false
         type: string
 
-
 jobs:
   determine-matrix:
     runs-on: ubuntu-latest
