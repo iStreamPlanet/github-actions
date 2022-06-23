@@ -11,17 +11,17 @@ on:
         default: false
         required: false
         type: boolean
-      module_doc_recursive:
+      recursive:
         description: "Toggles the option to generate module docs recursively"
         default: false
         required: false
         type: boolean
-      module_doc_output_file:
+      output_file:
         description: "Name of the output file for the module docs"
         default: README.md
         required: false
         type: string
-      module_doc_output_method:
+      output_method:
         description: "Method to be used for updating the module doc output file, valid options are 'inject', 'replace', and 'print'"
         default: inject
         required: false
@@ -74,9 +74,9 @@ jobs:
         uses: terraform-docs/gh-actions@v1.0.0
         with:
           working-dir: "${{ matrix.workspace }}"
-          output-file: "${{ inputs.module_doc_output_file }}"
-          output-method: ${{ inputs.module_doc_output_method }}
-          recursive: ${{ inputs.module_doc_recursive }}
+          output-file: "${{ inputs.output_file }}"
+          output-method: ${{ inputs.output_method }}
+          recursive: ${{ inputs.recursive }}
           git-push: "${{ inputs.git_push }}"
           git-commit-message: "Automated: terraform-docs for ${{ matrix.workspace }}"
           git-push-user-name: "${{ github.actor }}"
