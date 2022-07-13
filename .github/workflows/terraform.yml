@@ -1,0 +1,167 @@
+name: Terraform
+
+# This reusable workflow will perform terraform related actions like verify the validity of
+# the terraform modules and update the PR with the terraform plan output. It also has steps
+# to apply the respective terraform changes when a commit is pushed.
+on:
+  workflow_call:
+    inputs:
+      workspaces:
+        description: "A newline-separated list of globs or dependency glob expressions ('workspace-glob : dependency-glob') representing specific workspaces"
+        required: true
+        type: string
+      global_dependencies:
+        description: "A newline-separated list of globs representing dependencies of each workspace. If any of the dependencies have changed then all workspaces will be returned. Applies only to 'push' and 'pull_request' events."
+        required: false
+        type: string
+      relative_to_path:
+        description: "If provided, results will be relative to the given path"
+        required: false
+        type: string
+    secrets:
+      aws_access_key_id:
+        required: true
+      aws_secret_access_key:
+        required: true
+      ssh_private_key:
+        required: true
+
+jobs:
+  minimize-previous-comments:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Minimize previous comments
+        uses: iStreamPlanet/github-actions/minimize-comments@v1.13.0
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          by-author: github-actions
+          body-includes: |
+            terraform init
+            terraform fmt
+            terraform validate
+            terraform plan
+
+  determine-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build-workspace-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: build-workspace-matrix
+        uses: iStreamPlanet/github-actions/build-workspace-matrix@v1.13.0
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          workspaces: ${{ inputs.workspaces }}
+          workflow_dispatch_workspace: ${{ github.event.inputs.workspace }}
+          global_dependencies: ${{ inputs.global_dependencies }}
+          relative_to_path: ${{ inputs.relative_to_path }}
+
+  terraform:
+    needs: [determine-matrix]
+    runs-on: ubuntu-latest
+    if: needs.determine-matrix.outputs.matrix != '{"workspace":[]}'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.determine-matrix.outputs.matrix) }}
+    concurrency: terraform-${{ matrix.workspace }}
+    # Only declare an environment on events that result in 'terraform apply'
+    environment: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && matrix.workspace || null }}
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      WORKSPACE: clusters/aws/${{ matrix.workspace }}
+      WORKFLOW_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install asdf on the Action Runner
+        uses: asdf-vm/actions/setup@v1.1.0
+        with:
+          asdf_branch: "v0.10.2"
+      - name: Install asdf tools
+        working-directory: ${{ env.WORKSPACE }}
+        run: |
+          cp ./.tool-versions $HOME/
+          asdf plugin-add terraform
+          asdf plugin-add sops
+          asdf install
+      - name: "terraform fmt"
+        uses: iStreamPlanet/github-actions/terraform-actions@v1.13.0
+        if: github.event_name == 'pull_request'
+        with:
+          command: fmt
+          working_directory: ${{ env.WORKSPACE }}
+      - name: "Setup SSH access"
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.ssh_private_key }}
+      - name: "terraform init"
+        uses: iStreamPlanet/github-actions/terraform-actions@v1.13.0
+        env:
+          GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa"
+        with:
+          command: init
+          working_directory: ${{ env.WORKSPACE }}
+      - name: "terraform validate"
+        uses: iStreamPlanet/github-actions/terraform-actions@v1.13.0
+        with:
+          command: validate
+          working_directory: ${{ env.WORKSPACE }}
+
+      - name: "terraform plan"
+        id: terraform-plan
+        uses: iStreamPlanet/github-actions/terraform-actions@v1.13.0
+        if: github.event_name == 'pull_request' || github.event_name == 'schedule'
+        with:
+          command: plan
+          working_directory: ${{ env.WORKSPACE }}
+
+      - name: "terraform apply"
+        uses: iStreamPlanet/github-actions/terraform-actions@v1.13.0
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        with:
+          command: apply
+          working_directory: ${{ env.WORKSPACE }}
+
+      - name: Update drift issue
+        uses: iStreamPlanet/github-actions/update-issue@v1.13.0
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # Open an issue if drift detected during on schedule run, otherwise we just ran an 'apply' so assume drift is resolved
+          open: ${{ github.event_name == 'schedule' && steps.terraform-plan.outputs.plan-has-changes == 'true' }}
+          title: "Terraform drift in `${{ env.WORKSPACE }}`"
+          body: |
+            #### Terraform plan for `${{ env.WORKSPACE }}`
+            ```diff
+            ${{steps.terraform-plan.outputs.plan-output}}
+            ```
+            Run the [apply workflow][1] manually with workspace `${{ env.WORKSPACE }}` to resolve.
+
+            *Workflow: [`${{ github.workflow }}`](${{ env.WORKFLOW_RUN_URL }})*
+
+            [1]: https://github.com/${{github.repository}}/actions/workflows/terraform.yml
+          close-comment: |
+            Drift resolved.
+
+            *Workflow: [`${{ github.workflow }}`](${{ env.WORKFLOW_RUN_URL }}), Event: `${{ github.event_name }}`, Actor `${{ github.actor }}`*
+
+      # NOTE: this step should always be last in the job
+      - name: Update execution failure issue
+        uses: iStreamPlanet/github-actions/update-issue@v1.13.0
+        # Run regardless of job completion status, except for PRs, where the workflow result is communicated via a Check status
+        if: always() && github.event_name != 'pull_request'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # Open an issue if anything in the job failed, otherwise close any matching existing issues
+          open: ${{ job.status == 'failure' }}
+          title: "${{ github.workflow }} on ${{ github.event_name }} failed in `${{ matrix.workspace }}`"
+          body: |
+            The workflow run failed. Please investigate using the workflow run log linked below.
+
+            *Workflow: [`${{ github.workflow }}`](${{ env.WORKFLOW_RUN_URL }})*
+          close-comment: |
+            Most recent workflow run succeeded.
+
+            *Workflow: [`${{ github.workflow }}`](${{ env.WORKFLOW_RUN_URL }})*
