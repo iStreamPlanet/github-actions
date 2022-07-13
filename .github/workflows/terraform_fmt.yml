@@ -1,0 +1,67 @@
+name: Terraform fmt
+
+# This reusable workflow processes the specified terraform modules paths
+# to format the respective terraform modules and optionally pushes the changes
+# up to the PR.
+on:
+  workflow_call:
+    inputs:
+      git_push:
+        description: "Toggles the option to push the module doc and module format updates"
+        default: false
+        required: false
+        type: boolean
+      workspaces:
+        description: "A newline-separated list of globs or dependency glob expressions ('workspace-glob : dependency-glob') representing specific workspaces"
+        required: true
+        type: string
+      global_dependencies:
+        description: "A newline-separated list of globs representing dependencies of each workspace. If any of the dependencies have changed then all workspaces will be returned. Applies only to 'push' and 'pull_request' events."
+        required: false
+        type: string
+      relative_to_path:
+        description: "If provided, results will be relative to the given path"
+        required: false
+        type: string
+
+jobs:
+  determine-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build-workspace-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: build-workspace-matrix
+        uses: iStreamPlanet/github-actions/build-workspace-matrix@v1.13.0
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          workspaces: ${{ inputs.workspaces }}
+          workflow_dispatch_workspace: ${{ github.event.inputs.workspace }}
+          global_dependencies: ${{ inputs.global_dependencies }}
+          relative_to_path: ${{ inputs.relative_to_path }}
+
+  fmt:
+    needs: [determine-matrix]
+    runs-on: ubuntu-latest
+    if: needs.determine-matrix.outputs.matrix != '{"workspace":[]}'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.determine-matrix.outputs.matrix) }}
+    concurrency: terraform-${{ matrix.workspace }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: terraform fmt
+        uses: dflook/terraform-fmt@v1.25.1
+        with:
+          path: ${{ matrix.workspace }}
+
+      - name: commit
+        if: ${{ inputs.git_push }}
+        uses: EndBug/add-and-commit@v9.0.0
+        with:
+          message: "Automated: terraform fmt for ${{ matrix.workspace }}"
+          path: "${{ matrix.workspace }}"
