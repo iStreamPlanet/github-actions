@@ -25,6 +25,8 @@ on:
         required: true
       ssh_private_key:
         required: true
+      codefresh_api_key:
+        required: false
 
 jobs:
   minimize-previous-comments:
@@ -71,7 +73,8 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      WORKSPACE: clusters/aws/${{ matrix.workspace }}
+      CODEFRESH_API_KEY: ${{ secrets.codefresh_api_key }}
+      WORKSPACE: ${{ matrix.workspace }}
       WORKFLOW_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
       - uses: actions/checkout@v3
