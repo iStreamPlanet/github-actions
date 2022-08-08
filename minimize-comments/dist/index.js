@@ -8942,7 +8942,7 @@ run();
 async function run() {
     try {
         // Note: supporting other event types might require changing the query used
-        if (github_1.context.eventName !== "pull_request") {
+        if (!["pull_request", "pull_request_target"].includes(github_1.context.eventName)) {
             throw new Error(`This action is not supported for event of type '${github_1.context.eventName}'.`);
         }
         const token = (0, core_1.getInput)("github-token", { required: true });
