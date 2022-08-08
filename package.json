@@ -14,7 +14,7 @@
   "author": "iStreamPlanet",
   "license": "ISC",
   "devDependencies": {
-    "@octokit/webhooks-types": "^6.2.4",
+    "@octokit/webhooks-types": "^6.3.0",
     "@tsconfig/node16": "^1.0.3",
     "@types/jest": "^28.1.6",
     "@types/js-yaml": "^3.12.5",
