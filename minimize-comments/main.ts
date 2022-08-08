@@ -6,7 +6,7 @@ run();
 async function run() {
   try {
     // Note: supporting other event types might require changing the query used
-    if (context.eventName !== "pull_request") {
+    if (!["pull_request", "pull_request_target"].includes(context.eventName)) {
       throw new Error(
         `This action is not supported for event of type '${context.eventName}'.`
       );
