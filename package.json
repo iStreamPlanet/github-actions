@@ -16,7 +16,7 @@
   "devDependencies": {
     "@octokit/webhooks-types": "^6.2.4",
     "@tsconfig/node16": "^1.0.3",
-    "@types/jest": "^28.1.6",
+    "@types/jest": "^28.1.7",
     "@types/js-yaml": "^3.12.5",
     "@types/minimatch": "^3.0.4",
     "@vercel/ncc": "^0.34.0",
