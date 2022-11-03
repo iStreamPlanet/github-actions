@@ -61,14 +61,32 @@ test("getWorkspaces event:workflow_dispatch returns dispatch workspace", async (
   const workspaces = await getWorkspaces({
     ...shared,
     eventName: "workflow_dispatch",
+    allWorkspaces: "false",
   });
   expect(workspaces).toEqual(["clusters/origin-a"]);
 });
 
-test("getWorkspaces event:schedule returns all workspaces", async () => {
+test("getWorkspaces event:schedule returns all workspaces for scheduled job", async () => {
   const workspaces = await getWorkspaces({
     ...shared,
     eventName: "schedule",
+    allWorkspaces: "false",
+  });
+  expect(workspaces.sort()).toEqual([
+    "clusters/stream-a",
+    "clusters/stream-b",
+    "clusters/stream-c",
+    "clusters/origin-a",
+    "clusters/origin-b",
+    "clusters/broadcast",
+  ].sort());
+});
+
+test("getWorkspaces event:schedule returns all workspaces, when return_all_workspaces is true", async () => {
+  const workspaces = await getWorkspaces({
+    ...shared,
+    eventName: "schedule",
+    allWorkspaces: "true",
   });
   expect(workspaces.sort()).toEqual([
     "clusters/stream-a",
@@ -89,6 +107,7 @@ test("getWorkspaces event:push/pull_request returns workspaces with changes", as
   const workspaces = await getWorkspaces({
     ...shared,
     eventName: "push",
+    allWorkspaces: "false",
   });
   expect(workspaces.sort()).toEqual([
     "clusters/stream-a",
@@ -104,6 +123,7 @@ test("getWorkspaces event:push/pull_request returns all workspaces when global d
   const workspaces = await getWorkspaces({
     ...shared,
     eventName: "push",
+    allWorkspaces: "false",
   });
   expect(workspaces.sort()).toEqual([
     "clusters/broadcast",
@@ -123,6 +143,7 @@ test("getWorkspaces event:push/pull_request returns no workspaces when global de
   const workspaces = await getWorkspaces({
     ...shared,
     eventName: "push",
+    allWorkspaces: "false",
   });
   expect(workspaces.sort()).toEqual([].sort());
 });
@@ -135,6 +156,7 @@ test("getWorkspaces event:push/pull_request returns workspaces when dependency c
   const workspaces = await getWorkspaces({
     ...shared,
     eventName: "push",
+    allWorkspaces: "false",
   });
   expect(workspaces.sort()).toEqual([
     "clusters/stream-a",
@@ -151,6 +173,7 @@ test("getWorkspaces event:push/pull_request returns workspaces when shared depen
   const workspaces = await getWorkspaces({
     ...shared,
     eventName: "push",
+    allWorkspaces: "false",
   });
   expect(workspaces.sort()).toEqual([
     "clusters/origin-a",

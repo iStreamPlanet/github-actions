@@ -7,6 +7,10 @@ inputs:
   workspaces:
     description: "A newline-separated list of globs or dependency glob expressions ('workspace-glob : dependency-glob') representing specific workspaces"
     required: true
+  return_all_workspaces:
+    description: "Returns all workspaces for PR's regardless if files have changed or not"
+    required: false
+    default: "false"
   workflow_dispatch_workspace:
     description: "A particular workspace to return when the event type is 'workflow_dispatch'"
     required: false

@@ -14,6 +14,7 @@ type supportedEvents = (("workflow_dispatch" | "push" | "pull_request") & Webhoo
       eventName: context.eventName as supportedEvents,
       githubToken: getInput("github-token", { required: true }),
       workspaceGlobs: getInput("workspaces", { required: true }),
+      allWorkspaces: getInput("return_all_workspaces", { required: true }),
       globalDependencyGlobs: getInput("global_dependencies"),
       dispatchWorkspace: getInput("workflow_dispatch_workspace", {
         required: context.eventName === "workflow_dispatch",
@@ -38,6 +39,7 @@ export async function getWorkspaces(input: {
   eventName: supportedEvents,
   githubToken: string,
   workspaceGlobs: string,
+  allWorkspaces: string,
   globalDependencyGlobs: string,
   dispatchWorkspace: string,
 }): Promise<string[]> {
@@ -58,7 +60,7 @@ export async function getWorkspaces(input: {
 
   info(`Found matching workspaces: ${workspaces.join(", ")}`);
 
-  if (input.eventName === "schedule") {
+  if (input.eventName === "schedule" || input.allWorkspaces === "true") {
     return workspaces;
   }
 

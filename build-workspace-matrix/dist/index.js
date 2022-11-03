@@ -11267,6 +11267,7 @@ const changedFiles_1 = __nccwpck_require__(2077);
             eventName: github_1.context.eventName,
             githubToken: (0, core_1.getInput)("github-token", { required: true }),
             workspaceGlobs: (0, core_1.getInput)("workspaces", { required: true }),
+            allWorkspaces: (0, core_1.getInput)("return_all_workspaces", { required: true }),
             globalDependencyGlobs: (0, core_1.getInput)("global_dependencies"),
             dispatchWorkspace: (0, core_1.getInput)("workflow_dispatch_workspace", {
                 required: github_1.context.eventName === "workflow_dispatch",
@@ -11299,7 +11300,7 @@ async function getWorkspaces(input) {
     }
     const workspaces = await getMatchingWorkspaces(globberInputLines.join("\n"));
     (0, core_1.info)(`Found matching workspaces: ${workspaces.join(", ")}`);
-    if (input.eventName === "schedule") {
+    if (input.eventName === "schedule" || input.allWorkspaces === "true") {
         return workspaces;
     }
     const changedFilesList = await (0, changedFiles_1.changedFiles)(input.eventName, input.githubToken);
