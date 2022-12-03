@@ -14,7 +14,7 @@ function helmfileDiff {
   if [ ${exitCode} -eq 0 ]; then
     echo "Successfully ran helmfile diff command. No changes were found"
     echo
-    echo "::set-output name=diff-has-changes::${hasChanges}"
+    echo "diff-has-changes=${hasChanges}" >> $GITHUB_OUTPUT
     exit ${exitCode}
   fi
 
@@ -55,12 +55,10 @@ ${output}
     echo "${payload}" | curl -s -S -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data @- "${commentsURL}" > /dev/null
   fi
 
-  echo "::set-output name=diff-has-changes::${hasChanges}"
+  echo "diff-has-changes=${hasChanges}" >> $GITHUB_OUTPUT
 
-  # https://github.community/t5/GitHub-Actions/set-output-Truncates-Multiline-Strings/m-p/38372/highlight/true#M3322
-  output="${output//'%'/'%25'}"
-  output="${output//$'\n'/'%0A'}"
-  output="${output//$'\r'/'%0D'}"
-  echo "::set-output name=diff-output::${output}"
+  echo "diff-output<<EOF" >> $GITHUB_OUTPUT
+  echo "${output}" >> $GITHUB_OUTPUT
+  echo "EOF" >> $GITHUB_OUTPUT
   exit ${exitCode}
 }
