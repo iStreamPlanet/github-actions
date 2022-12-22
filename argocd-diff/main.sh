@@ -1,0 +1,94 @@
+#!/bin/bash
+
+ARGOCD_APP="$1"
+ARGOCD_DOMAIN="$2"
+ARGOCD_USER="$3"
+ARGOCD_PASSWORD="$4"
+CHART_PATH="$5"
+CLUSTER_NAME="$6"
+GITHUB_TOKEN="$7"
+VALUES_FILE="$8"
+
+RELEASE_NAME="tmp-apps-${CLUSTER_NAME}-${GITHUB_RUN_ID}"
+echo ${RELEASE_NAME}
+if [ $(expr length ${RELEASE_NAME}) -gt 46 ]; then
+  RELEASE_NAME=$(echo "${RELEASE_NAME:0:46}")
+fi
+
+helm template ${RELEASE_NAME} ${CHART_PATH} --values ${VALUES_FILE} --debug --validate > local.yaml
+yq -i '.metadata.namespace="argocd" | del(.metadata.finalizers) | del(.spec.syncPolicy.automated)' local.yaml
+TMP_APPS=$(yq '.metadata.name' local.yaml -o j -M | tr -d '"')
+yq -s '.metadata.name' local.yaml
+
+argocd --grpc-web login ${ARGOCD_DOMAIN} --username "${ARGOCD_USER}" --password "${ARGOCD_PASSWORD}"
+
+for APP in ${TMP_APPS}; do
+  argocd --grpc-web app create ${APP} -f ${APP}.yml --helm-pass-credentials
+  argocd --grpc-web app manifests ${APP} --source=git >> update_manifests.yaml
+  argocd --grpc-web app delete -y ${APP}
+done
+
+argocd --grpc-web app manifests ${ARGOCD_APP} --source=git > current_apps.yaml
+CURRENT_APPS=$(yq '.metadata.name' current_apps.yaml -o j -M | tr -d '"')
+
+for APP in ${CURRENT_APPS}; do
+  argocd --grpc-web app manifests ${APP} --source=git >> current_manifests.yaml
+done
+
+YQ_FILTER='
+  del(.metadata.creationTimestamp) |
+  del(.metadata.generation) |
+  del(.metadata.resourceVersion) |
+  del(.metadata.uid) |
+  del(.metadata.managedFields) |
+  del(.metadata.annotations."kubectl.kubernetes.io/last-applied-configuration") |
+  del(.metadata.annotations."deployment.kubernetes.io/revision") |
+  del(.metadata.labels."app.kubernetes.io/instance") |
+  del(.metadata.labels."argocd.argoproj.io/instance") |
+  del(.status)
+'
+GREP_FILTER='^\{\}$|^  annotations: \{\}$|^  labels: \{\}$|  vault/last-refresh:'
+
+yq "${YQ_FILTER}" current_manifests.yaml | egrep -v "${GREP_FILTER}" > current_cleaned_manifests.yaml
+yq "${YQ_FILTER}" update_manifests.yaml | egrep -v "${GREP_FILTER}" > update_cleaned_manifests.yaml
+
+set +e
+DIFF_OUTPUT=$(diff -u current_cleaned_manifests.yaml update_cleaned_manifests.yaml | tail -n +3; exit ${PIPESTATUS[0]})
+DIFF_EXIT_CODE="$?"
+
+case $DIFF_EXIT_CODE in
+  0)
+    DIFF_OUTPUT="===== No changes ====="
+    echo "${DIFF_OUTPUT}"
+    CHANGES="false"
+    DIFF_STATUS="Success"
+    ;;
+  1)
+    echo "${DIFF_OUTPUT}"
+    CHANGES="true"
+    DIFF_STATUS="Success"
+    ;;
+  *)
+    CHANGES="false"
+    DIFF_STATUS="Failed"
+    exit $DIFF_EXIT_CODE
+    ;;
+esac
+
+if [ ${CHANGES} == "true" ] || [ ${DIFF_STATUS} == "Failed" ]; then
+  echo -e "\n\nDiff detected, posting PR comment"
+  commentWrapper="## ArgoCD Diff ${DIFF_STATUS}
+### \`${CLUSTER_NAME}-common\`
+<details>
+  <summary>Show Output</summary>
+
+\`\`\`diff
+"${DIFF_OUTPUT}"
+\`\`\`
+
+</details>
+"
+  payload=$(echo "${commentWrapper}" | jq -R --slurp '{body: .}')
+  commentsURL=$(cat ${GITHUB_EVENT_PATH} | jq -r .pull_request.comments_url)
+  echo "${payload}" | curl -s -S -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data @- "${commentsURL}" > /dev/null
+fi
