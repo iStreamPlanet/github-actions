@@ -2,7 +2,7 @@ name: "ArgoCD Diff"
 description: "argocd diff"
 inputs:
   argocd-app:
-    description: "ArgoCD app name of cluster"
+    description: "Name of App of apps used in manifest"
     required: true
   argocd-domain:
     description: "ArgoCD domain"
