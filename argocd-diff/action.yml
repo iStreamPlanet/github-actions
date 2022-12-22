@@ -1,0 +1,35 @@
+name: "ArgoCD Diff"
+description: "argocd diff"
+inputs:
+  argocd-app:
+    description: "ArgoCD app name of cluster"
+    required: true
+  argocd-domain:
+    description: "ArgoCD domain"
+    required: true
+  argocd-user:
+    description: "ArgoCD user for login"
+    required: true
+  argocd-password:
+    description: "ArgoCD password for login"
+    required: true
+  chart-path:
+    description: "Path to app of apps manifest"
+    required: true
+  cluster-name:
+    description: "Name of cluster"
+    required: true
+  github-token:
+    description: "Github token"
+    required: true
+  values-file:
+    description: "Path to values file"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: argocd diff
+      shell: bash
+      id: main
+      run: ${{ github.action_path }}/main.sh "${{ inputs.argocd-app }}" "${{ inputs.argocd-domain }}" "${{ inputs.argocd-user }}" "${{ inputs.argocd-password }}" "${{ inputs.chart-path }}" "${{ inputs.cluster-name }}" "${{ inputs.github-token }}" "${{ inputs.values-file }}"
