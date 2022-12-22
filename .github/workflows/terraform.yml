@@ -34,7 +34,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Minimize previous comments
-        uses: iStreamPlanet/github-actions/minimize-comments@v1.15.0
+        uses: iStreamPlanet/github-actions/minimize-comments@v1.17.0
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           by-author: github-actions
@@ -51,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - id: build-workspace-matrix
-        uses: iStreamPlanet/github-actions/build-workspace-matrix@v1.15.0
+        uses: iStreamPlanet/github-actions/build-workspace-matrix@v1.17.0
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           workspaces: ${{ inputs.workspaces }}
@@ -90,7 +90,7 @@ jobs:
           asdf plugin-add sops
           asdf install
       - name: "terraform fmt"
-        uses: iStreamPlanet/github-actions/terraform-actions@v1.15.0
+        uses: iStreamPlanet/github-actions/terraform-actions@v1.17.0
         if: github.event_name == 'pull_request'
         with:
           command: fmt
@@ -100,35 +100,35 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.ssh_private_key }}
       - name: "terraform init"
-        uses: iStreamPlanet/github-actions/terraform-actions@v1.15.0
+        uses: iStreamPlanet/github-actions/terraform-actions@v1.17.0
         env:
           GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa"
         with:
           command: init
           working_directory: ${{ env.WORKSPACE }}
       - name: "terraform validate"
-        uses: iStreamPlanet/github-actions/terraform-actions@v1.15.0
+        uses: iStreamPlanet/github-actions/terraform-actions@v1.17.0
         with:
           command: validate
           working_directory: ${{ env.WORKSPACE }}
 
       - name: "terraform plan"
         id: terraform-plan
-        uses: iStreamPlanet/github-actions/terraform-actions@v1.15.0
+        uses: iStreamPlanet/github-actions/terraform-actions@v1.17.0
         if: github.event_name == 'pull_request' || github.event_name == 'schedule'
         with:
           command: plan
           working_directory: ${{ env.WORKSPACE }}
 
       - name: "terraform apply"
-        uses: iStreamPlanet/github-actions/terraform-actions@v1.15.0
+        uses: iStreamPlanet/github-actions/terraform-actions@v1.17.0
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         with:
           command: apply
           working_directory: ${{ env.WORKSPACE }}
 
       - name: Update drift issue
-        uses: iStreamPlanet/github-actions/update-issue@v1.15.0
+        uses: iStreamPlanet/github-actions/update-issue@v1.17.0
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -152,7 +152,7 @@ jobs:
 
       # NOTE: this step should always be last in the job
       - name: Update execution failure issue
-        uses: iStreamPlanet/github-actions/update-issue@v1.15.0
+        uses: iStreamPlanet/github-actions/update-issue@v1.17.0
         # Run regardless of job completion status, except for PRs, where the workflow result is communicated via a Check status
         if: always() && github.event_name != 'pull_request'
         with:
