@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install Node.js using asdf
-        uses: asdf-vm/actions/install@v1.1.0
+        uses: asdf-vm/actions/install@v2.1.0
         env:
           NODEJS_CHECK_SIGNATURES: 'no'
       - name: Cache Node.js modules
