@@ -96,7 +96,7 @@ jobs:
           command: fmt
           working_directory: ${{ env.WORKSPACE }}
       - name: "Setup SSH access"
-        uses: webfactory/ssh-agent@v0.5.4
+        uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.ssh_private_key }}
       - name: "terraform init"
