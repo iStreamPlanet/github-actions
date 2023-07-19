@@ -1,4 +1,4 @@
-gitdb2==3.0.0
+gitdb2==3.0.3.post1
 GitPython==3.0.6
 smmap==4.0.0
 smmap2==3.0.1
