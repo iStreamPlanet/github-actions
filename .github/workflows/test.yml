@@ -26,11 +26,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Node.js using asdf
-        uses: asdf-vm/actions/install@v1.1.0
+        uses: asdf-vm/actions/install@v3.0.2
         env:
           NODEJS_CHECK_SIGNATURES: 'no'
       - name: Cache Node.js modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           # npm cache files are stored in `~/.npm` on Linux/macOS
           path: ~/.npm 
