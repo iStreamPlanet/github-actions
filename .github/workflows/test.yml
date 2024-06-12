@@ -6,6 +6,11 @@ on:
       - '**/*.ts'
       - '**/package.json'
       - '**/package-lock.json'
+      - 'update-issue/action.yml'
+      - 'minimize-comments/action.yml'
+      - 'helmfile-dependency-check/action.yml'
+      - 'find-path-owners/action.yml'
+      - 'build-workspace-matrix/action.yml'
   push:
     branches:
       - main
