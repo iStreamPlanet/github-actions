@@ -1,7 +1,7 @@
 name: "helmfile-dependency-check"
 description: "Check for helmfile dependency updates"
 runs:
-  using: "node16"
+  using: "node20"
   main: "dist/index.js"
 inputs:
   working_directory:
