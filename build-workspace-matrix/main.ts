@@ -55,7 +55,7 @@ export async function getWorkspaces(input: {
     const [workspaceGlob, dependencyGlobWithFlag] = line.split(":").map(s => s.trim())
     globberInputLines.push(workspaceGlob)
     if (typeof dependencyGlobWithFlag === "string") {
-      const [dependencyGlob, flagString] = line.split("|").map(s => s.trim())
+      const [dependencyGlob, flagString] = dependencyGlobWithFlag.split("|").map(s => s.trim())
       const flag : Flag = Flag[flagString as keyof typeof Flag] // flagString can be undefined which would result in flag being undefined and that is fine.
       workspaceDependencies.push({ workspaceGlob, dependencyGlob, flag });
     }
