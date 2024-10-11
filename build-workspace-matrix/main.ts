@@ -8,6 +8,10 @@ import { changedFiles } from "./changedFiles"
 
 type supportedEvents = (("workflow_dispatch" | "push" | "pull_request") & WebhookEventName) | "schedule";
 
+enum Flag {
+  Echo = 'echo'
+}
+
 (async function run() {
   try {
     let result = await getWorkspaces({
@@ -45,13 +49,15 @@ export async function getWorkspaces(input: {
     return [input.dispatchWorkspace];
   }
 
-  const workspaceDependencies: { workspaceGlob: string, dependencyGlob: string }[] = [];
+  const workspaceDependencies: { workspaceGlob: string, dependencyGlob: string, flag: Flag }[] = [];
   const globberInputLines: string[] = [];
   for (const line of getInputLines(input.workspaceGlobs)) {
-    const [workspaceGlob, dependencyGlob] = line.split(":").map(s => s.trim())
+    const [workspaceGlob, dependencyGlobWithFlag] = line.split(":").map(s => s.trim())
     globberInputLines.push(workspaceGlob)
-    if (typeof dependencyGlob === "string") {
-      workspaceDependencies.push({ workspaceGlob, dependencyGlob });
+    if (typeof dependencyGlobWithFlag === "string") {
+      const [dependencyGlob, flagString] = line.split("|").map(s => s.trim())
+      const flag : Flag = Flag[flagString as keyof typeof Flag] // flagString can be undefined which would result in flag being undefined and that is fine.
+      workspaceDependencies.push({ workspaceGlob, dependencyGlob, flag });
     }
   }
   const workspaces = await getMatchingWorkspaces(globberInputLines.join("\n"));
@@ -78,12 +84,17 @@ export async function getWorkspaces(input: {
   }
 
   const workspacesWithChangedDependencies = new Set<string>();
-  for (const {workspaceGlob, dependencyGlob } of workspaceDependencies) {
+  for (const {workspaceGlob, dependencyGlob, flag } of workspaceDependencies) {
     const changed = changedFilesList.some(minimatch.filter(dependencyGlob));
     if (changed) {
-      const affectedWorkspaces = await getMatchingWorkspaces(workspaceGlob);
-      info(`Found changed workspace dependency matching glob '${dependencyGlob}: ${affectedWorkspaces.join(", ")}`);
-      affectedWorkspaces.forEach(w => workspacesWithChangedDependencies.add(w));
+      if (flag === Flag.Echo) {
+        info(`Echo flag found: returning workspace path as configured`);
+        workspacesWithChangedDependencies.add(workspaceGlob);
+      } else {
+        const affectedWorkspaces = await getMatchingWorkspaces(workspaceGlob);
+        info(`Found changed workspace dependency matching glob '${dependencyGlob}: ${affectedWorkspaces.join(", ")}`);
+        affectedWorkspaces.forEach(w => workspacesWithChangedDependencies.add(w));
+      }
     }
   }
 

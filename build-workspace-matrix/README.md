@@ -11,7 +11,13 @@ Builds a matrix of workspaces based on glob patterns and analysis of which files
 ### `workspaces`
 
 **Required** A newline-separated list of globs or dependency glob expressions representing specific workspaces. A `!` can be used to exclude certain patterns.
-A dependency glob expression looks like `foo/*/ : bar/**/*` - if anything under `bar` changes then all workspaces matching `foo/*/` are returned.
+A dependency glob expression looks like `foo/*/ : bar/**/*` - if anything under `bar` changes then all workspaces matching `foo/*/` are returned. Furthermore, the
+dependency glob expression may also contain a `flag` in the form of `foo/*/ : bar/**/* | <flag>`.
+
+#### Flags
+| Flag   | Behavior                                                                                                                          |
+|--------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `Echo` | The tool will return the exact workspace path as specified without attempting to match the glob pattern to an existing directory. |
 
 ### `workflow_dispatch_workspace`
 
