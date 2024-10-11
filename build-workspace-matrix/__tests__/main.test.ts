@@ -29,6 +29,9 @@ clusters/stream-*/ : clusters/modules/stream/**/*.txt
 clusters/stream-*/ : clusters/modules/origin-and-stream/**/*.txt
 clusters/origin-*/ : clusters/modules/origin/**/*.txt
 clusters/origin-*/ : clusters/modules/origin-and-stream/**/*.txt
+# these workspaces are echoed on dependency changes
+baz/foo/           : clusters/modules/foobar/**/*.txt | Echo
+foo/bar/baz/       : clusters/modules/foobar/**/*.txt | Echo
 # the below is excluded
 !clusters/modules/
 `,
@@ -158,5 +161,20 @@ test("getWorkspaces event:push/pull_request returns workspaces when shared depen
     "clusters/stream-a",
     "clusters/stream-b",
     "clusters/stream-c",
+  ].sort());
+});
+
+test("getWorkspaces event:push/pull_request returns workspaces when dependency changes with Echo Flag", async () => {
+  const mockedChangedFiles = jest.mocked(changedFiles);
+  mockedChangedFiles.mockResolvedValue([
+    "clusters/modules/foobar/subdir/file.txt",
+  ])
+  const workspaces = await getWorkspaces({
+    ...shared,
+    eventName: "push",
+  });
+  expect(workspaces.sort()).toEqual([
+    "baz/foo/",
+    "foo/bar/baz/"
   ].sort());
 });

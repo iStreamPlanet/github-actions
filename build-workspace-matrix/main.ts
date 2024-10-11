@@ -84,12 +84,13 @@ export async function getWorkspaces(input: {
   }
 
   const workspacesWithChangedDependencies = new Set<string>();
+  const workspacesToEcho = new Set<string>();
   for (const {workspaceGlob, dependencyGlob, flag } of workspaceDependencies) {
     const changed = changedFilesList.some(minimatch.filter(dependencyGlob));
     if (changed) {
       if (flag === Flag.Echo) {
         info(`Echo flag found: returning workspace path as configured`);
-        workspacesWithChangedDependencies.add(workspaceGlob);
+        workspacesToEcho.add(workspaceGlob);
       } else {
         const affectedWorkspaces = await getMatchingWorkspaces(workspaceGlob);
         info(`Found changed workspace dependency matching glob '${dependencyGlob}: ${affectedWorkspaces.join(", ")}`);
@@ -98,7 +99,8 @@ export async function getWorkspaces(input: {
     }
   }
 
-  return workspaces.filter((w) => changedFilesList.some((f) => f.startsWith(w)) || workspacesWithChangedDependencies.has(w));
+  const filteredWorkspaces = workspaces.filter((w) => changedFilesList.some((f) => f.startsWith(w)) || workspacesWithChangedDependencies.has(w));
+  return filteredWorkspaces.concat(Array.from(workspacesToEcho.values()));
 }
 
 async function getMatchingWorkspaces(globs: string) {
