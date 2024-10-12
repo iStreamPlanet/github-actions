@@ -46,6 +46,8 @@ export async function getWorkspaces(input: {
   if (input.eventName === "workflow_dispatch") {
     return [input.dispatchWorkspace];
   }
+
+  const cwd = process.cwd();
   if (input.workingDirectory) {
     process.chdir(input.workingDirectory);
   }
@@ -92,6 +94,7 @@ export async function getWorkspaces(input: {
     }
   }
 
+  process.chdir(cwd);
   return workspaces.filter((w) => changedFilesList.some((f) => f.startsWith(w)) || workspacesWithChangedDependencies.has(w));
 }
 
