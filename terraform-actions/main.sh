@@ -9,10 +9,10 @@ fi
 # See: https://learn.hashicorp.com/tutorials/terraform/automate-terraform#controlling-terraform-output-in-automation
 export TF_IN_AUTOMATION=true
 
+header_message="$3"
 workingDir="$2"
 function main {
   command="$1"
-  header_message="$3"
   echo "header message 1: ${header_message}"
   scriptDir=$(dirname ${0})
   source ${scriptDir}/apply.sh
