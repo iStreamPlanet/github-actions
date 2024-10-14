@@ -49,8 +49,8 @@ export async function getWorkspaces(input: {
 
   const cwd = process.cwd();
   if (input.workingDirectory) {
-    info("Changing working directory to: " + input.workingDirectory)
     process.chdir(input.workingDirectory);
+    info("Changed working directory: " + cwd + " -> " + process.cwd());
   }
 
   const workspaceDependencies: { workspaceGlob: string, dependencyGlob: string }[] = [];
