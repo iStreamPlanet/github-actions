@@ -5,7 +5,7 @@ inputs:
     description: "The terraform command to run"
     required: true
   header_message:
-    description: "Message to add before the terraform output that is posted to a PR. must be a single line string."
+    description: "Message to add before the terraform output that is posted to a PR. (Must be a single line string)"
     required: false
     default: ""
   working_directory:
