@@ -2,6 +2,7 @@
 
 function terraformInit {
   set -o pipefail
+  header_message="$1"
   tempfile=$(mktemp)
   terraform init -no-color -input=false ${*} 2>&1 | tee $tempfile
   exitCode=$?
@@ -20,6 +21,7 @@ function terraformInit {
 
   if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && [ "${commentStatus}" == "Failed" ]; then
     commentWrapper="#### \`terraform init\` ${commentStatus} for \`${workingDir}\`
+${header_message}
 <details><summary>Show Output</summary>
 
 \`\`\`

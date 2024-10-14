@@ -4,6 +4,10 @@ inputs:
   command:
     description: "The terraform command to run"
     required: true
+  header_message:
+    description: "Message to add before the terraform output that is posted to a PR"
+    required: false
+    default: ""
   working_directory:
     description: "The directory to run all the commands in"
     required: false
@@ -22,4 +26,4 @@ runs:
       shell: bash
       id: main
       working-directory: ${{ inputs.working_directory }}
-      run: ${{ github.action_path }}/main.sh "${{ inputs.command }}" "${{ inputs.working_directory }}"
+      run: ${{ github.action_path }}/main.sh "${{ inputs.command }}" "${{ inputs.working_directory }}" "${{ inputs.header_message }}""

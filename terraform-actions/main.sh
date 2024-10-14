@@ -12,6 +12,7 @@ export TF_IN_AUTOMATION=true
 workingDir="$2"
 function main {
   command="$1"
+  header_message="$2"
   scriptDir=$(dirname ${0})
   source ${scriptDir}/apply.sh
   source ${scriptDir}/fmt.sh
@@ -24,16 +25,16 @@ function main {
       terraformApply
       ;;
     fmt)
-      terraformFmt
+      terraformFmt $header_message
       ;;
     init)
-      terraformInit
+      terraformInit $header_message
       ;;
     plan)
-      terraformPlan
+      terraformPlan $header_message
       ;;
     validate)
-      terraformValidate
+      terraformValidate $header_message
       ;;
     *)
       echo "Error: Unrecognized command ${command}"

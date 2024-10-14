@@ -2,6 +2,7 @@
 
 function terraformFmt {
   set -o pipefail
+  header_message="$1"
   tempfile=$(mktemp)
   terraform fmt -check=true -write=false -diff -recursive -no-color ${*} 2>&1 | tee $tempfile
   exitCode=$?
@@ -20,6 +21,7 @@ function terraformFmt {
 
   if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && [ "${commentStatus}" == "Failed" ]; then
     commentWrapper="#### \`terraform fmt\` ${commentStatus} for \`${workingDir}\`
+${header_message}
 <details><summary>Show Output</summary>
 
 \`\`\`diff
