@@ -1,7 +1,9 @@
 #!/bin/bash
 
 function terraformPlan {
+  echo "header message 2: ${header_message}"
   set -o pipefail
+  echo "header message 3: ${header_message}"
   tempfile=$(mktemp)
   terraform plan -no-color -detailed-exitcode ${*} 2>&1 | tee $tempfile
   exitCode=$?
@@ -47,6 +49,7 @@ function terraformPlan {
 
   if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && ([ "${hasChanges}" == "true" ] || [ "${commentStatus}" == "Failed" ]); then
     commentWrapper="#### \`terraform plan\` ${commentStatus} for \`${workingDir}\`
+foo test
 ${header_message}
 <details><summary>Show Output</summary>
 

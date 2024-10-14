@@ -13,6 +13,7 @@ workingDir="$2"
 function main {
   command="$1"
   header_message="$3"
+  echo "header message 1: ${header_message}"
   scriptDir=$(dirname ${0})
   source ${scriptDir}/apply.sh
   source ${scriptDir}/fmt.sh
@@ -25,16 +26,16 @@ function main {
       terraformApply
       ;;
     fmt)
-      terraformFmt $header_message
+      terraformFmt
       ;;
     init)
-      terraformInit $header_message
+      terraformInit
       ;;
     plan)
-      terraformPlan $header_message
+      terraformPlan
       ;;
     validate)
-      terraformValidate $header_message
+      terraformValidate
       ;;
     *)
       echo "Error: Unrecognized command ${command}"
