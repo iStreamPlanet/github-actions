@@ -12,7 +12,7 @@ export TF_IN_AUTOMATION=true
 workingDir="$2"
 function main {
   command="$1"
-  header_message="$2"
+  header_message="$3"
   scriptDir=$(dirname ${0})
   source ${scriptDir}/apply.sh
   source ${scriptDir}/fmt.sh
