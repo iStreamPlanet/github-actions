@@ -26,4 +26,4 @@ runs:
       shell: bash
       id: main
       working-directory: ${{ inputs.working_directory }}
-      run: ${{ github.action_path }}/main.sh "${{ inputs.command }}" "${{ inputs.working_directory }}" "${{ inputs.header_message }}""
+      run: ${{ github.action_path }}/main.sh "${{ inputs.command }}" "${{ inputs.working_directory }}" "${{ inputs.header_message }}"
