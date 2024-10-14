@@ -2,7 +2,6 @@
 
 function terraformValidate {
   set -o pipefail
-  header_message="$1"
   tempfile=$(mktemp)
   terraform validate -no-color ${*} 2>&1 | tee $tempfile
   exitCode=$?

@@ -2,7 +2,6 @@
 
 function terraformFmt {
   set -o pipefail
-  header_message="$1"
   tempfile=$(mktemp)
   terraform fmt -check=true -write=false -diff -recursive -no-color ${*} 2>&1 | tee $tempfile
   exitCode=$?
