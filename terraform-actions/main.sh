@@ -13,7 +13,6 @@ header_message="$3"
 workingDir="$2"
 function main {
   command="$1"
-  echo "header message 1: ${header_message}"
   scriptDir=$(dirname ${0})
   source ${scriptDir}/apply.sh
   source ${scriptDir}/fmt.sh

@@ -1,9 +1,7 @@
 #!/bin/bash
 
 function terraformPlan {
-  echo "header message 2: ${header_message}"
   set -o pipefail
-  echo "header message 3: ${header_message}"
   tempfile=$(mktemp)
   terraform plan -no-color -detailed-exitcode ${*} 2>&1 | tee $tempfile
   exitCode=$?
