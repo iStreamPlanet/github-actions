@@ -9,7 +9,7 @@ inputs:
     description: "The terraform command to run"
     required: true
   header_message:
-    description: "Message to add before the terraform output that is posted to a PR"
+    description: "Message to add before the terraform output that is posted to a PR. must be a single line string."
     required: false
     default: ""
   working_directory:
@@ -27,8 +27,7 @@ Example usage of `terraform plan`:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   with:
     command: plan
-    header_message: |
-      *Note*: This is a message that appears before the terraform plan output
+    header_message: "*Note*: This is a message that appears before the terraform plan output"
     working_directory: terraform/
 ```
 

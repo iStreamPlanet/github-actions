@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ "$#" -ne 2 ]; then
-  echo 'Usage: ./main.sh $command $working_directory'
+if [ "$#" -ne 3 ]; then
+  echo 'Usage: ./main.sh $command $working_directory $header_message'
   exit 1
 fi
 
