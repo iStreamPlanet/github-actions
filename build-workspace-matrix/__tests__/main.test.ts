@@ -5,17 +5,25 @@ import * as path from "path";
 
 jest.mock("../changedFiles");
 
+const rootFolders = [
+    "repoA",
+    "repoB"
+]
+
 const folders = [
-  "clusters/stream-a",
-  "clusters/stream-b",
-  "clusters/stream-c",
-  "clusters/origin-a",
-  "clusters/origin-b",
-  "clusters/broadcast",
-  "clusters/modules/stream",
-  "clusters/modules/origin-and-stream",
-  "clusters/modules/origin",
-  "clusters/modules/global",
+  "repoA/clusters/stream-a",
+  "repoA/clusters/stream-b",
+  "repoA/clusters/stream-c",
+  "repoA/clusters/origin-a",
+  "repoA/clusters/origin-b",
+  "repoA/clusters/broadcast",
+  "repoA/clusters/modules/stream",
+  "repoA/clusters/modules/origin-and-stream",
+  "repoA/clusters/modules/origin",
+  "repoA/clusters/modules/global",
+
+  "repoB/clusters/foo-a",
+  "repoB/clusters/bar-b",
 ];
 
 const shared = {
@@ -36,15 +44,19 @@ clusters/origin-*/ : clusters/modules/origin-and-stream/**/*.txt
 # a comment
 clusters/modules/global/**/*.txt
 `,
+  workingDirectory: path.join(__dirname, "repoA"),
 }
 let wd: string;
 
 beforeAll(async () => {
   wd = process.cwd();
   process.chdir(__dirname);
-  const folder = path.join(__dirname, "clusters");
-  if (existsSync(folder)) {
-    await fs.rmdir(folder, { recursive: true });
+
+  for (const f of rootFolders) {
+    const folder = path.join(__dirname, f);
+    if (existsSync(folder)) {
+      await fs.rmdir(folder, { recursive: true });
+    }
   }
   for (const f of folders) {
     const folder = path.join(__dirname, f);
@@ -54,7 +66,9 @@ beforeAll(async () => {
 
 afterAll(async () => {
   process.chdir(wd);
-  await fs.rmdir(path.join(__dirname, "clusters"), { recursive: true });
+  for (const f of rootFolders) {
+    await fs.rmdir(path.join(__dirname, f), { recursive: true });
+  }
 })
 
 test("getWorkspaces event:workflow_dispatch returns dispatch workspace", async () => {
@@ -158,5 +172,23 @@ test("getWorkspaces event:push/pull_request returns workspaces when shared depen
     "clusters/stream-a",
     "clusters/stream-b",
     "clusters/stream-c",
+  ].sort());
+});
+
+test("getWorkspaces event:push/pull_request returns workspaces from secondary repo when shared dependency changes", async () => {
+  const mockedChangedFiles = jest.mocked(changedFiles);
+  mockedChangedFiles.mockResolvedValue([
+    "clusters/modules/origin-and-stream/subdir/file.txt",
+  ])
+  const workspaces = await getWorkspaces({
+    ...shared,
+    workspaceGlobs: `
+repoB/clusters/foo*/ : clusters/modules/origin-and-stream/**/*.txt
+`,
+    eventName: "push",
+    workingDirectory: __dirname
+  });
+  expect(workspaces.sort()).toEqual([
+    "repoB/clusters/foo-a",
   ].sort());
 });

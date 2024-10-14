@@ -25,6 +25,10 @@ A newline-separated list of globs representing dependencies of each workspace. I
 
 If provided, results will be relative to the given path
 
+### `working_directory`
+
+If provided, the action uses the specified path as the root for the purposes of detecting matching workspaces based on the provided glob patterns.
+
 ## Outputs
 
 ### `matrix`

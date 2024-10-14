@@ -18,6 +18,7 @@ type supportedEvents = (("workflow_dispatch" | "push" | "pull_request") & Webhoo
       dispatchWorkspace: getInput("workflow_dispatch_workspace", {
         required: context.eventName === "workflow_dispatch",
       }),
+      workingDirectory: getInput("working_directory"),
     });
     console.log(
       `Found ${result.length} impacted workspaces: ${result.join(", ")}`
@@ -40,9 +41,16 @@ export async function getWorkspaces(input: {
   workspaceGlobs: string,
   globalDependencyGlobs: string,
   dispatchWorkspace: string,
+  workingDirectory: string,
 }): Promise<string[]> {
   if (input.eventName === "workflow_dispatch") {
     return [input.dispatchWorkspace];
+  }
+
+  const cwd = process.cwd();
+  if (input.workingDirectory) {
+    process.chdir(input.workingDirectory);
+    info(`Changed working directory: ${cwd} -> ${process.cwd()}`);
   }
 
   const workspaceDependencies: { workspaceGlob: string, dependencyGlob: string }[] = [];
@@ -87,6 +95,7 @@ export async function getWorkspaces(input: {
     }
   }
 
+  process.chdir(cwd);
   return workspaces.filter((w) => changedFilesList.some((f) => f.startsWith(w)) || workspacesWithChangedDependencies.has(w));
 }
 

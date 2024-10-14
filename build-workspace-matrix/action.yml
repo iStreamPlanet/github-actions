@@ -16,6 +16,9 @@ inputs:
   relative_to_path:
     description: "If provided, results will be relative to the given path"
     required: false
+  working_directory:
+    description: "If provided, the action uses the specified path as the root for the purposes of detecting matching workspaces based on the provided glob patterns."
+    required: false
 outputs:
   matrix:
     description: "The matrix object of the shape: { workspace: [] }"
