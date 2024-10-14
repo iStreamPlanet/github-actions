@@ -49,7 +49,6 @@ function terraformPlan {
 
   if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && ([ "${hasChanges}" == "true" ] || [ "${commentStatus}" == "Failed" ]); then
     commentWrapper="#### \`terraform plan\` ${commentStatus} for \`${workingDir}\`
-foo test
 ${header_message}
 <details><summary>Show Output</summary>
 
