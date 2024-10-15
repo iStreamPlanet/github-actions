@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ "$#" -ne 2 ]; then
-  echo 'Usage: ./main.sh $command $working_directory'
+if [ "$#" -ne 3 ]; then
+  echo 'Usage: ./main.sh $command $working_directory $header_message'
   exit 1
 fi
 
@@ -9,6 +9,7 @@ fi
 # See: https://learn.hashicorp.com/tutorials/terraform/automate-terraform#controlling-terraform-output-in-automation
 export TF_IN_AUTOMATION=true
 
+header_message="$3"
 workingDir="$2"
 function main {
   command="$1"
