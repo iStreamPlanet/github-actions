@@ -20,6 +20,7 @@ function terraformFmt {
 
   if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && [ "${commentStatus}" == "Failed" ]; then
     commentWrapper="#### \`terraform fmt\` ${commentStatus} for \`${workingDir}\`
+${header_message}
 <details><summary>Show Output</summary>
 
 \`\`\`diff

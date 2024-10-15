@@ -20,6 +20,7 @@ function terraformValidate {
 
   if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && [ "${commentStatus}" == "Failed" ]; then
     commentWrapper="#### \`terraform validate\` ${commentStatus} for \`${workingDir}\`
+${header_message}
 <details><summary>Show Output</summary>
 
 \`\`\`
