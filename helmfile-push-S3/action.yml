@@ -46,7 +46,7 @@ runs:
       shell: bash
       run: |
         helm package ${{ inputs.chart-path }} --version ${{ inputs.chart-version }} --destination /dev/shm/chart
-        helm package ${{ inputs.chart-path }} --version ${{ inputs.chart-version }}=${{ inputs.github-sha }} --destination /dev/shm/chart
+        helm package ${{ inputs.chart-path }} --version ${{ inputs.chart-version }}-${{ inputs.github-sha }} --destination /dev/shm/chart
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
