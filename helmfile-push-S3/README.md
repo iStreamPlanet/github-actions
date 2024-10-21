@@ -42,7 +42,7 @@ None
 ## Example usage
 
 ```yaml
-uses: iStreamPlanet/github-actions/helmfile-push@main
+uses: iStreamPlanet/github-actions/helmfile-push-S3@main
 with:
   aws-access-key-id: ${{ secrets.HELM_CHART_AWS_ACCESS_KEY_ID}}
   aws-secret-access-key: ${{ secrets.HELM_CHART_AWS_ACCESS_KEY_ID}}
