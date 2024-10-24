@@ -64,5 +64,5 @@ runs:
       run: |
         echo "HELM_REPO=helm-$(date +%s)" >> $GITHUB_ENV
         helm s3 init --ignore-if-exists ${{ inputs.repo-location }}
-        helm repo add ${{ env.HELM_VERSION}} ${{ inputs.repo-location }}
-        ls "/dev/shm/chart/" | xargs -I {} helm s3 push --ignore-if-exists "/dev/shm/chart/{}" ${{ env.HELM_VERSION}}
+        helm repo add ${{ env.HELM_REPO}} ${{ inputs.repo-location }}
+        ls "/dev/shm/chart/" | xargs -I {} helm s3 push --ignore-if-exists "/dev/shm/chart/{}" ${{ env.HELM_REPO}}
