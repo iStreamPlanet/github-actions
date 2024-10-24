@@ -38,26 +38,28 @@ runs:
         HELM_VERSION: 3.12.3
       with:
         version: ${{ env.HELM_VERSION }}
-    - name: Install Helm S3 plugin
+    - name: Install Helm S3 plugin 
       shell: bash
       run: |
-        helm plugin install https://github.com/hypnoglow/helm-s3.git
+        if ! command helm s3 2>&1 >/dev/null
+        then
+          helm plugin install https://github.com/hypnoglow/helm-s3.git
+        else
+          echo "Helm S3 Plugin already installed"
+        fi
     - name: Package chart
       shell: bash
-      if: always()
       run: |
         helm package ${{ inputs.chart-path }} --version ${{ inputs.chart-version }} --destination /dev/shm/chart
         helm package ${{ inputs.chart-path }} --version ${{ inputs.chart-version }}-${{ inputs.github-sha }} --destination /dev/shm/chart
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
-      if: always()
       with:
         aws-access-key-id: ${{ inputs.aws-access-key-id }}
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
         aws-region: ${{ inputs.repo-region }}
     - name: Push Chart to S3
       shell: bash
-      if: always()
       run: |
         helm s3 init --ignore-if-exists ${{ inputs.repo-location }}
         helm repo add repo ${{ inputs.repo-location }}
