@@ -25,7 +25,7 @@ inputs:
     description: Path to the S3 helm repo
     required: true
     default: ""
-  repo-region: 
+  repo-region:
     description: Region of the S3 helm repo
     required: true
     default: ""
@@ -36,13 +36,12 @@ runs:
       uses: azure/setup-helm@v4
       env:
         HELM_VERSION: 3.12.3
-        HELM_REPO: helm
       with:
         version: ${{ env.HELM_VERSION }}
-    - name: Install Helm S3 plugin 
+    - name: Install Helm S3 plugin
       shell: bash
       run: |
-        if ! command helm s3 2>&1 >/dev/null
+        if ! command helm s3 > /dev/null 2>&1
         then
           helm plugin install https://github.com/hypnoglow/helm-s3.git
         else
@@ -62,7 +61,6 @@ runs:
     - name: Push Chart to S3
       shell: bash
       run: |
-        echo "HELM_REPO=helm-$(date +%s)" >> $GITHUB_ENV
         helm s3 init --ignore-if-exists ${{ inputs.repo-location }}
-        helm repo add ${{ env.HELM_REPO}} ${{ inputs.repo-location }}
-        ls "/dev/shm/chart/" | xargs -I {} helm s3 push --ignore-if-exists "/dev/shm/chart/{}" ${{ env.HELM_REPO}}
+        helm repo add ${{ inputs.repo-region}} ${{ inputs.repo-location }}
+        ls "/dev/shm/chart/" | xargs -I {} helm s3 push --ignore-if-exists "/dev/shm/chart/{}" ${{ inputs.repo-region}}
