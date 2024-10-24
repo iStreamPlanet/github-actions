@@ -36,6 +36,7 @@ runs:
       uses: azure/setup-helm@v4
       env:
         HELM_VERSION: 3.12.3
+        HELM_REPO: helm
       with:
         version: ${{ env.HELM_VERSION }}
     - name: Install Helm S3 plugin 
@@ -61,6 +62,7 @@ runs:
     - name: Push Chart to S3
       shell: bash
       run: |
+        echo "HELM_REPO=helm-$(date +%s)" >> $GITHUB_ENV
         helm s3 init --ignore-if-exists ${{ inputs.repo-location }}
-        helm repo add repo ${{ inputs.repo-location }}
-        ls "/dev/shm/chart/" | xargs -I {} helm s3 push --ignore-if-exists "/dev/shm/chart/{}" repo
+        helm repo add ${{ env.HELM_VERSION}} ${{ inputs.repo-location }}
+        ls "/dev/shm/chart/" | xargs -I {} helm s3 push --ignore-if-exists "/dev/shm/chart/{}" ${{ env.HELM_VERSION}}
