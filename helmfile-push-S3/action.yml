@@ -25,7 +25,7 @@ inputs:
     description: Path to the S3 helm repo
     required: true
     default: ""
-  repo-region: 
+  repo-region:
     description: Region of the S3 helm repo
     required: true
     default: ""
@@ -38,10 +38,10 @@ runs:
         HELM_VERSION: 3.12.3
       with:
         version: ${{ env.HELM_VERSION }}
-    - name: Install Helm S3 plugin 
+    - name: Install Helm S3 plugin
       shell: bash
       run: |
-        if ! command helm s3 2>&1 >/dev/null
+        if ! command helm s3 > /dev/null 2>&1
         then
           helm plugin install https://github.com/hypnoglow/helm-s3.git
         else
