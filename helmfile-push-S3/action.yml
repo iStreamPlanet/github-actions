@@ -38,10 +38,15 @@ runs:
         HELM_VERSION: 3.12.3
       with:
         version: ${{ env.HELM_VERSION }}
-    - name: Install Helm S3 plugin
+    - name: Install Helm S3 plugin 
       shell: bash
       run: |
-        helm plugin install https://github.com/hypnoglow/helm-s3.git
+        if ! command helm s3 2>&1 >/dev/null
+        then
+          helm plugin install https://github.com/hypnoglow/helm-s3.git
+        else
+          echo "Helm S3 Plugin already installed"
+        fi
     - name: Package chart
       shell: bash
       run: |
