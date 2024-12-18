@@ -13,7 +13,7 @@ jobs:
         echo "BOOM"
         exit 1
   notify:
-    uses: ./.github/workflow/fail-alert.yml
+    uses: ./.github/workflows/fail-alert.yml
     secrets:
       slack_webhook: ${{ secrets.TESTING_SLACK_WEBHOOK }}
 
