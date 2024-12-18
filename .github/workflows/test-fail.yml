@@ -1,6 +1,7 @@
 name: Fake Failure Thingy
-  on:
-    push:
+
+on:
+  push:
 
 jobs:
   oh_noes:

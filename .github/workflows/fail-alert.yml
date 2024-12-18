@@ -1,9 +1,9 @@
 name: Failure Notification
 on:
   workflow_call:
-  secrets:
-    slack_webhook:
-      required: true
+    secrets:
+      slack_webhook:
+        required: true
 
 jobs:
   send_notification:
