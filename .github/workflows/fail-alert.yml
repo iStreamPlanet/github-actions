@@ -27,7 +27,6 @@ jobs:
         echo "Tell ${{ github.triggering_actor }}"
         
     - name: Send Slack
-      if: false
       uses: slackapi/slack-github-action@v1.27.0
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.slack_webhook }}
