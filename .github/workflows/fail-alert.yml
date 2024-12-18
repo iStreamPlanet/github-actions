@@ -1,3 +1,10 @@
+# Simple failure notification reusable workflow
+#
+# Fast Follows
+#
+# * inputs we can override, eg workflow name, message, title, etc...
+# * an org wide var with the slack webhook so no one has to specify it
+
 name: Failure Notification
 on:
   workflow_call:
@@ -9,14 +16,16 @@ jobs:
   send_notification:
     name: Send Failure Notification
     runs-on: ubuntu-latest
+    env:
+      CI_BUILD_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
 
     - name: Debug
-      env:
-        GITWHAB: ${{ toJson(github) }}
       run: |
-        echo "$GITHUB_CONTEXT"
-        echo "$GITWHAB"
+        echo "Github Action ${{ github.workflow }} Failed"
+        echo "on ${{ github.repository }} Repo"
+        echo "Tell ${{ github.triggering_actor }}"
+        
     - name: Send Slack
       if: false
       uses: slackapi/slack-github-action@v1.27.0
@@ -26,13 +35,13 @@ jobs:
       with:
         payload: |
           {
-            "text": "Text that never shows up",
+            "text": "GH Action ${{ github.workflow}} Failed on ${{ github.repository }}. Tell ${{ github.triggering_actor }}",
             "blocks": [
               {
                 "type": "header",
                 "text": {
                   "type": "plain_text",
-                  "text": ":scream:Github Action Failed!","emoji": true
+                  "text": "Github Workflow ${{ github.workflow }} Failed on ${{ github.repository }}!"
                 }
               },
               {
@@ -40,7 +49,7 @@ jobs:
                 "elements": [
                   {
                     "type": "mrkdwn",
-                    "text": "Eat all humans!: ${{ env.CI_BUILD_URL }}"
+                    "text": "See ${{ env.CI_BUILD_URL }}"
                   }
                 ]
               }
