@@ -5,7 +5,7 @@ on:
 
 jobs:
   oh_noes:
-    runs_on: ubuntu-latest
+    runs-on: ubuntu-latest
     continue-on-error: true
     steps:
     - name: Something Fails!
