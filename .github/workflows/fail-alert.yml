@@ -13,7 +13,7 @@ jobs:
 
     - name: Debug
       run: |
-        echo ${{ github | toJSON }}
+        echo ${{ toJSON(github) }}
     - name: Send Slack
       if: false
       uses: slackapi/slack-github-action@v1.27.0
