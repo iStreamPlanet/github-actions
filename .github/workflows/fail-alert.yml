@@ -46,3 +46,8 @@ jobs:
               }
             ]
           }
+  fail:
+    name: Don't mask failure
+    runs-on: ubuntu-latest
+    steps:
+    - run: exit 1
