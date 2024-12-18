@@ -29,7 +29,7 @@ jobs:
         echo "Tell ${{ github.triggering_actor }}"
         echo -n "Secret ends with: "
         echo "${AS_AN_ENV_VAR}" | tail -c 4
-        echo ${{ secrets.slack_webhook }} | wc -c
+        echo ${{ secrets.slack_webhook }} | tail -c 6
         
     - name: Send Slack
       uses: slackapi/slack-github-action@v1.27.0
