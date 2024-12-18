@@ -1,0 +1,18 @@
+name: Fake Failure Thingy
+  on:
+    push:
+
+jobs:
+  oh_noes:
+    runs_on: ubuntu-latest
+    continue-on-error: true
+    steps:
+    - name: Something Fails!
+      run: |
+        echo "BOOM"
+        exit 1
+  notify:
+    uses: .github/workflow/fail-alert.yml
+    secrets:
+      slack_webhook: ${{ secrets.TESTING_SLACK_WEBHOOK }}
+
