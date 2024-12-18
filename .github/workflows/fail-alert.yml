@@ -22,13 +22,13 @@ jobs:
 
     - name: Debug
       env:
-       SECRET: ${{ secrets.slack_webhook }}
+       AS_AN_ENV_VAR: ${{ secrets.slack_webhook }}
       run: |
         echo "Github Action ${{ github.workflow }} Failed"
         echo "on ${{ github.repository }} Repo"
         echo "Tell ${{ github.triggering_actor }}"
         echo -n "Secret ends with: "
-        echo "$SECRET" | tail -c 4
+        echo "${AS_AN_ENV_VAR}" | tail -c 4
         
     - name: Send Slack
       uses: slackapi/slack-github-action@v1.27.0
