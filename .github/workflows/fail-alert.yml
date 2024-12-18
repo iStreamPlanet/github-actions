@@ -12,8 +12,11 @@ jobs:
     steps:
 
     - name: Debug
+      env:
+        GITWHAB: ${{ toJson(github) }}
       run: |
-        echo ${{ toJSON(github) }}
+        echo "$GITHUB_CONTEXT"
+        echo "$GITWHAB"
     - name: Send Slack
       if: false
       uses: slackapi/slack-github-action@v1.27.0
