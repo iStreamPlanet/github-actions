@@ -42,13 +42,11 @@ jobs:
                 }
               },
               {
-                "type": "context",
-                "elements": [
-                  {
-                    "type": "mrkdwn",
-                    "text": "On '${{ github.repository }}'\nworkflow '${{ github.workflow }}' failed\nTell ${{ github.triggering_actor }}.\nSee ${{ env.CI_BUILD_URL }}"
-                  }
-                ]
+                "type": "section",
+                "text": {
+                   "type": "mrkdwn",
+                   "text": "On '${{ github.repository }}'\nworkflow '${{ github.workflow }}' failed\nTell ${{ github.triggering_actor }}.\nSee ${{ env.CI_BUILD_URL }}"
+                }
               }
             ]
           }
