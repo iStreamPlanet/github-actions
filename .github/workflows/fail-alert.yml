@@ -1,9 +1,4 @@
 # Simple failure notification reusable workflow
-#
-# Fast Follows
-#
-# * inputs we can override, eg workflow name, message, title, etc...
-# * an org wide var with the slack webhook so no one has to specify it
 
 name: Failure Notification
 on:
