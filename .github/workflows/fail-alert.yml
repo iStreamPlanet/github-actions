@@ -46,7 +46,7 @@ jobs:
                 "elements": [
                   {
                     "type": "mrkdwn",
-                    "text": "On ${{ github.repository }}\nworkflow '${{ github.workflow }} failed'\nTell ${{ github.triggering_actor }}.\nSee ${{ env.CI_BUILD_URL }}"
+                    "text": "On '${{ github.repository }}'\nworkflow '${{ github.workflow }}' failed\nTell ${{ github.triggering_actor }}.\nSee ${{ env.CI_BUILD_URL }}"
                   }
                 ]
               }

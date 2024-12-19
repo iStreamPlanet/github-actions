@@ -42,6 +42,7 @@ jobs:
 
 * Get an org-wide webhook and call it from within fail-alert. Users wouldn't need to have one.
 * Accept optional inputs to override values from github. E.G. workflow name, contact etc...
+* Better slack message formatting with Block Kit.
 * Somehow map gh users to slack name and do a real @
   * Make an actual slack app that looks it up on a table or something
   * Have users put thier slack @handle in gh profile and look that up somehow?
