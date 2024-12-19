@@ -30,38 +30,8 @@ Checks if there is a valid `helmfile.yaml` in the working directory. Executes `h
 
 Runs Trufflehog as a GitHub Action.  Based off of [`https://github.com/edplato/trufflehog-actions-scan`](https://github.com/edplato/trufflehog-actions-scan).  Uses Dependabot to stay up-to-date with the latest version.
 
-#### [`fail-alert`](./github/workflows/fail-alert.yml)
+#### [`fail-alert`](./fail-alert.md)
 
 Reusable workflow, not an action. For when you want a slack alert to notify the person who triggeredthe build when it fails 
 
-1. Add a job that you want to monitor.
-2. Add a new job directly after that.
-3. It must `needs` the job you want to monitor.
-4. set `if: ${{ failure() }}` on the new job.
-5. Make the new job `uses: iStreamPlanet/github-actions/.github/workflows/fail-alert.yml@main`
-6. fail-alert has no inputs, but does require a secrets.slack_webhook for whichever slack channel you want to message. 
-
-Here's an example workflow 
-
-```
-name: Project X
-
-on:
-  push 
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps
-    - name: Something Fails!
-      run: |
-        exit 1
-
-  notify:
-    needs: build
-    if: ${{ failure() }}
-    uses: iStreamPlanet/github-actions/.github/workflows/fail-alert.yml@main
-    secrets:
-      slack_webhook: ${{ secrets.DEPLOYMENTS_SLACK_WEBHOOK }}
-```                                                                  
 
