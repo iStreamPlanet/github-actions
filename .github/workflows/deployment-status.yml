@@ -44,12 +44,12 @@ jobs:
 
     - name: Big Debug
       run: |
-        echo ${{ toJson(github) }}
+        echo "${{ toJson(github) }}"
 
     
     - name: Job Debug
       run: |
-        echo ${{ toJson(job) }}
+        echo "${{ toJson(job) }}"
 
     - name: Debug
       run: |
