@@ -1,0 +1,83 @@
+# Reusable Build Status Notification Workflow
+# Sends Start & Success or Failure to #live-deployments 
+
+name: Deployment Notifications
+on:
+  workflow_call:
+    secrets: 
+      slack_webhook:  # when we get org level vars, this will not be needed
+        required: true
+    inputs:
+      success:
+        description: Are we reporting success?
+        default: false
+        type: boolean
+      failure:
+        description: Are we reporting failure?
+        default: false
+        type: boolean
+
+jobs:
+  notification:
+    name: Send Notification
+    runs-on: ubuntu-latest
+    env:
+      CI_BUILD_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+    - name: Are We a Success?
+      if: ${{ inputs.success && !inputs.failure }}
+      run: echo "ACTION=SUCCESS" >> "$GITHUB_ENV"
+
+    - name: Are We a Failure?
+      if: ${{ !inputs.success && inputs.failure }}
+      run: echo "ACTION=FAILURE" >> "$GITHUB_ENV"
+
+    - name: Are We a Start?
+      if: ${{ !inputs.success && !inputs.failure }}
+      run: echo "ACTION=START" >> "$GITHUB_ENV"
+
+    - name: Are We a Logical Impossibility?
+      if: ${{ inputs.success && inputs.failure }}
+      run: |
+        echo "Do not set `success` and `failure` at the same time"
+        exit 1
+
+    - name: Debug
+      run: |
+        echo "Workflow ${{ github.workflow }}"
+        echo "on ${{ github.repository }} Repo"
+        echo "Tell ${{ github.triggering_actor }}"
+        echo -n "Web hook ends with: "
+        echo ${{ secrets.slack_webhook }} | tail -c 4
+        
+    - name: Send Slack
+      uses: slackapi/slack-github-action@v1.27.0
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.slack_webhook }}
+        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+      with:
+        payload: |
+          {
+            "text": "GH Action ${{ github.workflow}} Failed on ${{ github.repository }}. Tell ${{ github.triggering_actor }}",
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "Workflow Failed"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                   "type": "mrkdwn",
+                   "text": "On '${{ github.repository }}'\nworkflow '${{ github.workflow }}' failed\nTell ${{ github.triggering_actor }}.\nSee ${{ env.CI_BUILD_URL }}"
+                }
+              }
+            ]
+          }
+  fail:
+    name: Don't mask failure
+    runs-on: ubuntu-latest
+    steps:
+    - run: exit 1
