@@ -46,9 +46,10 @@ jobs:
       run: |
         echo ${{ toJson(github) }}
 
+    
     - name: Job Debug
       run: |
-        echo ${{ toJson(jobs) }}
+        echo ${{ toJson(job) }}
 
     - name: Debug
       run: |
