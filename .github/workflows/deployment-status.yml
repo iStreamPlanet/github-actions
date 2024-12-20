@@ -42,6 +42,14 @@ jobs:
         echo "Do not set `success` and `failure` at the same time"
         exit 1
 
+    - name: Big Debug
+      run: |
+        echo ${{ toJson(github) }}
+
+    - name: Job Debug
+      run: |
+        echo ${{ toJson(jobs) }}
+
     - name: Debug
       run: |
         echo "Workflow ${{ github.workflow }}"
@@ -64,7 +72,7 @@ jobs:
                 "type": "header",
                 "text": {
                   "type": "plain_text",
-                  "text": "Workflow Failed"
+                  "text": "Workflow ${{ env.ACTION }}"
                 }
               },
               {
