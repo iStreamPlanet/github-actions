@@ -15,14 +15,6 @@ jobs:
       CI_BUILD_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
 
-    - name: Big Debug
-      run: |
-        echo ${{ toJson(github) }}
-
-    - name: Job Debug
-      run: |
-        echo ${{ toJson(jobs) }}
-
     - name: Debug
       run: |
         echo "Github Action ${{ github.workflow }} Failed"
