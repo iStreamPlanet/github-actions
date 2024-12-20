@@ -86,7 +86,8 @@ jobs:
             ]
           }
   fail:
-    name: Don't mask failure
+    name: exit on failure if this is a failure
+    if: inputs.failure
     runs-on: ubuntu-latest
     steps:
     - run: exit 1
