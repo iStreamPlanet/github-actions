@@ -76,9 +76,12 @@ jobs:
       run: echo "title=${{ inputs.title }}" >> $GITHUB_ENV 
 
     - name: version
-      run: |
-        test -n '${{inputs.version}}' && echo "version='Version ${{inputs.version}}'"
-        test -z '${{inputs.version}}' && echo "version=''"
+      if: inputs.version
+      run: echo "version=Version ${{inputs.version}}" >> $GITHUB_ENV
+
+    - name: no version
+      if: "!inputs.version"
+      run: echo "version=" >> $GITHUB_ENV
 
     - name: Env Debug
       run: echo "${{ toJson(env) }}"
