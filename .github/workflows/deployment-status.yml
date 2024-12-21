@@ -20,6 +20,12 @@ on:
         description: Are we reporting failure?
         default: false
         type: boolean
+      title:
+        description: Override the default title
+        type: string
+      version:
+        description: optional version to include in message
+        type: string
 
 jobs:
   notification:
@@ -67,7 +73,16 @@ jobs:
     - name: starting messages
       if: "!inputs.failure && !inputs.success"
       run: |
-        echo "title='Starting Workflow'" >> $GITHUB_ENV 
+        echo "title=Starting Workflow" >> $GITHUB_ENV 
+
+    - name: override default title
+      if: inputs.title
+      run: echo "title=${{ inputs.title }}" >> $GITHUB_ENV 
+
+    - name: version
+      run: |
+        test -n ${{inputs.version}} && echo "version='Version ${{inputs.version}}" >> $GITHUB_ENV
+        test -z ${{inputs.version}} && echo "version=''" >> $GITHUB_ENV
 
     - name: Env Debug
       run: echo "${{ toJson(env) }}"
@@ -88,7 +103,7 @@ jobs:
       with:
         payload: |
           {
-            "text": "GH Action ${{ github.workflow}} Failed on ${{ github.repository }}. Tell ${{ github.triggering_actor }}",
+            "text": "GH Action ${{ github.workflow}} ${{ env.ACTION }} on ${{ github.repository }}. Launched by ${{ github.triggering_actor }}",
             "blocks": [
               {
                 "type": "header",
@@ -101,7 +116,7 @@ jobs:
                 "type": "section",
                 "text": {
                    "type": "mrkdwn",
-                   "text": "On '${{ github.repository }}'\nworkflow '${{ github.workflow }}' failed\nTell ${{ github.triggering_actor }}.\nSee ${{ env.CI_BUILD_URL }}"
+                   "text": "${{ github.repository }}\n${{ github.workflow }}\n${{ github.triggering_actor }}.\n${{env.version}}\nSee ${{ env.CI_BUILD_URL }}"
                 }
               }
             ]
