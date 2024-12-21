@@ -77,11 +77,11 @@ jobs:
 
     - name: version
       if: inputs.version
-      run: echo "version=Version ${{inputs.version}}" >> $GITHUB_ENV
+      run: echo "version=Version ${{inputs.version}}\n" >> $GITHUB_ENV
 
-    - name: no version
-      if: "!inputs.version"
-      run: echo "version=" >> $GITHUB_ENV
+    #- name: no version
+    #  if: "!inputs.version"
+    #  run: echo "version=" >> $GITHUB_ENV
 
     - name: Env Debug
       run: echo "${{ toJson(env) }}"
@@ -115,7 +115,7 @@ jobs:
                 "type": "section",
                 "text": {
                    "type": "mrkdwn",
-                   "text": "${{ github.repository }}\n${{ github.workflow }}\n${{ github.triggering_actor }}.\n${{env.version}}\nSee ${{ env.CI_BUILD_URL }}"
+                   "text": "${{ github.repository }}\n${{ github.workflow }}\n${{ github.triggering_actor }}.\n${{ env.version }}See ${{ env.CI_BUILD_URL }}"
                 }
               }
             ]
