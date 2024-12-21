@@ -56,10 +56,6 @@ jobs:
       run: |
         echo "${{ toJson(github) }}"
 
-    - name: Job Debug
-      run: |
-        echo "${{ toJson(job) }}"
-
     - name: success messages
       if: inputs.success
       run: |
@@ -81,8 +77,8 @@ jobs:
 
     - name: version
       run: |
-        test -n ${{inputs.version}} && echo "version='Version ${{inputs.version}}'" >> $GITHUB_ENV
-        test -z ${{inputs.version}} && echo "version=''" >> $GITHUB_ENV
+        test -n '${{inputs.version}}' && echo "version='Version ${{inputs.version}}'" >> $GITHUB_ENV
+        test -z '${{inputs.version}}' && echo "version=''" >> $GITHUB_ENV
 
     - name: Env Debug
       run: echo "${{ toJson(env) }}"
