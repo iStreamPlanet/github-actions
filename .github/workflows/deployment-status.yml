@@ -1,6 +1,10 @@
 # Reusable Build Status Notification Workflow
 # Sends Start & Success or Failure to #live-deployments 
 
+# TODO:
+#  include message time
+#  improve formatting/message (copy T2)
+
 name: Deployment Notifications
 on:
   workflow_call:
@@ -46,10 +50,27 @@ jobs:
       run: |
         echo "${{ toJson(github) }}"
 
-    
     - name: Job Debug
       run: |
         echo "${{ toJson(job) }}"
+
+    - name: success messages
+      if: inputs.success
+      run: |
+        echo "title='Workflow Successful'" >> $GITHUB_ENV
+
+    - name: failure messages
+      if: inputs.failure
+      run: |
+        echo "title='Workflow Failed'" >> $GITHUB_ENV
+
+    - name: starting messages
+      if: "!inputs.failure && !inputs.success"
+      run: |
+        echo "title='Starting Workflow'" >> $GITHUB_ENV 
+
+    - name: Env Debug
+      run: echo "${{ toJson(env) }}"
 
     - name: Debug
       run: |
@@ -73,7 +94,7 @@ jobs:
                 "type": "header",
                 "text": {
                   "type": "plain_text",
-                  "text": "Workflow ${{ env.ACTION }}"
+                  "text": "${{ env.title }}"
                 }
               },
               {
