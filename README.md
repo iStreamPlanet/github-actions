@@ -29,3 +29,9 @@ Checks if there is a valid `helmfile.yaml` in the working directory. Executes `h
 #### [`trufflehog-actions-scan`](trufflehog-actions-scan)
 
 Runs Trufflehog as a GitHub Action.  Based off of [`https://github.com/edplato/trufflehog-actions-scan`](https://github.com/edplato/trufflehog-actions-scan).  Uses Dependabot to stay up-to-date with the latest version.
+
+#### [`fail-alert`](./fail-alert.md)
+
+Reusable workflow, not an action. For when you want a slack alert to notify the person who triggered the build when it fails 
+
+

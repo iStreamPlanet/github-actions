@@ -1,0 +1,56 @@
+# Simple failure notification reusable workflow
+
+name: Failure Notification
+on:
+  workflow_call:
+    secrets:
+      slack_webhook:
+        required: true
+
+jobs:
+  send_notification:
+    name: Send Failure Notification
+    runs-on: ubuntu-latest
+    env:
+      CI_BUILD_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+
+    - name: Debug
+      run: |
+        echo "Github Action ${{ github.workflow }} Failed"
+        echo "on ${{ github.repository }} Repo"
+        echo "Tell ${{ github.triggering_actor }}"
+        echo -n "Web hook ends with: "
+        echo ${{ secrets.slack_webhook }} | tail -c 4
+        
+    - name: Send Slack
+      uses: slackapi/slack-github-action@v1.27.0
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.slack_webhook }}
+        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+      with:
+        payload: |
+          {
+            "text": "GH Action ${{ github.workflow}} Failed on ${{ github.repository }}. Tell ${{ github.triggering_actor }}",
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "Workflow Failed"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                   "type": "mrkdwn",
+                   "text": "On '${{ github.repository }}'\nworkflow '${{ github.workflow }}' failed\nTell ${{ github.triggering_actor }}.\nSee ${{ env.CI_BUILD_URL }}"
+                }
+              }
+            ]
+          }
+  fail:
+    name: Don't mask failure
+    runs-on: ubuntu-latest
+    steps:
+    - run: exit 1
