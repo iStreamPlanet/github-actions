@@ -32,6 +32,6 @@ Runs Trufflehog as a GitHub Action.  Based off of [`https://github.com/edplato/t
 
 #### [`fail-alert`](./fail-alert.md)
 
-Reusable workflow, not an action. For when you want a slack alert to notify the person who triggeredthe build when it fails 
+Reusable workflow, not an action. For when you want a slack alert to notify the person who triggered the build when it fails 
 
 
