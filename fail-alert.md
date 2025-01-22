@@ -45,4 +45,4 @@ jobs:
 * Better slack message formatting with Block Kit.
 * Somehow map gh users to slack name and do a real @
   * Make an actual slack app that looks it up on a table or something
-  * Have users put thier slack @handle in gh profile and look that up somehow?
+  * Have users put their slack @handle in gh profile and look that up somehow?
