@@ -2,10 +2,12 @@
 
 Sends a slack alert when a job fails
 
+[fail-alert.yml](/.github/workflows/fail-alert.yml)
+
 The alert contains the name of the repo, the workflow and the GitHub user who triggered the 
 workflow. 
 
-Anyone who triggers workflows should add their GitHub username as a (keyword)[https://slack.com/help/articles/201355156-Configure-your-Slack-notifications#keyword-notifications] in Slack.
+Anyone who triggers workflows should add their GitHub username as a [keyword](https://slack.com/help/articles/201355156-Configure-your-Slack-notifications#keyword-notifications) in Slack.
 
 1. Add any jobs that you want to monitor.
 2. Add a new job.
