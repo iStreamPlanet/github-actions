@@ -64,7 +64,7 @@ ${output}
 
   echo "plan-has-changes=${hasChanges}" >> $GITHUB_OUTPUT
 
-  echo "diff-output<<EOF" >> $GITHUB_OUTPUT
+  echo "command-output<<EOF" >> $GITHUB_OUTPUT
   echo "${output}" >> $GITHUB_OUTPUT
   echo "EOF" >> $GITHUB_OUTPUT
   exit ${exitCode}

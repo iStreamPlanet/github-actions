@@ -15,25 +15,13 @@ function terraformInit {
     exit ${exitCode}
   fi
 
+  echo "command-outcome=${commentStatus}" >> "$GITHUB_OUTPUT"
+  echo "command-output<<EOT" >> $GITHUB_OUTPUT
+  echo "${output}" >> $GITHUB_OUTPUT
+  echo "EOT" >> $GITHUB_OUTPUT
+
   echo "Error: Failed to run terraform init"
   echo
-
-  if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && [ "${commentStatus}" == "Failed" ]; then
-    commentWrapper="#### \`terraform init\` ${commentStatus} for \`${workingDir}\`
-${header_message}
-<details><summary>Show Output</summary>
-
-\`\`\`
-${output}
-\`\`\`
-
-</details>
-"
-
-    payload=$(echo "${commentWrapper}" | jq -R --slurp '{body: .}')
-    commentsURL=$(cat ${GITHUB_EVENT_PATH} | jq -r .pull_request.comments_url)
-    echo "${payload}" | curl -s -S -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data @- "${commentsURL}" > /dev/null
-  fi
 
   exit ${exitCode}
 }
