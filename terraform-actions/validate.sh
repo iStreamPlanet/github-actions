@@ -4,7 +4,7 @@ function terraformValidate {
   set -o pipefail
   tempfile=$(mktemp)
   terraform validate -no-color ${*} 2>&1 | tee $tempfile
-  exitCode=$?
+  exitCode=${PIPESTATUS[0]}
   output=$(cat $tempfile)
   rm $tempfile
   commentStatus="Failed"

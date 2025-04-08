@@ -4,7 +4,7 @@ function terraformPlan {
   set -o pipefail
   tempfile=$(mktemp)
   terraform plan -no-color -detailed-exitcode ${*} 2>&1 | tee $tempfile
-  exitCode=$?
+  exitCode=${PIPESTATUS[0]}
   output=$(cat $tempfile)
   rm $tempfile
   hasChanges=false

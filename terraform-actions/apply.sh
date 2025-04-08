@@ -4,7 +4,7 @@ function terraformApply {
   set -o pipefail
   tempfile=$(mktemp)
   terraform apply -no-color -auto-approve -input=false ${*} 2>&1 | tee $tempfile
-  exitCode=$?
+  exitCode=${PIPESTATUS[0]}
   output=$(cat $tempfile)
   rm $tempfile
 
