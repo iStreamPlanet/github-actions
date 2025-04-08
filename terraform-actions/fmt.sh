@@ -4,7 +4,7 @@ function terraformFmt {
   set -o pipefail
   tempfile=$(mktemp)
   terraform fmt -check=true -write=false -diff -recursive -no-color ${*} 2>&1 | tee $tempfile
-  exitCode=${PIPESTATUS[0]}
+  exitCode=$?
   output=$(cat $tempfile)
   rm $tempfile
   commentStatus="Failed"
