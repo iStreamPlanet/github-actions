@@ -5,6 +5,7 @@ function terraformPlan {
   tempfile=$(mktemp)
   terraform plan -no-color -detailed-exitcode ${*} 2>&1 | tee $tempfile
   exitCode=$?
+  echo "${exitCode}"
   output=$(cat $tempfile)
   rm $tempfile
   hasChanges=false
