@@ -8,7 +8,7 @@ CHART_PATH="$5"
 CLUSTER_NAME="$6"
 GITHUB_TOKEN="$7"
 VALUES_FILE="$8"
-USE_API_TOKEN_AUTH="$9"
+USE_LOGIN_AUTH="$9"
 
 export ARGOCD_SERVER="${ARGOCD_DOMAIN}"
 
@@ -23,7 +23,7 @@ yq -i '.metadata.namespace="argocd" | del(.metadata.finalizers) | del(.spec.sync
 TMP_APPS=$(yq '.metadata.name' local.yaml -o j -M | tr -d '"')
 yq -s '.metadata.name' local.yaml
 
-if [[ "${USE_API_TOKEN_AUTH,,}" == "false" ]]; then
+if [[ "${USE_LOGIN_AUTH,,}" == "true" ]]; then
   argocd --grpc-web login ${ARGOCD_DOMAIN} --username "${ARGOCD_USER}" --password "${ARGOCD_PASSWORD}"
 fi
 
