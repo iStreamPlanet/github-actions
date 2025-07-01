@@ -8,6 +8,9 @@ CHART_PATH="$5"
 CLUSTER_NAME="$6"
 GITHUB_TOKEN="$7"
 VALUES_FILE="$8"
+USE_API_TOKEN_AUTH="$9"
+
+export ARGOCD_SERVER="${ARGOCD_DOMAIN}"
 
 RELEASE_NAME="tmp-apps-${CLUSTER_NAME}-${GITHUB_RUN_ID}"
 echo ${RELEASE_NAME}
@@ -20,7 +23,9 @@ yq -i '.metadata.namespace="argocd" | del(.metadata.finalizers) | del(.spec.sync
 TMP_APPS=$(yq '.metadata.name' local.yaml -o j -M | tr -d '"')
 yq -s '.metadata.name' local.yaml
 
-argocd --grpc-web login ${ARGOCD_DOMAIN} --username "${ARGOCD_USER}" --password "${ARGOCD_PASSWORD}"
+if [[ "${USE_API_TOKEN_AUTH,,}" == "false" ]]; then
+  argocd --grpc-web login ${ARGOCD_DOMAIN} --username "${ARGOCD_USER}" --password "${ARGOCD_PASSWORD}"
+fi
 
 for APP in ${TMP_APPS}; do
   argocd --grpc-web app create ${APP} -f ${APP}.yml --helm-pass-credentials
@@ -41,6 +46,7 @@ YQ_FILTER='
   del(.metadata.resourceVersion) |
   del(.metadata.uid) |
   del(.metadata.managedFields) |
+  del(.metadata.annotations."argocd.argoproj.io/tracking-id") |
   del(.metadata.annotations."kubectl.kubernetes.io/last-applied-configuration") |
   del(.metadata.annotations."deployment.kubernetes.io/revision") |
   del(.metadata.labels."app.kubernetes.io/instance") |

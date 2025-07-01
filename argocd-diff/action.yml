@@ -13,6 +13,10 @@ inputs:
   argocd-password:
     description: "ArgoCD password for login"
     required: true
+  argocd-use-api-token-auth:
+    description: "Use ArgoCD API token for authenticating the CLI instead of username and password"
+    required: false
+    default: "false"
   chart-path:
     description: "Path to app of apps manifest"
     required: true
@@ -32,4 +36,4 @@ runs:
     - name: argocd diff
       shell: bash
       id: main
-      run: ${{ github.action_path }}/main.sh "${{ inputs.argocd-app }}" "${{ inputs.argocd-domain }}" "${{ inputs.argocd-user }}" "${{ inputs.argocd-password }}" "${{ inputs.chart-path }}" "${{ inputs.cluster-name }}" "${{ inputs.github-token }}" "${{ inputs.values-file }}"
+      run: ${{ github.action_path }}/main.sh "${{ inputs.argocd-app }}" "${{ inputs.argocd-domain }}" "${{ inputs.argocd-user }}" "${{ inputs.argocd-password }}" "${{ inputs.chart-path }}" "${{ inputs.cluster-name }}" "${{ inputs.github-token }}" "${{ inputs.values-file }}" "${{ inputs.argocd-use-api-token-auth }}"
