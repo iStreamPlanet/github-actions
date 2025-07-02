@@ -57,11 +57,11 @@ runs:
         "${{ inputs.argocd-use-login-auth }}"
 
     - name: "argocd diff output comment"
-      if:
+      if: steps.argocd-diff.outputs.changes-found == 'true' || steps.argocd-diff.outputs.diff-status == 'Failed'
+      id: diff-output-comment
       uses: marocchino/sticky-pull-request-comment@v2
       with:
         header: ${{ inputs.argocd-app }}
-        delete: true
         message: |
           #### `argocd diff` ${{ steps.argocd-diff.outputs.diff-status }} for `${{ inputs.cluster-name }}` `${{ inputs.argocd-app }}`
           <details>
@@ -74,6 +74,13 @@ runs:
 
           Workspace: `${{ inputs.job-workspace }}`
           [Run Details](${{ inputs.job-url }}) 
+
+    - name: "argocd diff output comment"
+      if: steps.diff-output-comment.outcome == 'skipped'
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        header: ${{ inputs.argocd-app }}
+        delete: true
 
     - name: "sticky comment note"
       if: steps.argocd-diff.outputs.changes-found == 'true' || steps.argocd-diff.outputs.diff-status == 'Failed'
