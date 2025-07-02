@@ -57,7 +57,6 @@ runs:
         "${{ inputs.argocd-use-login-auth }}"
 
     - name: "argocd diff output comment"
-      if: steps.argocd-diff.outputs.changes-found == 'true' || steps.argocd-diff.outputs.diff-status == 'Failed'
       uses: marocchino/sticky-pull-request-comment@v2
       with:
         header: ${{ inputs.workspace }}
@@ -67,8 +66,7 @@ runs:
             <summary>Show Output</summary>
 
             ```diff
-            - test
-            + test2
+            ${{ env.DIFF_OUTPUT }}
             ```
           </details>
 
