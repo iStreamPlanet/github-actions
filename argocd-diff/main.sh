@@ -24,23 +24,31 @@ TMP_APPS=$(yq '.metadata.name' local.yaml -o j -M | tr -d '"')
 yq -s '.metadata.name' local.yaml
 
 if [[ "${USE_LOGIN_AUTH,,}" == "true" ]]; then
-  argocd --grpc-web login ${ARGOCD_DOMAIN} --username "${ARGOCD_USER}" --password "${ARGOCD_PASSWORD}"
+  argocd login ${ARGOCD_DOMAIN} --username "${ARGOCD_USER}" --password "${ARGOCD_PASSWORD}"
 fi
 
 for APP in ${TMP_APPS}; do
-  argocd --grpc-web app create ${APP} -f ${APP}.yml --helm-pass-credentials
-  argocd --grpc-web app manifests ${APP} --source=git >> update_manifests.yaml
-  argocd --grpc-web app delete -y ${APP}
+  argocd app create ${APP} -f ${APP}.yml --helm-pass-credentials
+  argocd app manifests ${APP} --source=git >> update_manifests.yaml
+  argocd app delete -y ${APP}
 done
 
-argocd --grpc-web app manifests ${ARGOCD_APP} --source=git > current_apps.yaml
+argocd app manifests ${ARGOCD_APP} --source=git > current_apps.yaml
 CURRENT_APPS=$(yq '.metadata.name' current_apps.yaml -o j -M | tr -d '"')
 
 for APP in ${CURRENT_APPS}; do
-  argocd --grpc-web app manifests ${APP} --source=git >> current_manifests.yaml
+  argocd app manifests ${APP} --source=git >> current_manifests.yaml
 done
 
+# Below is a list of application specific fields that we want to filter out along with the general metadata fields.
+#
+#  ## Datadog specific fields:
+#  .data.install_id:
+#  .data.install_time:
 YQ_FILTER='
+  del(.data.install_id) |
+  del(.data.install_time) |
+
   del(.metadata.creationTimestamp) |
   del(.metadata.generation) |
   del(.metadata.resourceVersion) |
