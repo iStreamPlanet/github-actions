@@ -88,7 +88,7 @@ case $DIFF_EXIT_CODE in
     exit $DIFF_EXIT_CODE
     ;;
 esac
-
+# TODO identify files in diff output
 echo "Setting up outputs"
 
 echo "changes-found=${CHANGES}" >> $GITHUB_OUTPUT

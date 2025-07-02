@@ -67,7 +67,8 @@ runs:
             <summary>Show Output</summary>
 
             ```diff
-            ${{ env.DIFF_OUTPUT }}
+            - test
+            + test2
             ```
           </details>
 
