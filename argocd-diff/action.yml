@@ -44,4 +44,16 @@ runs:
     - name: argocd diff
       shell: bash
       id: main
-      run: ${{ github.action_path }}/main.sh "${{ inputs.argocd-app }}" "${{ inputs.argocd-domain }}" "${{ inputs.argocd-user }}" "${{ inputs.argocd-password }}" "${{ inputs.chart-path }}" "${{ inputs.cluster-name }}" "${{ inputs.github-token }}" "${{ inputs.values-file }}" "${{ inputs.argocd-use-login-auth }}" "${{ inputs.job-workspace }}" "${{ inputs.job-url }}"
+      run: |
+       ${{ github.action_path }}/main.sh \
+        "${{ inputs.argocd-app }}" \
+        "${{ inputs.argocd-domain }}" \
+        "${{ inputs.argocd-user }}" \
+        "${{ inputs.argocd-password }}" \
+        "${{ inputs.chart-path }}" \
+        "${{ inputs.cluster-name }}" \
+        "${{ inputs.github-token }}" \
+        "${{ inputs.values-file }}" \
+        "${{ inputs.argocd-use-login-auth }}" \
+        "${{ inputs.job-workspace }}" \
+        "${{ inputs.job-url }}"
