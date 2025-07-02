@@ -93,12 +93,8 @@ esac
 echo "changes-found=${CHANGES}" >> $GITHUB_OUTPUT
 echo "diff-status=${DIFF_STATUS}" >> $GITHUB_OUTPUT
 
-# Exporting the diff output to GitHub Actions environment variable instead of to $GITHUB_OUTPUT.
-# The reason for this is that the diff output can be quite large, and has complex formatting that sometimes breaks
-# when using the standard output method. This method builds a 'heredoc' by parts and exports it to the environment
-# variable called `DIFF_OUTPUT`. The variable can then be accessed in subsequent steps via '${{ env.DIFF_OUTPUT }}'.
-# See below for a detailed explanation of how this works:
-# https://trstringer.com/github-actions-multiline-strings/
-echo "DIFF_OUTPUT<<EOF" >> $GITHUB_ENV
-echo "${DIFF_OUTPUT}" >> $GITHUB_ENV
-echo "EOF" >> $GITHUB_ENV
+# The diff output can be quite large, and has complex formatting that sometimes breaks GITHUB_OUTPUT. This method
+# builds a 'heredoc' by parts directly into the GITHUB_OUTPUT file.
+echo "diff-output<<EOF" >> $GITHUB_OUTPUT
+echo "${DIFF_OUTPUT}" >> $GITHUB_OUTPUT
+echo "EOF" >> $GITHUB_OUTPUT
