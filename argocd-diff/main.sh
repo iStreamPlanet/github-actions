@@ -2,13 +2,10 @@
 
 ARGOCD_APP="$1"
 ARGOCD_DOMAIN="$2"
-ARGOCD_USER="$3"
-ARGOCD_PASSWORD="$4"
-CHART_PATH="$5"
-CLUSTER_NAME="$6"
-GITHUB_TOKEN="$7"
-VALUES_FILE="$8"
-USE_LOGIN_AUTH="$9"
+CHART_PATH="$3"
+CLUSTER_NAME="$4"
+GITHUB_TOKEN="$5"
+VALUES_FILE="$6"
 
 export ARGOCD_SERVER="${ARGOCD_DOMAIN}"
 
@@ -22,10 +19,6 @@ helm template ${RELEASE_NAME} ${CHART_PATH} --values ${VALUES_FILE} --debug --va
 yq -i '.metadata.namespace="argocd" | del(.metadata.finalizers) | del(.spec.syncPolicy.automated)' local.yaml
 TMP_APPS=$(yq '.metadata.name' local.yaml -o j -M | tr -d '"')
 yq -s '.metadata.name' local.yaml
-
-if [[ "${USE_LOGIN_AUTH,,}" == "true" ]]; then
-  argocd login ${ARGOCD_DOMAIN} --username "${ARGOCD_USER}" --password "${ARGOCD_PASSWORD}"
-fi
 
 for APP in ${TMP_APPS}; do
   argocd app create ${APP} -f ${APP}.yml --helm-pass-credentials
