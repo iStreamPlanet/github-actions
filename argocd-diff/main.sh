@@ -2,13 +2,10 @@
 
 ARGOCD_APP="$1"
 ARGOCD_DOMAIN="$2"
-ARGOCD_USER="$3"
-ARGOCD_PASSWORD="$4"
-CHART_PATH="$5"
-CLUSTER_NAME="$6"
-GITHUB_TOKEN="$7"
-VALUES_FILE="$8"
-USE_LOGIN_AUTH="$9"
+CHART_PATH="$3"
+CLUSTER_NAME="$4"
+GITHUB_TOKEN="$5"
+VALUES_FILE="$6"
 
 export ARGOCD_SERVER="${ARGOCD_DOMAIN}"
 
@@ -22,10 +19,6 @@ helm template ${RELEASE_NAME} ${CHART_PATH} --values ${VALUES_FILE} --debug --va
 yq -i '.metadata.namespace="argocd" | del(.metadata.finalizers) | del(.spec.syncPolicy.automated)' local.yaml
 TMP_APPS=$(yq '.metadata.name' local.yaml -o j -M | tr -d '"')
 yq -s '.metadata.name' local.yaml
-
-if [[ "${USE_LOGIN_AUTH,,}" == "true" ]]; then
-  argocd login ${ARGOCD_DOMAIN} --username "${ARGOCD_USER}" --password "${ARGOCD_PASSWORD}"
-fi
 
 for APP in ${TMP_APPS}; do
   argocd app create ${APP} -f ${APP}.yml --helm-pass-credentials
@@ -88,21 +81,13 @@ case $DIFF_EXIT_CODE in
     exit $DIFF_EXIT_CODE
     ;;
 esac
+# TODO identify files in diff output
 
-if [ ${CHANGES} == "true" ] || [ ${DIFF_STATUS} == "Failed" ]; then
-  echo -e "\n\nDiff detected, posting PR comment"
-  commentWrapper="## ArgoCD Diff ${DIFF_STATUS}
-### \`${CLUSTER_NAME}-common\`
-<details>
-  <summary>Show Output</summary>
+echo "changes-found=${CHANGES}" >> $GITHUB_OUTPUT
+echo "diff-status=${DIFF_STATUS}" >> $GITHUB_OUTPUT
 
-\`\`\`diff
-"${DIFF_OUTPUT}"
-\`\`\`
-
-</details>
-"
-  payload=$(echo "${commentWrapper}" | jq -R --slurp '{body: .}')
-  commentsURL=$(cat ${GITHUB_EVENT_PATH} | jq -r .pull_request.comments_url)
-  echo "${payload}" | curl -s -S -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data @- "${commentsURL}" > /dev/null
-fi
+# The diff output can be quite large, and has complex formatting that sometimes breaks GITHUB_OUTPUT. This method
+# builds a 'heredoc' by parts directly into the GITHUB_OUTPUT file.
+echo "diff-output<<EOF" >> $GITHUB_OUTPUT
+echo "${DIFF_OUTPUT}" >> $GITHUB_OUTPUT
+echo "EOF" >> $GITHUB_OUTPUT

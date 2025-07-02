@@ -7,16 +7,6 @@ inputs:
   argocd-domain:
     description: "ArgoCD domain"
     required: true
-  argocd-user:
-    description: "ArgoCD user for login"
-    required: true
-  argocd-password:
-    description: "ArgoCD password for login"
-    required: true
-  argocd-use-login-auth:
-    description: "Authenticate to the ArgoCD API using a username and password"
-    required: false
-    default: "true"
   chart-path:
     description: "Path to app of apps manifest"
     required: true
@@ -29,11 +19,45 @@ inputs:
   values-file:
     description: "Path to values file"
     required: true
+  job-workspace:
+    description: "GitHub job workspace, used for PR message"
+    required: false
+    default: ""
+  job-url:
+    description: "GitHub job URL, used for PR message"
+    required: false
+    default: ""
 
 runs:
   using: "composite"
   steps:
     - name: argocd diff
       shell: bash
-      id: main
-      run: ${{ github.action_path }}/main.sh "${{ inputs.argocd-app }}" "${{ inputs.argocd-domain }}" "${{ inputs.argocd-user }}" "${{ inputs.argocd-password }}" "${{ inputs.chart-path }}" "${{ inputs.cluster-name }}" "${{ inputs.github-token }}" "${{ inputs.values-file }}" "${{ inputs.argocd-use-login-auth }}"
+      id: argocd-diff
+      run: |
+       ${{ github.action_path }}/main.sh \
+        "${{ inputs.argocd-app }}" \
+        "${{ inputs.argocd-domain }}" \
+        "${{ inputs.chart-path }}" \
+        "${{ inputs.cluster-name }}" \
+        "${{ inputs.github-token }}" \
+        "${{ inputs.values-file }}" 
+
+    - name: "argocd diff output comment"
+      if: steps.argocd-diff.outputs.changes-found == 'true' || steps.argocd-diff.outputs.diff-status == 'Failed'
+      id: diff-output-comment
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        header: ${{ inputs.argocd-app }}
+        message: |
+          #### `argocd diff` ${{ steps.argocd-diff.outputs.diff-status }} for `${{ inputs.cluster-name }}` `${{ inputs.argocd-app }}`
+          <details>
+            <summary>Show Output</summary>
+
+            ```diff
+            ${{ steps.argocd-diff.outputs.diff-output }}
+            ```
+          </details>
+
+          Workspace: `${{ inputs.job-workspace }}`
+          [Run Details](${{ inputs.job-url }}) 
