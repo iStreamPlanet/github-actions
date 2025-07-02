@@ -13,9 +13,9 @@ inputs:
     required: false
     default: "."
 outputs:
-  plan-output:
-    description: "The Terraform plan command output"
-    value: ${{ steps.main.outputs.plan-output }}
+  command-output:
+    description: "The Terraform command output"
+    value: ${{ steps.main.outputs.command-output }}
   plan-has-changes:
     description: "Whether the plan contained changes"
     value: ${{ steps.main.outputs.plan-has-changes }}
@@ -27,3 +27,21 @@ runs:
       id: main
       working-directory: ${{ inputs.working_directory }}
       run: ${{ github.action_path }}/main.sh "${{ inputs.command }}" "${{ inputs.working_directory }}" "${{ inputs.header_message }}"
+    - name: Comment output on PR
+      uses: marocchino/sticky-pull-request-comment@v2
+      if: ${{ !cancelled() && github.event_name == 'pull_request' && && inputs.command-output != '' && steps.main.outputs.plan-has-changes != 'false' }}
+      with:
+        recreate: true
+        header: terraform ${{ inputs.working_directory }}
+        message: |
+          **`terraform ${{ inputs.command }}` ${{ steps.main.outputs.command-outcome }} for `${{ inputs.working_directory }}`**
+
+          <details>
+            <summary>View output</summary>
+
+            ```
+            ${{ steps.main.outputs.command-output }}
+            ```
+          </details>
+
+          Run via [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
