@@ -105,7 +105,7 @@ if [ ${CHANGES} == "true" ] || [ ${DIFF_STATUS} == "Failed" ]; then
 </details>
 
 Workspace: \`${JOB_WORKSPACE}\`
-[Run Details](${{ JOB_URL }})
+[Run Details](${JOB_URL})
 "
   payload=$(echo "${commentWrapper}" | jq -R --slurp '{body: .}')
   commentsURL=$(cat ${GITHUB_EVENT_PATH} | jq -r .pull_request.comments_url)
