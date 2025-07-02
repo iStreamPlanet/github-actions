@@ -89,7 +89,6 @@ case $DIFF_EXIT_CODE in
     ;;
 esac
 # TODO identify files in diff output
-echo "Setting up outputs"
 
 echo "changes-found=${CHANGES}" >> $GITHUB_OUTPUT
 echo "diff-status=${DIFF_STATUS}" >> $GITHUB_OUTPUT
@@ -103,5 +102,3 @@ echo "diff-status=${DIFF_STATUS}" >> $GITHUB_OUTPUT
 echo "DIFF_OUTPUT<<EOF" >> $GITHUB_ENV
 echo "${DIFF_OUTPUT}" >> $GITHUB_ENV
 echo "EOF" >> $GITHUB_ENV
-
-echo "Done setting up outputs"

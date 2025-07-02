@@ -43,7 +43,7 @@ runs:
   steps:
     - name: argocd diff
       shell: bash
-      id: main
+      id: argocd-diff
       run: |
        ${{ github.action_path }}/main.sh \
         "${{ inputs.argocd-app }}" \
@@ -57,9 +57,10 @@ runs:
         "${{ inputs.argocd-use-login-auth }}"
 
     - name: "argocd diff output comment"
+      if: steps.argocd-diff.outputs.changes-found == 'true' || steps.argocd-diff.outputs.diff-status == 'Failed'
       uses: marocchino/sticky-pull-request-comment@v2
       with:
-        header: ${{ inputs.workspace }}
+        header: ${{ inputs.argocd-app }}
         message: |
           #### `argocd diff` ${{ steps.argocd-diff.outputs.diff-status }} for `${{ inputs.cluster-name }}` `${{ inputs.argocd-app }}`
           <details>
