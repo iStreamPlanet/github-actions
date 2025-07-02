@@ -93,7 +93,6 @@ echo "Setting up outputs"
 
 echo "changes-found=${CHANGES}" >> $GITHUB_OUTPUT
 echo "diff-status=${DIFF_STATUS}" >> $GITHUB_OUTPUT
-echo "diff-output=${DIFF_OUTPUT}" >> $GITHUB_OUTPUT
 
 # Exporting the diff output to GitHub Actions environment variable instead of to $GITHUB_OUTPUT.
 # The reason for this is that the diff output can be quite large, and has complex formatting that sometimes breaks
