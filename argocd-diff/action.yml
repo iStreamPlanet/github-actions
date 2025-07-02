@@ -67,7 +67,7 @@ runs:
             <summary>Show Output</summary>
 
             ```diff
-            ${{ steps.argocd-diff.outputs.diff-output }}
+            ${{ env.DIFF_OUTPUT }}
             ```
           </details>
 
