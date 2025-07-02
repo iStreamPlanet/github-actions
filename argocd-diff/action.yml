@@ -61,7 +61,7 @@ runs:
       uses: marocchino/sticky-pull-request-comment@v2
       with:
         header: ${{ inputs.argocd-app }}
-        delete: ${{ steps.argocd-diff.outputs.changes-found == 'true' || steps.argocd-diff.outputs.diff-status == 'Failed' }}
+        delete: true
         message: |
           #### `argocd diff` ${{ steps.argocd-diff.outputs.diff-status }} for `${{ inputs.cluster-name }}` `${{ inputs.argocd-app }}`
           <details>
