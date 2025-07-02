@@ -73,3 +73,12 @@ runs:
 
           Workspace: `${{ inputs.job-workspace }}`
           [Run Details](${{ inputs.job-url }})
+
+    - name: "sticky comment note"
+      if: steps.argocd-diff.outputs.changes-found == 'true' || steps.argocd-diff.outputs.diff-status == 'Failed'
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        header: "notice"
+        message: |
+          ℹ️ The ArgoCD Diff Github Action uses [marocchino/sticky-pull-request-comment](https://github.com/marocchino/sticky-pull-request-comment)
+          which updates PR comments in place instead of hiding and creating new ones.
