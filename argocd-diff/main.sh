@@ -9,8 +9,6 @@ CLUSTER_NAME="$6"
 GITHUB_TOKEN="$7"
 VALUES_FILE="$8"
 USE_LOGIN_AUTH="$9"
-JOB_WORKSPACE="${10}"
-JOB_URL="${11}"
 
 export ARGOCD_SERVER="${ARGOCD_DOMAIN}"
 
@@ -91,23 +89,6 @@ case $DIFF_EXIT_CODE in
     ;;
 esac
 
-if [ ${CHANGES} == "true" ] || [ ${DIFF_STATUS} == "Failed" ]; then
-  echo -e "\n\nDiff detected, posting PR comment"
-  commentWrapper="## ArgoCD Diff ${DIFF_STATUS}
-### \`${CLUSTER_NAME}-common\`
-<details>
-  <summary>Show Output</summary>
-
-\`\`\`diff
-"${DIFF_OUTPUT}"
-\`\`\`
-
-</details>
-
-Workspace: \`${JOB_WORKSPACE}\`
-[Run Details](${JOB_URL})
-"
-  payload=$(echo "${commentWrapper}" | jq -R --slurp '{body: .}')
-  commentsURL=$(cat ${GITHUB_EVENT_PATH} | jq -r .pull_request.comments_url)
-  echo "${payload}" | curl -s -S -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data @- "${commentsURL}" > /dev/null
-fi
+echo "changes-found=${CHANGES}" >> $GITHUB_OUTPUT
+echo "diff-status=${DIFF_STATUS}" >> $GITHUB_OUTPUT
+echo "diff-output=${DIFF_OUTPUT}" >> $GITHUB_OUTPUT
