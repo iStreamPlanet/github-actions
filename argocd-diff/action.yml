@@ -7,16 +7,6 @@ inputs:
   argocd-domain:
     description: "ArgoCD domain"
     required: true
-  argocd-user:
-    description: "ArgoCD user for login"
-    required: true
-  argocd-password:
-    description: "ArgoCD password for login"
-    required: true
-  argocd-use-login-auth:
-    description: "Authenticate to the ArgoCD API using a username and password"
-    required: false
-    default: "true"
   chart-path:
     description: "Path to app of apps manifest"
     required: true
@@ -36,4 +26,4 @@ runs:
     - name: argocd diff
       shell: bash
       id: main
-      run: ${{ github.action_path }}/main.sh "${{ inputs.argocd-app }}" "${{ inputs.argocd-domain }}" "${{ inputs.argocd-user }}" "${{ inputs.argocd-password }}" "${{ inputs.chart-path }}" "${{ inputs.cluster-name }}" "${{ inputs.github-token }}" "${{ inputs.values-file }}" "${{ inputs.argocd-use-login-auth }}"
+      run: ${{ github.action_path }}/main.sh "${{ inputs.argocd-app }}" "${{ inputs.argocd-domain }}" "${{ inputs.chart-path }}" "${{ inputs.cluster-name }}" "${{ inputs.github-token }}" "${{ inputs.values-file }}"
