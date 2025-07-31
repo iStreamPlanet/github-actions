@@ -110,8 +110,15 @@ case $CHILD_DIFF_EXIT_CODE in
     ;;
 esac
 
-CHANGES=([ ${CHILD_CHANGES} == "true" ] || [ ${PARENT_CHANGES} == "true" ])
-DIFF_STATUS=([ ${CHILD_DIFF_STATUS} == "Success" ] && [ ${PARENT_DIFF_STATUS} == "Success" ]) || "Failed"
+CHANGES=false
+if [ "${CHILD_CHANGES}" == "true" ] || [ "${PARENT_CHANGES}" == "true" ]; then
+  CHANGES=true
+fi
+
+DIFF_STATUS="Failed"
+if [ "${CHILD_DIFF_STATUS}" == "Success" ] && [ "${PARENT_DIFF_STATUS}" == "Success" ]; then
+  DIFF_STATUS="Success"
+fi
 
 if [ ${CHANGES} == "true" ] || [ ${DIFF_STATUS} == "Failed" ]; then
   echo -e "\n\nDiff detected, posting PR comment"
