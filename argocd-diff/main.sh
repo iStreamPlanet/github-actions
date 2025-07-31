@@ -82,8 +82,7 @@ case $CHILD_DIFF_EXIT_CODE in
     ;;
 esac
 
-REVISION=${GITHUB_REF#refs/heads/}
-PARENT_DIFF_OUTPUT=$(argocd app diff ${ARGOCD_APP} --revision ${REVISION} ; exit ${PIPESTATUS[0]})
+PARENT_DIFF_OUTPUT=$(argocd app diff ${ARGOCD_APP} --revision ${GITHUB_HEAD_REF} ; exit ${PIPESTATUS[0]})
 PARENT_DIFF_EXIT_CODE="$?"
 
 case PARENT_DIFF_EXIT_CODE in
