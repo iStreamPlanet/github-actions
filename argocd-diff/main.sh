@@ -13,7 +13,7 @@ echo "Processing parent diff output for ArgoCD app: ${ARGOCD_APP} on cluster: ${
 PARENT_DIFF_OUTPUT=$(argocd app diff ${ARGOCD_APP} --revision ${GITHUB_HEAD_REF} ; exit ${PIPESTATUS[0]})
 PARENT_DIFF_EXIT_CODE="$?"
 
-case PARENT_DIFF_EXIT_CODE in
+case $PARENT_DIFF_EXIT_CODE in
   0)
     PARENT_DIFF_OUTPUT="===== No changes ====="
     echo "${PARENT_DIFF_OUTPUT}"
