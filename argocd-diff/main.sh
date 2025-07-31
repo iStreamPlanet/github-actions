@@ -60,37 +60,74 @@ yq "${YQ_FILTER}" current_manifests.yaml | egrep -v "${GREP_FILTER}" > current_c
 yq "${YQ_FILTER}" update_manifests.yaml | egrep -v "${GREP_FILTER}" > update_cleaned_manifests.yaml
 
 set +e
-DIFF_OUTPUT=$(diff -u current_cleaned_manifests.yaml update_cleaned_manifests.yaml | tail -n +3; exit ${PIPESTATUS[0]})
-DIFF_EXIT_CODE="$?"
+CHILD_DIFF_OUTPUT=$(diff -u current_cleaned_manifests.yaml update_cleaned_manifests.yaml | tail -n +3; exit ${PIPESTATUS[0]})
+CHILD_DIFF_EXIT_CODE="$?"
 
-case $DIFF_EXIT_CODE in
+case $CHILD_DIFF_EXIT_CODE in
   0)
-    DIFF_OUTPUT="===== No changes ====="
-    echo "${DIFF_OUTPUT}"
-    CHANGES="false"
-    DIFF_STATUS="Success"
+    CHILD_DIFF_OUTPUT="===== No changes ====="
+    echo "${CHILD_DIFF_OUTPUT}"
+    CHILD_CHANGES="false"
+    CHILD_DIFF_STATUS="Success"
     ;;
   1)
-    echo "${DIFF_OUTPUT}"
-    CHANGES="true"
-    DIFF_STATUS="Success"
+    echo "${CHILD_DIFF_OUTPUT}"
+    CHILD_CHANGES="true"
+    CHILD_DIFF_STATUS="Success"
     ;;
   *)
-    CHANGES="false"
-    DIFF_STATUS="Failed"
-    exit $DIFF_EXIT_CODE
+    CHILD_CHANGES="false"
+    CHILD_DIFF_STATUS="Failed"
+    exit $CHILD_DIFF_EXIT_CODE
     ;;
 esac
+
+REVISION=${GITHUB_REF#refs/heads/}
+PARENT_DIFF_OUTPUT=$(argocd app diff ${ARGOCD_APP} --revision ${REVISION} ; exit ${PIPESTATUS[0]})
+PARENT_DIFF_EXIT_CODE="$?"
+
+case PARENT_DIFF_EXIT_CODE in
+  0)
+    PARENT_DIFF_OUTPUT="===== No changes ====="
+    echo "${PARENT_DIFF_OUTPUT}"
+    PARENT_CHANGES="false"
+    PARENT_DIFF_STATUS="Success"
+    ;;
+  1)
+    echo "${PARENT_DIFF_OUTPUT}"
+    PARENT_CHANGES="true"
+    PARENT_DIFF_STATUS="Success"
+    ;;
+  *)
+    PARENT_CHANGES="false"
+    PARENT_DIFF_STATUS="Failed"
+    exit $CHILD_DIFF_EXIT_CODE
+    ;;
+esac
+
+CHANGES=([ ${CHILD_CHANGES} == "true" ] || [ ${PARENT_CHANGES} == "true" ])
+DIFF_STATUS=([ ${CHILD_DIFF_STATUS} == "Success" ] && [ ${PARENT_DIFF_STATUS} == "Success" ]) || "Failed"
 
 if [ ${CHANGES} == "true" ] || [ ${DIFF_STATUS} == "Failed" ]; then
   echo -e "\n\nDiff detected, posting PR comment"
   commentWrapper="## ArgoCD Diff ${DIFF_STATUS}
+- Parent: \`${PARENT_DIFF_STATUS}\`
+- Child: \`${CHILD_DIFF_STATUS}\`
 ### \`${CLUSTER_NAME}-common\`
 <details>
-  <summary>Show Output</summary>
+  <summary>Parent Diff Output</summary>
 
 \`\`\`diff
-"${DIFF_OUTPUT}"
+"${PARENT_DIFF_OUTPUT}"
+\`\`\`
+
+</details>
+
+<details>
+  <summary>Child Diff Output</summary>
+
+\`\`\`diff
+"${CHILD_DIFF_OUTPUT}"
 \`\`\`
 
 </details>
