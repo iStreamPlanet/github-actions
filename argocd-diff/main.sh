@@ -10,7 +10,7 @@ VALUES_FILE="$6"
 export ARGOCD_SERVER="${ARGOCD_DOMAIN}"
 
 echo "Processing parent diff output for ArgoCD app: ${ARGOCD_APP} on cluster: ${CLUSTER_NAME}"
-PARENT_DIFF_OUTPUT=$(argocd app diff ${ARGOCD_APP} --revision ${GITHUB_HEAD_REF} ; exit ${PIPESTATUS[0]})
+PARENT_DIFF_OUTPUT=$(argocd app diff "${ARGOCD_APP}" --revision "${GITHUB_HEAD_REF}" ; exit ${PIPESTATUS[0]})
 PARENT_DIFF_EXIT_CODE="$?"
 
 case $PARENT_DIFF_EXIT_CODE in
@@ -110,9 +110,9 @@ case $CHILD_DIFF_EXIT_CODE in
     ;;
 esac
 
-CHANGES=false
+CHANGES="false"
 if [ "${CHILD_CHANGES}" == "true" ] || [ "${PARENT_CHANGES}" == "true" ]; then
-  CHANGES=true
+  CHANGES="true"
 fi
 
 DIFF_STATUS="Failed"
