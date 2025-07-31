@@ -30,7 +30,7 @@ case $PARENT_DIFF_EXIT_CODE in
     echo "${PARENT_DIFF_OUTPUT}"
     PARENT_CHANGES="false"
     PARENT_DIFF_STATUS="Failed"
-    exit $CHILD_DIFF_EXIT_CODE
+    exit $PARENT_DIFF_EXIT_CODE
     ;;
 esac
 
