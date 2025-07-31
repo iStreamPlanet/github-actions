@@ -9,6 +9,32 @@ VALUES_FILE="$6"
 
 export ARGOCD_SERVER="${ARGOCD_DOMAIN}"
 
+echo "Processing parent diff output for ArgoCD app: ${ARGOCD_APP} on cluster: ${CLUSTER_NAME}"
+PARENT_DIFF_OUTPUT=$(argocd app diff "${ARGOCD_APP}" --revision "${GITHUB_HEAD_REF}" ; exit ${PIPESTATUS[0]})
+PARENT_DIFF_EXIT_CODE="$?"
+
+case $PARENT_DIFF_EXIT_CODE in
+  0)
+    PARENT_DIFF_OUTPUT="===== No changes ====="
+    echo "${PARENT_DIFF_OUTPUT}"
+    PARENT_CHANGES="false"
+    PARENT_DIFF_STATUS="Success"
+    ;;
+  1)
+    echo "${PARENT_DIFF_OUTPUT}"
+    PARENT_CHANGES="true"
+    PARENT_DIFF_STATUS="Success"
+    ;;
+  *)
+    echo "Parent diff failed with exit code ${PARENT_DIFF_EXIT_CODE}"
+    echo "${PARENT_DIFF_OUTPUT}"
+    PARENT_CHANGES="false"
+    PARENT_DIFF_STATUS="Failed"
+    exit $PARENT_DIFF_EXIT_CODE
+    ;;
+esac
+
+echo "Processing child diff output for ArgoCD app: ${ARGOCD_APP} on cluster: ${CLUSTER_NAME}"
 RELEASE_NAME="tmp-apps-${CLUSTER_NAME}-${GITHUB_RUN_ID}"
 echo ${RELEASE_NAME}
 if [ $(expr length ${RELEASE_NAME}) -gt 46 ]; then
@@ -60,37 +86,60 @@ yq "${YQ_FILTER}" current_manifests.yaml | egrep -v "${GREP_FILTER}" > current_c
 yq "${YQ_FILTER}" update_manifests.yaml | egrep -v "${GREP_FILTER}" > update_cleaned_manifests.yaml
 
 set +e
-DIFF_OUTPUT=$(diff -u current_cleaned_manifests.yaml update_cleaned_manifests.yaml | tail -n +3; exit ${PIPESTATUS[0]})
-DIFF_EXIT_CODE="$?"
+CHILD_DIFF_OUTPUT=$(diff -u current_cleaned_manifests.yaml update_cleaned_manifests.yaml | tail -n +3; exit ${PIPESTATUS[0]})
+CHILD_DIFF_EXIT_CODE="$?"
 
-case $DIFF_EXIT_CODE in
+case $CHILD_DIFF_EXIT_CODE in
   0)
-    DIFF_OUTPUT="===== No changes ====="
-    echo "${DIFF_OUTPUT}"
-    CHANGES="false"
-    DIFF_STATUS="Success"
+    CHILD_DIFF_OUTPUT="===== No changes ====="
+    echo "${CHILD_DIFF_OUTPUT}"
+    CHILD_CHANGES="false"
+    CHILD_DIFF_STATUS="Success"
     ;;
   1)
-    echo "${DIFF_OUTPUT}"
-    CHANGES="true"
-    DIFF_STATUS="Success"
+    echo "${CHILD_DIFF_OUTPUT}"
+    CHILD_CHANGES="true"
+    CHILD_DIFF_STATUS="Success"
     ;;
   *)
-    CHANGES="false"
-    DIFF_STATUS="Failed"
-    exit $DIFF_EXIT_CODE
+    echo "Child diff failed with exit code ${CHILD_DIFF_EXIT_CODE}"
+    echo "${CHILD_DIFF_OUTPUT}"
+    CHILD_CHANGES="false"
+    CHILD_DIFF_STATUS="Failed"
+    exit $CHILD_DIFF_EXIT_CODE
     ;;
 esac
+
+CHANGES="false"
+if [ "${CHILD_CHANGES}" == "true" ] || [ "${PARENT_CHANGES}" == "true" ]; then
+  CHANGES="true"
+fi
+
+DIFF_STATUS="Failed"
+if [ "${CHILD_DIFF_STATUS}" == "Success" ] && [ "${PARENT_DIFF_STATUS}" == "Success" ]; then
+  DIFF_STATUS="Success"
+fi
 
 if [ ${CHANGES} == "true" ] || [ ${DIFF_STATUS} == "Failed" ]; then
   echo -e "\n\nDiff detected, posting PR comment"
   commentWrapper="## ArgoCD Diff ${DIFF_STATUS}
+- Parent: \`${PARENT_DIFF_STATUS}\`
+- Child: \`${CHILD_DIFF_STATUS}\`
 ### \`${CLUSTER_NAME}-common\`
 <details>
-  <summary>Show Output</summary>
+  <summary>Parent Diff Output</summary>
 
 \`\`\`diff
-"${DIFF_OUTPUT}"
+"${PARENT_DIFF_OUTPUT}"
+\`\`\`
+
+</details>
+
+<details>
+  <summary>Child Diff Output</summary>
+
+\`\`\`diff
+"${CHILD_DIFF_OUTPUT}"
 \`\`\`
 
 </details>
