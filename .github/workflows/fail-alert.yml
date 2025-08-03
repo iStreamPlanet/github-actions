@@ -24,7 +24,7 @@ jobs:
         echo ${{ secrets.slack_webhook }} | tail -c 4
         
     - name: Send Slack
-      uses: slackapi/slack-github-action@v1.27.0
+      uses: slackapi/slack-github-action@v2.1.1
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.slack_webhook }}
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
