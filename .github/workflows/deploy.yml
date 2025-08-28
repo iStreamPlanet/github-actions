@@ -1,0 +1,68 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      release:
+        description: "Helm release name"
+        required: true
+        type: string
+      clusters:
+        description: "JSON array of cluster configs"
+        required: true
+        type: string
+      chart-name:
+        description: "Chart name (used in chart-path)"
+        required: true
+        type: string
+      chart-version:
+        description: "Version tag for the chart"
+        required: true
+        type: string
+      plugins:
+        description: "Helm plugin URL"
+        required: false
+        default: "https://github.com/hypnoglow/helm-s3.git"
+        type: string
+      helm-s3-plugin-version:
+        description: "Helm S3 plugin version"
+        required: false
+        default: "v0.16.2"
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy Helm chart
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'release' }}
+    strategy:
+      matrix:
+        cluster: ${{ fromJson(inputs.clusters) }}
+      max-parallel: 1
+    steps:
+      - name: Configure AWS credentials (${{ matrix.cluster.region }})
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ matrix.cluster.region }}
+          role-to-assume: ${{ matrix.cluster.role-arn }}
+
+      - name: Install chart to ${{ matrix.cluster.name }}
+        uses: lmorris-isp/github-actions-deploy-eks-helm@main
+        with:
+          aws-region: ${{ matrix.cluster.region }}
+          chart-repository: ${{ matrix.cluster.helm-repo }}
+          chart-path: ${{ matrix.cluster.name }}/${{ inputs.chart-name }}
+          version: ${{ inputs.chart-version }}
+          cluster-name: ${{ matrix.cluster.name }}
+          namespace: ${{ matrix.cluster.namespace }}
+          name: ${{ inputs.release }}
+          plugins: ${{ inputs.plugins }}
+          helm-s3-plugin-version: ${{ inputs.helm-s3-plugin-version }}
+          values: environment=${{ matrix.cluster.environment }},imageTag=${{ inputs.chart-version }},imageRegion=${{ matrix.cluster.region }},replicas=1
