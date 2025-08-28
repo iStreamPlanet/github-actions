@@ -23,10 +23,6 @@ on:
         description: "Path to Helm chart"
         required: true
         type: string
-      chart-values:
-        description: "The values to use when packaging the chart."
-        required: true
-        type: string
       chart-version:
         description: "Version tag for the chart"
         required: true
@@ -104,4 +100,4 @@ jobs:
           name: ${{ env.RELEASE }}
           namespace: ${{ env.NAMESPACE }}
           timeout: 300s
-          values: ${{ inputs.chart-values }}
+          values: ${{ matrix.clusters.chart-values }}
