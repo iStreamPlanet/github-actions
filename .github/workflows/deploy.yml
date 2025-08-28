@@ -3,6 +3,10 @@ name: Deploy
 on:
   workflow_call:
     inputs:
+      awsAccount:
+        description: "AWS Account ID"
+        required: false
+        type: string
       release:
         description: "Helm release name"
         required: true
@@ -15,10 +19,22 @@ on:
         description: "Chart name (used in chart-path)"
         required: true
         type: string
+      chart-path:
+        description: "Path to Helm chart"
+        required: true
+        type: string
+      chart-values:
+        description: "The values to use when packaging the chart."
+        required: true
+        type: string
       chart-version:
         description: "Version tag for the chart"
         required: true
         type: string
+      enable-s3:
+        description: "Enable S3 Helm repo support"
+        required: false
+        type: boolean
       plugins:
         description: "Helm plugin URL"
         required: false
@@ -37,8 +53,9 @@ on:
 
 jobs:
   deploy:
-    name: Deploy Helm chart
+    name: Deploy ${{ inputs.chart-name }} Helm chart
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'release' }}
     strategy:
       matrix:
         cluster: ${{ fromJson(inputs.clusters) }}
@@ -52,17 +69,39 @@ jobs:
           aws-region: ${{ matrix.cluster.region }}
           role-to-assume: ${{ matrix.cluster.role-arn }}
 
-      - name: Install chart to ${{ matrix.cluster.name }}
+      # Optional: Push Helm chart to S3 (if enabled)
+      - name: Push Helm chart to S3 (${{ matrix.cluster.region }})
+        if: ${{ inputs.enable_s3 }}
+        run: |
+          helm s3 init --ignore-if-exists ${{ inputs.helm-s3-repo }}
+          helm repo add ${{ inputs.chart-name }}-${{ matrix.cluster.region }} ${{ inputs.helm-s3-repo }}
+          helm s3 push --ignore-if-exists /dev/shm/chart/* ${{ inputs.chart-name }}-${{ matrix.cluster.region }}
+
+      # Dry-run for testing
+      - name: Dry-run Helm for ${{ matrix.cluster.name }}
         uses: lmorris-isp/github-actions-deploy-eks-helm@main
         with:
           aws-region: ${{ matrix.cluster.region }}
-          chart-repository: ${{ matrix.cluster.helm-repo }}
-          chart-path: ${{ matrix.cluster.name }}/${{ inputs.chart-name }}
-          version: ${{ inputs.chart-version }}
+          chart-path: ${{ env.CHART_REF }}
           cluster-name: ${{ matrix.cluster.name }}
-          namespace: ${{ matrix.cluster.namespace }}
-          name: ${{ inputs.release }}
-          plugins: ${{ inputs.plugins }}
-          helm-s3-plugin-version: ${{ inputs.helm-s3-plugin-version }}
+          helm-wait: wait
           dry-run: true
-          values: environment=${{ matrix.cluster.environment }},imageTag=${{ inputs.chart-version }},imageRegion=${{ matrix.cluster.region }},replicas=1
+          name: ${{ env.RELEASE }}
+          namespace: ${{ env.NAMESPACE }}
+          timeout: 300s
+          helm-extra-args: "--debug"
+          values: ${{ inputs.chart-values }}
+
+      # Actual install only when appropriate
+      - name: Install Helm chart to ${{ matrix.cluster.name }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && contains(fromJSON('["dev", "int", "stage"]'), matrix.cluster.environment)) || github.event_name == 'push' }}
+        uses: lmorris-isp/github-actions-deploy-eks-helm@main
+        with:
+          aws-region: ${{ matrix.cluster.region }}
+          chart-path: ${{ env.CHART_REF }}
+          cluster-name: ${{ matrix.cluster.name }}
+          helm-wait: wait
+          name: ${{ env.RELEASE }}
+          namespace: ${{ env.NAMESPACE }}
+          timeout: 300s
+          values: ${{ inputs.chart-values }}
