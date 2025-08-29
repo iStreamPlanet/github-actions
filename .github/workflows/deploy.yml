@@ -71,8 +71,8 @@ jobs:
       - name: Push Helm chart to S3 (${{ matrix.cluster.region }})
         if: ${{ inputs.enable-s3 }}
         run: |
-          helm s3 init --ignore-if-exists ${{ inputs.helm-s3-repo }}
-          helm repo add ${{ inputs.chart-name }}-${{ matrix.cluster.region }} ${{ inputs.cluster.helm-s3-repo }}
+          helm s3 init --ignore-if-exists ${{ matrix.cluster.helm-s3-repo }}
+          helm repo add ${{ inputs.chart-name }}-${{ matrix.cluster.region }} ${{ matrix.cluster.helm-s3-repo }}
           helm s3 push --ignore-if-exists /dev/shm/chart/* ${{ inputs.chart-name }}-${{ matrix.cluster.region }}
 
       # Dry-run for testing
