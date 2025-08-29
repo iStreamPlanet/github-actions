@@ -1,0 +1,106 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      awsAccount:
+        description: "AWS Account ID"
+        required: false
+        type: string
+      release:
+        description: "Helm release name"
+        required: true
+        type: string
+      clusters:
+        description: "JSON array of cluster configs"
+        required: true
+        type: string
+      chart-name:
+        description: "Chart name (used in chart-path)"
+        required: true
+        type: string
+      chart-path:
+        description: "Path to Helm chart"
+        required: true
+        type: string
+      chart-version:
+        description: "Version tag for the chart"
+        required: true
+        type: string
+      enable-s3:
+        description: "Enable S3 Helm repo support"
+        required: false
+        type: boolean
+      plugins:
+        description: "Helm plugin URL"
+        required: false
+        default: "https://github.com/hypnoglow/helm-s3.git"
+        type: string
+      helm-s3-plugin-version:
+        description: "Helm S3 plugin version"
+        required: false
+        default: "v0.16.2"
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy ${{ inputs.chart-name }} Helm chart
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'release' }}
+    strategy:
+      matrix:
+        cluster: ${{ fromJson(inputs.clusters) }}
+      max-parallel: 1
+    steps:
+      - name: Configure AWS credentials (${{ matrix.cluster.region }})
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ matrix.cluster.region }}
+          role-to-assume: ${{ matrix.cluster.role-arn }}
+
+      # Optional: Push Helm chart to S3 (if enabled)
+      - name: Push Helm chart to S3 (${{ matrix.cluster.region }})
+        if: ${{ inputs.enable-s3 }}
+        run: |
+          helm s3 init --ignore-if-exists ${{ matrix.cluster.helm-s3-repo }}
+          helm repo add ${{ inputs.chart-name }}-${{ matrix.cluster.region }} ${{ matrix.cluster.helm-s3-repo }}
+          helm s3 push --ignore-if-exists /dev/shm/chart/* ${{ inputs.chart-name }}-${{ matrix.cluster.region }}
+
+      # Dry-run for testing
+      - name: Dry-run Helm for ${{ matrix.cluster.name }}
+        uses: lmorris-isp/github-actions-deploy-eks-helm@main
+        with:
+          aws-region: ${{ matrix.cluster.region }}
+          chart-path: ${{ inputs.chart-path }}
+          cluster-name: ${{ matrix.cluster.name }}
+          helm-wait: wait
+          dry-run: true
+          name: ${{ inputs.release }}
+          namespace: ${{ matrix.cluster.namespace }}
+          timeout: 300s
+          helm-extra-args: "--debug"
+          values: ${{ matrix.cluster.chart-values }}
+
+      # Actual install only when appropriate
+      - name: Install Helm chart to ${{ matrix.cluster.name }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && contains(fromJSON('["dev", "int", "stage"]'), matrix.cluster.environment)) || github.event_name == 'push' }}
+        uses: lmorris-isp/github-actions-deploy-eks-helm@main
+        with:
+          aws-region: ${{ matrix.cluster.region }}
+          chart-path: ${{ inputs.chart-path }}
+          cluster-name: ${{ matrix.cluster.name }}
+          helm-wait: wait
+          dry-run: true
+          name: ${{ inputs.release }}
+          namespace: ${{ matrix.cluster.namespace }}
+          timeout: 300s
+          values: ${{ matrix.cluster.chart-values }}
