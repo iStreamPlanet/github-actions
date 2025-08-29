@@ -51,6 +51,8 @@ jobs:
   deploy:
     name: Deploy ${{ inputs.chart-name }} Helm chart
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'release' }}
     strategy:
       matrix:
@@ -70,7 +72,7 @@ jobs:
         if: ${{ inputs.enable-s3 }}
         run: |
           helm s3 init --ignore-if-exists ${{ inputs.helm-s3-repo }}
-          helm repo add ${{ inputs.chart-name }}-${{ matrix.cluster.region }} ${{ inputs.helm-s3-repo }}
+          helm repo add ${{ inputs.chart-name }}-${{ matrix.cluster.region }} ${{ inputs.cluster.helm-s3-repo }}
           helm s3 push --ignore-if-exists /dev/shm/chart/* ${{ inputs.chart-name }}-${{ matrix.cluster.region }}
 
       # Dry-run for testing
@@ -78,15 +80,15 @@ jobs:
         uses: lmorris-isp/github-actions-deploy-eks-helm@main
         with:
           aws-region: ${{ matrix.cluster.region }}
-          chart-path: ${{ env.CHART_REF }}
+          chart-path: ${{ inputs.chart-path }}
           cluster-name: ${{ matrix.cluster.name }}
           helm-wait: wait
           dry-run: true
-          name: ${{ env.RELEASE }}
-          namespace: ${{ env.NAMESPACE }}
+          name: ${{ inputs.release }}
+          namespace: ${{ matrix.cluster.namespace }}
           timeout: 300s
           helm-extra-args: "--debug"
-          values: ${{ inputs.chart-values }}
+          values: ${{ matrix.cluster.chart-values }}
 
       # Actual install only when appropriate
       - name: Install Helm chart to ${{ matrix.cluster.name }}
@@ -94,10 +96,10 @@ jobs:
         uses: lmorris-isp/github-actions-deploy-eks-helm@main
         with:
           aws-region: ${{ matrix.cluster.region }}
-          chart-path: ${{ env.CHART_REF }}
+          chart-path: ${{ inputs.chart-path }}
           cluster-name: ${{ matrix.cluster.name }}
           helm-wait: wait
-          name: ${{ env.RELEASE }}
-          namespace: ${{ env.NAMESPACE }}
+          name: ${{ inputs.release }}
+          namespace: ${{ matrix.cluster.namespace }}
           timeout: 300s
-          values: ${{ matrix.clusters.chart-values }}
+          values: ${{ matrix.cluster.chart-values }}
