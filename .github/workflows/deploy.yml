@@ -3,6 +3,15 @@ name: Deploy
 on:
   workflow_call:
     inputs:
+      app-region:
+        description: "Application region, ie US_WEST or US_EAST"
+        required: false
+        type: string
+      atomic:
+        description: "Deploy to atomic clusters"
+        required: false
+        type: boolean
+        default: false
       awsAccount:
         description: "AWS Account ID"
         required: false
@@ -27,6 +36,14 @@ on:
         description: "Version tag for the chart"
         required: true
         type: string
+      config-files:
+        description: "Additional config files"
+        required: false
+        type: string
+      deployregion:
+        description: "Deploy region, ie US_WEST or US_EAST"
+        required: false
+        type: string
       enable-s3:
         description: "Enable S3 Helm repo support"
         required: false
@@ -41,6 +58,11 @@ on:
         required: false
         default: "v0.16.2"
         type: string
+      value-files:
+        description: "YAML files to pass to helm as -f args"
+        required: false
+        type: string
+
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
@@ -53,6 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      deployments: write
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'release' }}
     strategy:
       matrix:
