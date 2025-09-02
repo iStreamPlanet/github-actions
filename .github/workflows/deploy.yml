@@ -112,7 +112,7 @@ jobs:
           plugins: ${{ inputs.plugins }}
           helm-s3-plugin-version: ${{ inputs.helm-s3-plugin-version }}
           dry-run: true
-          values: environment=${{ matrix.cluster.environment }},imageTag=${{ inputs.chart-version }},imageRegion=${{ matrix.cluster.region }},replicas=1
+          values: $${{ matrix.cluster.chart-values }}
 
       - name: Deploy Helm to ${{ matrix.cluster.name }}
         uses: lmorris-isp/github-actions-deploy-eks-helm@main
@@ -126,4 +126,4 @@ jobs:
           name: ${{ inputs.release }}
           plugins: ${{ inputs.plugins }}
           helm-s3-plugin-version: ${{ inputs.helm-s3-plugin-version }}
-          values: environment=${{ matrix.cluster.environment }},imageTag=${{ inputs.chart-version }},imageRegion=${{ matrix.cluster.region }},replicas=1
+          values: ${{ matrix.cluster.chart-values }}
