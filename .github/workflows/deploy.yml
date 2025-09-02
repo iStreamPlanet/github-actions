@@ -49,7 +49,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy ${{ inputs.chart-name }} Helm chart
+    name: Deploy Helm chart for release ${{ inputs.release }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -67,40 +67,17 @@ jobs:
           aws-region: ${{ matrix.cluster.region }}
           role-to-assume: ${{ matrix.cluster.role-arn }}
 
-      # Optional: Push Helm chart to S3 (if enabled)
-      - name: Push Helm chart to S3 (${{ matrix.cluster.region }})
-        if: ${{ inputs.enable-s3 }}
-        run: |
-          helm s3 init --ignore-if-exists ${{ matrix.cluster.helm-s3-repo }}
-          helm repo add ${{ inputs.chart-name }}-${{ matrix.cluster.region }} ${{ matrix.cluster.helm-s3-repo }}
-          helm s3 push --ignore-if-exists /dev/shm/chart/* ${{ inputs.chart-name }}-${{ matrix.cluster.region }}
-
-      # Dry-run for testing
-      - name: Dry-run Helm for ${{ matrix.cluster.name }}
+      - name: Install chart to ${{ matrix.cluster.name }}
         uses: lmorris-isp/github-actions-deploy-eks-helm@main
         with:
           aws-region: ${{ matrix.cluster.region }}
-          chart-path: ${{ inputs.chart-path }}
+          chart-repository: ${{ matrix.cluster.helm-s3-repo }}
+          chart-path: ${{ matrix.cluster.name }}/${{ inputs.chart-name }}
+          version: ${{ inputs.chart-version }}
           cluster-name: ${{ matrix.cluster.name }}
-          helm-wait: wait
-          dry-run: true
-          name: ${{ inputs.release }}
           namespace: ${{ matrix.cluster.namespace }}
-          timeout: 300s
-          helm-extra-args: "--debug"
-          values: ${{ matrix.cluster.chart-values }}
-
-      # Actual install only when appropriate
-      - name: Install Helm chart to ${{ matrix.cluster.name }}
-        if: ${{ (github.event_name == 'workflow_dispatch' && contains(fromJSON('["dev", "int", "stage"]'), matrix.cluster.environment)) || github.event_name == 'push' }}
-        uses: lmorris-isp/github-actions-deploy-eks-helm@main
-        with:
-          aws-region: ${{ matrix.cluster.region }}
-          chart-path: ${{ inputs.chart-path }}
-          cluster-name: ${{ matrix.cluster.name }}
-          helm-wait: wait
-          dry-run: true
           name: ${{ inputs.release }}
-          namespace: ${{ matrix.cluster.namespace }}
-          timeout: 300s
-          values: ${{ matrix.cluster.chart-values }}
+          plugins: ${{ inputs.plugins }}
+          helm-s3-plugin-version: ${{ inputs.helm-s3-plugin-version }}
+          dry-run: true
+          values: environment=${{ matrix.cluster.environment }},imageTag=${{ inputs.chart-version }},imageRegion=${{ matrix.cluster.region }},replicas=1
