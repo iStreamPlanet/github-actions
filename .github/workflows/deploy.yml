@@ -44,19 +44,22 @@ on:
         description: "Deploy region, ie US_WEST or US_EAST"
         required: false
         type: string
-      enable-s3:
-        description: "Enable S3 Helm repo support"
+      helm-repo-usw2:
+        description: "Helm repo URL for US_WEST_2"
         required: false
-        type: boolean
-      plugins:
-        description: "Helm plugin URL"
+        type: string
+      helm-repo-use1:
+        description: "Helm repo URL for US_EAST_1"
         required: false
-        default: "https://github.com/hypnoglow/helm-s3.git"
         type: string
       helm-s3-plugin-version:
         description: "Helm S3 plugin version"
         required: false
-        default: "v0.16.2"
+        type: string
+      plugins:
+        description: "Helm plugin URL"
+        required: false
+        default: "https://github.com/hypnoglow/helm-s3.git"
         type: string
       value-files:
         description: "YAML files to pass to helm as -f args"
@@ -64,10 +67,16 @@ on:
         type: string
 
     secrets:
-      AWS_ACCESS_KEY_ID:
+      CLUSTER_AWS_ACCESS_KEY_ID:
         required: true
-      AWS_SECRET_ACCESS_KEY:
+      CLUSTER_AWS_SECRET_ACCESS_KEY:
         required: true
+      CDS_USER:
+        required: false
+      CDS_KEY:
+        required: false
+      MC_LICENSE:
+        required: false
 
 jobs:
   deploy:
@@ -85,12 +94,12 @@ jobs:
       - name: Configure AWS credentials (${{ matrix.cluster.region }})
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.CLUSTER_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.CLUSTER_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ matrix.cluster.region }}
           role-to-assume: ${{ matrix.cluster.role-arn }}
 
-      - name: Install chart to ${{ matrix.cluster.name }}
+      - name: Dry-run Helm to ${{ matrix.cluster.name }}
         uses: lmorris-isp/github-actions-deploy-eks-helm@main
         with:
           aws-region: ${{ matrix.cluster.region }}
@@ -103,4 +112,18 @@ jobs:
           plugins: ${{ inputs.plugins }}
           helm-s3-plugin-version: ${{ inputs.helm-s3-plugin-version }}
           dry-run: true
+          values: environment=${{ matrix.cluster.environment }},imageTag=${{ inputs.chart-version }},imageRegion=${{ matrix.cluster.region }},replicas=1
+
+      - name: Deploy Helm to ${{ matrix.cluster.name }}
+        uses: lmorris-isp/github-actions-deploy-eks-helm@main
+        with:
+          aws-region: ${{ matrix.cluster.region }}
+          chart-repository: ${{ matrix.cluster.helm-s3-repo }}
+          chart-path: ${{ matrix.cluster.name }}/${{ inputs.chart-name }}
+          version: ${{ inputs.chart-version }}
+          cluster-name: ${{ matrix.cluster.name }}
+          namespace: ${{ matrix.cluster.namespace }}
+          name: ${{ inputs.release }}
+          plugins: ${{ inputs.plugins }}
+          helm-s3-plugin-version: ${{ inputs.helm-s3-plugin-version }}
           values: environment=${{ matrix.cluster.environment }},imageTag=${{ inputs.chart-version }},imageRegion=${{ matrix.cluster.region }},replicas=1
