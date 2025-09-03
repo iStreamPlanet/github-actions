@@ -20,10 +20,6 @@ on:
         description: "Helm release name"
         required: true
         type: string
-      clusters:
-        description: "JSON array of cluster configs"
-        required: true
-        type: string
       chart-name:
         description: "Chart name (used in chart-path)"
         required: true
@@ -32,8 +28,20 @@ on:
         description: "Path to Helm chart"
         required: true
         type: string
+      chart-values:
+        description: "Additional values to pass to helm"
+        required: true
+        type: string
       chart-version:
         description: "Version tag for the chart"
+        required: true
+        type: string
+      cluster-name:
+        description: "Cluster name"
+        required: true
+        type: string
+      cluster-region:
+        description: "Cluster region, ie us-west-2 or us-east-1"
         required: true
         type: string
       config-files:
@@ -44,22 +52,26 @@ on:
         description: "Deploy region, ie US_WEST or US_EAST"
         required: false
         type: string
-      helm-repo-usw2:
-        description: "Helm repo URL for US_WEST_2"
-        required: false
-        type: string
-      helm-repo-use1:
-        description: "Helm repo URL for US_EAST_1"
+      helm-s3-repo:
+        description: "Helm S3 repo URL"
         required: false
         type: string
       helm-s3-plugin-version:
         description: "Helm S3 plugin version"
         required: false
         type: string
+      namespace:
+        description: "Kubernetes namespace"
+        required: true
+        type: string
       plugins:
         description: "Helm plugin URL"
         required: false
         default: "https://github.com/hypnoglow/helm-s3.git"
+        type: string
+      role-arn:
+        description: "Role ARN to assume in target account"
+        required: true
         type: string
       value-files:
         description: "YAML files to pass to helm as -f args"
@@ -84,47 +96,42 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    strategy:
-      matrix:
-        cluster: ${{ fromJson(inputs.clusters) }}
-      max-parallel: 1
     steps:
-      - name: Configure AWS credentials (${{ matrix.cluster.region }})
-        if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'release' }}
+      - name: Configure AWS credentials (${{ inputs.cluster-region }})
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.CLUSTER_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.CLUSTER_AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ matrix.cluster.region }}
-          role-to-assume: ${{ matrix.cluster.role-arn }}
+          aws-region: ${{ inputs.cluster-region }}
+          role-to-assume: ${{ inputs.role-arn }}
 
-      - name: Dry-run Helm to ${{ matrix.cluster.name }}
-        if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'release' }}
+      - name: Dry-run Helm to ${{ inputs.cluster-name }}
         uses: lmorris-isp/github-actions-deploy-eks-helm@main
         with:
-          aws-region: ${{ matrix.cluster.region }}
-          chart-repository: ${{ matrix.cluster.helm-s3-repo }}
-          chart-path: ${{ matrix.cluster.name }}/${{ inputs.chart-name }}
+          aws-region: ${{ inputs.cluster-region }}
+          chart-repository: ${{ inputs.helm-s3-repo }}
+          chart-path: ${{ inputs.chart-path }}
           version: ${{ inputs.chart-version }}
-          cluster-name: ${{ matrix.cluster.name }}
-          namespace: ${{ matrix.cluster.namespace }}
+          cluster-name: ${{ inputs.cluster-name }}
+          namespace: ${{ inputs.namespace }}
           name: ${{ inputs.release }}
           plugins: ${{ inputs.plugins }}
           helm-s3-plugin-version: ${{ inputs.helm-s3-plugin-version }}
           dry-run: true
-          values: ${{ matrix.cluster.chart-values }}
+          values: ${{ inputs.chart-values }}
 
-      - name: Deploy Helm to ${{ matrix.cluster.name }}
+      - name: Deploy Helm to ${{ inputs.cluster-name }}
         if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'release' }}
         uses: lmorris-isp/github-actions-deploy-eks-helm@main
         with:
-          aws-region: ${{ matrix.cluster.region }}
-          chart-repository: ${{ matrix.cluster.helm-s3-repo }}
-          chart-path: ${{ matrix.cluster.name }}/${{ inputs.chart-name }}
+          aws-region: ${{ inputs.cluster-region }}
+          chart-repository: ${{ inputs.helm-s3-repo }}
+          chart-path: ${{ inputs.chart-path }}
           version: ${{ inputs.chart-version }}
-          cluster-name: ${{ matrix.cluster.name }}
-          namespace: ${{ matrix.cluster.namespace }}
+          cluster-name: ${{ inputs.cluster-name }}
+          namespace: ${{ inputs.namespace }}
           name: ${{ inputs.release }}
           plugins: ${{ inputs.plugins }}
           helm-s3-plugin-version: ${{ inputs.helm-s3-plugin-version }}
-          values: ${{ matrix.cluster.chart-values }}
+          dry-run: true
+          values: ${{ inputs.chart-values }}
