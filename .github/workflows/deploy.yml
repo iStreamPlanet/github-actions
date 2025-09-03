@@ -118,6 +118,7 @@ jobs:
           plugins: ${{ inputs.plugins }}
           helm-s3-plugin-version: ${{ inputs.helm-s3-plugin-version }}
           dry-run: true
+          timeout: 300s
           values: ${{ inputs.chart-values }}
 
       - name: Deploy Helm to ${{ inputs.cluster-name }}
@@ -134,4 +135,5 @@ jobs:
           plugins: ${{ inputs.plugins }}
           helm-s3-plugin-version: ${{ inputs.helm-s3-plugin-version }}
           dry-run: true
+          timeout: 300s
           values: ${{ inputs.chart-values }}
