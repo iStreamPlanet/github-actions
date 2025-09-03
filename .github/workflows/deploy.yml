@@ -112,7 +112,7 @@ jobs:
           plugins: ${{ inputs.plugins }}
           helm-s3-plugin-version: ${{ inputs.helm-s3-plugin-version }}
           dry-run: true
-          values: $${{ matrix.cluster.chart-values }}
+          values: ${{ matrix.cluster.chart-values }}
 
       - name: Deploy Helm to ${{ matrix.cluster.name }}
         if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'release' }}
