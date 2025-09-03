@@ -84,7 +84,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      deployments: write
     strategy:
       matrix:
         cluster: ${{ fromJson(inputs.clusters) }}
