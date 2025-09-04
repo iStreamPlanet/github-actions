@@ -52,6 +52,14 @@ on:
         description: "Deploy region, ie US_WEST or US_EAST"
         required: false
         type: string
+      enable-ecr:
+        description: "Enable ECR for the application"
+        required: false
+        type: boolean
+      enable-s3:
+        description: "Enable S3 for the application"
+        required: false
+        type: boolean
       helm-s3-repo:
         description: "Helm S3 repo URL"
         required: false
