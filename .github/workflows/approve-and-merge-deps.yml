@@ -1,0 +1,27 @@
+name: "Approve and merge deps"
+
+on:
+    pull_request:
+        types:
+            - opened
+            - edited
+            - synchronize
+
+jobs:
+    approve_and_merge_deps_patch:
+        uses: iStreamPlanet/.github/.github/workflows/auto-approve-and-merge-deps.yml@main
+        with:
+            version-update-type: semver-patch
+            enable-auto-merge: true
+        permissions:
+            contents: write
+            pull-requests: write
+
+    approve_and_merge_deps_minor:
+        uses: iStreamPlanet/.github/.github/workflows/auto-approve-and-merge-deps.yml@main
+        with:
+            version-update-type: semver-minor
+            enable-auto-merge: true
+        permissions:
+            contents: write
+            pull-requests: write
