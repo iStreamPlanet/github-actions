@@ -2,6 +2,8 @@ name: "Approve and merge deps"
 
 on:
     pull_request:
+        branches:
+            - 'dependabot/**'
         types:
             - opened
             - edited
